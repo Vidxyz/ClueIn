@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/snackbar_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
@@ -7,6 +5,7 @@ import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_state.dart';
 import 'package:cluein_app/src/views/create_new_game/views/add_basic_game_details.dart';
 import 'package:cluein_app/src/views/create_new_game/views/add_initial_cards.dart';
+import 'package:cluein_app/src/views/main_game/main_game_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -80,7 +79,10 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
 
           }
           else if (state is NewGameSavedAndReadyToStart) {
-            // todo - Lets fkn goooo to the game
+            Navigator.pushReplacement(
+                context,
+                MainGameView.route(gameDefinition: state.gameDefinition)
+            );
           }
         },
         child: _pageViews(),
@@ -217,9 +219,8 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
             }
           }
           else {
-            print(currentState.initialCards);
-            print('-------------');
             final maxCards = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
+            print(currentState.initialCards);
             SnackbarUtils.showSnackBarShort(context, "Please select exactly $maxCards cards");
           }
         }

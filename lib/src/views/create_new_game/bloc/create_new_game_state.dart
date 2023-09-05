@@ -1,4 +1,5 @@
 import 'package:cluein_app/src/models/game_card.dart';
+import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class CreateNewGameState extends Equatable {
@@ -16,23 +17,15 @@ class NewGameBeingSaved extends CreateNewGameState {
 }
 
 class NewGameSavedAndReadyToStart extends CreateNewGameState {
-  final String gameId;
-  final int totalPlayers;
-  final Map<int, String> playerNames;
-  final List<GameCard> initialCards;
+  final GameDefinition gameDefinition;
 
   const NewGameSavedAndReadyToStart({
-    required this.gameId,
-    required this.totalPlayers,
-    required this.playerNames,
-    required this.initialCards,
+    required this.gameDefinition,
   });
 
   @override
   List<Object> get props => [
-    totalPlayers,
-    playerNames,
-    initialCards,
+    gameDefinition,
   ];
 }
 

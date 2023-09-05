@@ -38,7 +38,7 @@ dependencies:
   flutter_markdown: ^0.6.10+4
   url_launcher: ^6.1.5
   logging: ^1.0.2
-  google_mobile_ads: ^3.0.0
+  # google_mobile_ads: ^3.0.0
   vibration: ^1.7.7
   auto_size_text: ^3.0.0
   numberpicker: ^2.1.2

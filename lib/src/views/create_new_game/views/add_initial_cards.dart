@@ -1,4 +1,5 @@
 import 'package:cluein_app/src/models/game_card.dart';
+import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.dart';
@@ -63,6 +64,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
           builder: (context, state) {
             if (state is NewGameDetailsModified) {
               return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -111,7 +113,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
               ),
             );
           },
-          body: _renderPersons(),
+          body: _renderCharacters(),
           isExpanded: isPersonSectionExpanded,
         )
       ],
@@ -174,45 +176,49 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
     );
   }
 
-  _renderPersons() {
-    final list = ["Scarlett", "Mustard", "White", "Green", "Peacock", "Plum"];
+  _renderCharacters() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: ListView.builder(
           shrinkWrap: true,
-          itemCount: list.length,
+          itemCount: ConstantUtils.characterList.length,
           itemBuilder: (context, index) {
-            return _renderInitialCardSelectViewForEntity(list[index], _checkBoxPersons(list[index]));
+            return _renderInitialCardSelectViewForEntity(
+                ConstantUtils.characterList[index],
+                _checkBoxPersons(ConstantUtils.characterList[index])
+            );
           }
       ),
     );
   }
 
   _renderWeapons() {
-    final list = ["Dagger", "Candlestick", "Revolver", "Rope", "Lead Pipe", "Wrench"];
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: ListView.builder(
           shrinkWrap: true,
-          itemCount: list.length,
+          itemCount: ConstantUtils.weaponList.length,
           itemBuilder: (context, index) {
-            return _renderInitialCardSelectViewForEntity(list[index],  _checkBoxWeapons(list[index]));
+            return _renderInitialCardSelectViewForEntity(
+                ConstantUtils.weaponList[index],
+                _checkBoxWeapons(ConstantUtils.weaponList[index])
+            );
           }
       ),
     );
   }
 
   _renderRooms() {
-    final list = [
-      "Hall", "Lounge", "DiningRoom", "Kitchen", "BallRoom", "Conservatory", "BilliardRoom", "Library", "Study"
-    ];
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: ListView.builder(
           shrinkWrap: true,
-          itemCount: list.length,
+          itemCount: ConstantUtils.roomList.length,
           itemBuilder: (context, index) {
-            return _renderInitialCardSelectViewForEntity(list[index], _checkBoxRooms(list[index]));
+            return _renderInitialCardSelectViewForEntity(
+                ConstantUtils.roomList[index],
+                _checkBoxRooms(ConstantUtils.roomList[index])
+            );
           }
       ),
     );

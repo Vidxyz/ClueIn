@@ -47,20 +47,23 @@ class HomePageState extends State<HomePage> {
   }
 
   _actionButton(String title) {
-    return ElevatedButton(
-        onPressed: () {
-          switch (title) {
-            case "New Game":
-              _goToCreateNewGamePage();
-              break;
-            default:
-              break;
-          }
-        },
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(Colors.teal),
-        ),
-        child: Text(title),
+    return SizedBox(
+      width: 200,
+      child: ElevatedButton(
+          onPressed: () {
+            switch (title) {
+              case "New Game":
+                _goToCreateNewGamePage();
+                break;
+              default:
+                break;
+            }
+          },
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.teal),
+          ),
+          child: Text(title),
+      ),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 
 class GameDefinition extends Equatable {
   final String gameId;
+  final String gameName;
   final int totalPlayers;
   final Map<int, String> playerNames;
   final List<GameCard> initialCards;
@@ -28,6 +29,7 @@ class GameDefinition extends Equatable {
 
   const GameDefinition({
     required this.gameId,
+    required this.gameName,
     required this.totalPlayers,
     required this.playerNames,
     required this.initialCards,
@@ -37,6 +39,7 @@ class GameDefinition extends Equatable {
   @override
   List<Object?> get props => [
     gameId,
+    gameName,
     totalPlayers,
     playerNames,
     initialCards,
@@ -50,6 +53,7 @@ class GameDefinition extends Equatable {
   static GameDefinition GameDefinitionFromJson(Map<String, dynamic> json) =>
       GameDefinition(
         gameId: json['gameId'] as String,
+        gameName: json['gameName'] as String,
         totalPlayers: json['totalPlayers'] as int,
         playerNames: (json['playerNames'] as Map<int, String>),
         initialCards: (json['initialCards'] as List<String>)
@@ -69,6 +73,7 @@ class GameDefinition extends Equatable {
   static Map<String, dynamic> GameDefinitionToJson(GameDefinition instance) =>
       <String, dynamic>{
         'gameId': instance.gameId,
+        'gameName': instance.gameName,
         'totalPlayers': instance.totalPlayers,
         'playerNames': instance.playerNames,
         'initialCards': instance.initialCards.map((e) => e.cardName()),
