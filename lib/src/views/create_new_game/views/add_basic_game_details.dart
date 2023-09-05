@@ -20,7 +20,9 @@ class AddBasicGameDetailsView extends StatefulWidget {
   }
 }
 
-class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> {
+class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
 
   final List<String> playerNamesHint = ["P1", "P2", "P3", "P4", "P5", "P6"];
 

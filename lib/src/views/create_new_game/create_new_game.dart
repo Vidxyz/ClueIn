@@ -77,7 +77,10 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
       body: BlocListener<CreateNewGameBloc, CreateNewGameState>(
         listener: (context, state) {
           if (state is NewGameDetailsModified) {
-            print("In blocListener in main bloc, and state is - $state");
+
+          }
+          else if (state is NewGameSavedAndReadyToStart) {
+            // todo - Lets fkn goooo to the game
           }
         },
         child: _pageViews(),
@@ -89,7 +92,7 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
 
 
   _changeButtonIconIfNeeded(int pageNumber) {
-    if (pageNumber == 2) {
+    if (pageNumber == 1) {
       setState(() {
         floatingActionButtonIcon = const Icon(Icons.check, color: Colors.white);
       });
@@ -174,7 +177,24 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
     );
   }
 
+  void _goToPreviousPageOrNothing(int currentPage) {
+    if (currentPage != 0) {
+      // Move to previous page if not at first page
+      _pageController.animateToPage(currentPage - 1,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut
+      );
+    }
+  }
+
   VoidCallback? _onBackFloatingActionButtonPress() {
+    final currentState = _createNewGameBloc.state;
+    if (currentState is NewGameDetailsModified) {
+      final currentPage = _pageController.page;
+      if (currentPage != null) {
+        _goToPreviousPageOrNothing(currentPage.toInt());
+      }
+    }
     return null;
   }
 
@@ -197,8 +217,10 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
             }
           }
           else {
+            print(currentState.initialCards);
+            print('-------------');
             final maxCards = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
-            SnackbarUtils.showSnackBarShort(context, "Please select only $maxCards cards");
+            SnackbarUtils.showSnackBarShort(context, "Please select exactly $maxCards cards");
           }
         }
       }

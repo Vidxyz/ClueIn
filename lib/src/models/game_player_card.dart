@@ -1,6 +1,7 @@
 import 'package:cluein_app/src/models/game_card.dart';
 
-abstract class GamePlayerCard extends GameCard {}
+abstract class GamePlayerCard extends GameCard {
+}
 
 class Scarlett extends GamePlayerCard {
   @override

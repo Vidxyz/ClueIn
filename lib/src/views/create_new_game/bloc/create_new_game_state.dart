@@ -11,6 +11,31 @@ abstract class CreateNewGameState extends Equatable {
 
 class CreateNewGameStateInitial extends CreateNewGameState {}
 
+class NewGameBeingSaved extends CreateNewGameState {
+  const NewGameBeingSaved();
+}
+
+class NewGameSavedAndReadyToStart extends CreateNewGameState {
+  final String gameId;
+  final int totalPlayers;
+  final Map<int, String> playerNames;
+  final List<GameCard> initialCards;
+
+  const NewGameSavedAndReadyToStart({
+    required this.gameId,
+    required this.totalPlayers,
+    required this.playerNames,
+    required this.initialCards,
+  });
+
+  @override
+  List<Object> get props => [
+    totalPlayers,
+    playerNames,
+    initialCards,
+  ];
+}
+
 class NewGameDetailsModified extends CreateNewGameState {
   final String gameName;
   final int totalPlayers;

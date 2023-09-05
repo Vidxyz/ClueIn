@@ -1,8 +1,11 @@
+import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'create_new_game_event.dart';
+import 'package:uuid/uuid.dart';
 
 class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
   final logger = Logger("CreateNewGameBloc");
@@ -25,6 +28,30 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
 
   // This will save current game to SharedPrefs, and then emit event to pop and send shared prefs ID
   void _beginNewClueGame(BeginNewClueGame event, Emitter<CreateNewGameState> emit) async {
+    emit(const NewGameBeingSaved());
+    final uuid = const Uuid();
+    final newGameId = uuid.v4();
+    final gameToSave = GameDefinition(
+        gameId: newGameId,
+        totalPlayers: event.totalPlayers,
+        playerNames: event.playerNames,
+        initialCards: event.initialCards,
+    );
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    final jsonStringToSave = gameToSave.toJson().toString();
+    final existingSavedGameIds = prefs.getStringList("cluein_game_ids") ?? [];
+    existingSavedGameIds.add(newGameId);
+    await prefs.setStringList("cluein_game_ids", existingSavedGameIds);
+    await prefs.setString("cluein_saved_game_$newGameId", jsonStringToSave);
+
+    emit(
+        NewGameSavedAndReadyToStart(
+            gameId: event.gameName,
+            totalPlayers: event.totalPlayers,
+            playerNames: event.playerNames,
+            initialCards: event.initialCards,
+        )
+    );
   }
 }
