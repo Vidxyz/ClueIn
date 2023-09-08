@@ -20,7 +20,10 @@ import 'package:equatable/equatable.dart';
 ///    }
 ///    ...
 /// }
-typedef GameState = Map<String, Map<String, List<String>>>;
+///
+typedef CharacterName = String;
+typedef PlayerName = String;
+typedef GameState = Map<CharacterName, Map<PlayerName, List<String>>>;
 
 abstract class MainGameState extends Equatable {
   const MainGameState();

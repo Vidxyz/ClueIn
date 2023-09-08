@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cluein_app/src/utils/keyboard_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.dart';
@@ -49,19 +50,24 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
           if (state is NewGameDetailsModified) {
             return SingleChildScrollView(
               child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: WidgetUtils.skipNulls([
-                    Divider(color: Theme.of(context).primaryColor),
-                    WidgetUtils.spacer(2.5),
-                    _renderGameNameView(),
-                    WidgetUtils.spacer(2.5),
-                    _renderTotalPlayers(),
-                    WidgetUtils.spacer(2.5),
-                    _renderParticipantsList(state),
-                    // Move this to its own widget
-                    // _renderAvailabilitiesView(state),
-                  ]),
+                child: GestureDetector(
+                  onTap: () {
+                    KeyboardUtils.hideKeyboard(context);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: WidgetUtils.skipNulls([
+                      Divider(color: Theme.of(context).primaryColor),
+                      WidgetUtils.spacer(2.5),
+                      _renderGameNameView(),
+                      WidgetUtils.spacer(2.5),
+                      _renderTotalPlayers(),
+                      WidgetUtils.spacer(2.5),
+                      _renderParticipantsList(state),
+                      // Move this to its own widget
+                      // _renderAvailabilitiesView(state),
+                    ]),
+                  ),
                 ),
               ),
             );
@@ -114,7 +120,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                       decoration: InputDecoration(
                         hintText: playerNamesHint[index],
                         hintStyle: const TextStyle(color: Colors.grey),
-                        border: OutlineInputBorder(
+                        border: const OutlineInputBorder(
                           borderSide: BorderSide(
                             color: Colors.teal,
                           ),
