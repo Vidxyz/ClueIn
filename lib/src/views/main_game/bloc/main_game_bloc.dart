@@ -10,7 +10,6 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     on<MainGameStateChanged>(_mainGameStateChanged);
   }
 
-  // todo - do inferences here
   void _mainGameStateChanged(MainGameStateChanged event, Emitter<MainGameState> emit) async {
     emit(
         MainGameStateModified(

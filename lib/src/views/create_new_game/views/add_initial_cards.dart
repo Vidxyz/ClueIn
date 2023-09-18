@@ -176,6 +176,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
     );
   }
 
+  // todo - add a prompt to tell user to select exactly X number of cards in this screen
   _renderCharacters() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
