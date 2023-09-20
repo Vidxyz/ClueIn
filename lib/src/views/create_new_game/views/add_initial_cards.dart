@@ -1,5 +1,7 @@
 import 'package:cluein_app/src/models/game_card.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
+import 'package:cluein_app/src/utils/keyboard_utils.dart';
+import 'package:cluein_app/src/utils/screen_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.dart';
@@ -8,8 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddInitialCardsView extends StatefulWidget {
-
-  const AddInitialCardsView({super.key});
+  const AddInitialCardsView({
+    super.key,
+  });
 
 
   @override
@@ -18,9 +21,8 @@ class AddInitialCardsView extends StatefulWidget {
   }
 }
 
-class AddInitialCardsViewState extends State<AddInitialCardsView> with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
+class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBindingObserver {
+
 
   Map<String, bool> personNameToBoolMap = {};
   Map<String, bool> weaponNameToBoolMap = {};
@@ -35,6 +37,8 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
 
   late CreateNewGameBloc _createNewGameBloc;
 
+  bool hasHintDialogBeenShown = false;
+
   @override
   void initState() {
     super.initState();
@@ -47,11 +51,19 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
         personCountTextFieldController.text = currentState.totalPlayers.toString();
       });
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (!hasHintDialogBeenShown) {
+        _showHintDialogToSetupGame();
+        hasHintDialogBeenShown = true;
+      }
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
-    return  BlocListener<CreateNewGameBloc, CreateNewGameState>(
+    return BlocListener<CreateNewGameBloc, CreateNewGameState>(
       listener: (context, state) {
         if (state is NewGameDetailsModified) {
           setState(() {
@@ -64,7 +76,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
           builder: (context, state) {
             if (state is NewGameDetailsModified) {
               return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
+                physics: ScrollPhysics(),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -74,6 +86,8 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
                       _renderGameNameView(state),
                       WidgetUtils.spacer(2.5),
                       _renderTotalPlayers(state),
+                      WidgetUtils.spacer(2.5),
+                      _renderSelectNumberOfCardsHintText(),
                       WidgetUtils.spacer(2.5),
                       _renderAllPersonCards(),
                       WidgetUtils.spacer(2.5),
@@ -92,96 +106,144 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
     );
   }
 
+  _renderSelectNumberOfCardsHintText() {
+    final currentState = _createNewGameBloc.state;
+    if (currentState is NewGameDetailsModified) {
+      final maxCards = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Text(
+            "Please select exactly the $maxCards cards that you start the game with",
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.teal,
+                fontSize: 14,
+                fontWeight: FontWeight.bold
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   _renderAllPersonCards() {
-    return ExpansionPanelList(
-      expansionCallback: (index, isExpanded) {
-        setState(() {
-          isPersonSectionExpanded = !isExpanded;
-        });
-      },
+    return Column(
       children: [
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return const ListTile(
-              title: Text(
-                "Persons",
-                style:  TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.grey
-                ),
-              ),
-            );
+        ExpansionPanelList(
+          expansionCallback: (index, isExpanded) {
+            setState(() {
+              isPersonSectionExpanded = !isExpanded;
+            });
           },
-          body: _renderCharacters(),
-          isExpanded: isPersonSectionExpanded,
-        )
+          children: [
+            ExpansionPanel(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return ListTile(
+                  onTap: () {
+                    setState(() {
+                      isPersonSectionExpanded = !isExpanded;
+                    });
+                  },
+                  title: const Text(
+                    "Persons",
+                    style:  TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.grey
+                    ),
+                  ),
+                );
+              },
+              body: _renderCharacters(),
+              isExpanded: isPersonSectionExpanded,
+            )
+          ],
+        ),
       ],
     );
   }
 
   _renderAllWeaponsCards() {
-    return ExpansionPanelList(
-      expansionCallback: (index, isExpanded) {
-        setState(() {
-          isWeaponSectionExpanded = !isExpanded;
-        });
-      },
+    return Column(
       children: [
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return const ListTile(
-              title: Text(
-                "Weapons",
-                style:  TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.grey
-                ),
-              ),
-            );
+        ExpansionPanelList(
+          expansionCallback: (index, isExpanded) {
+            setState(() {
+              isWeaponSectionExpanded = !isExpanded;
+            });
           },
-          body: _renderWeapons(),
-          isExpanded: isWeaponSectionExpanded,
-        )
+          children: [
+            ExpansionPanel(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return ListTile(
+                  onTap: () {
+                    setState(() {
+                      isWeaponSectionExpanded = !isExpanded;
+                    });
+                  },
+                  title: const Text(
+                    "Weapons",
+                    style:  TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.grey
+                    ),
+                  ),
+                );
+              },
+              body: _renderWeapons(),
+              isExpanded: isWeaponSectionExpanded,
+            )
+          ],
+        ),
       ],
     );
   }
 
   _renderAllRoomsCards() {
-    return ExpansionPanelList(
-      expansionCallback: (index, isExpanded) {
-        setState(() {
-          isRoomSectionExpanded = !isExpanded;
-        });
-      },
+    return Column(
       children: [
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return const ListTile(
-              title: Text(
-                "Rooms",
-                style:  TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.grey
-                ),
-              ),
-            );
+        ExpansionPanelList(
+          expansionCallback: (index, isExpanded) {
+            setState(() {
+              isRoomSectionExpanded = !isExpanded;
+            });
           },
-          body: _renderRooms(),
-          isExpanded: isRoomSectionExpanded,
-        )
+          children: [
+            ExpansionPanel(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return ListTile(
+                  onTap: () {
+                    setState(() {
+                      isRoomSectionExpanded = !isExpanded;
+                    });
+                  },
+                  title: const Text(
+                    "Rooms",
+                    style:  TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.grey
+                    ),
+                  ),
+                );
+              },
+              body: _renderRooms(),
+              isExpanded: isRoomSectionExpanded,
+            )
+          ],
+        ),
       ],
     );
   }
 
-  // todo - add a prompt to tell user to select exactly X number of cards in this screen
   _renderCharacters() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: ListView.builder(
           shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: ConstantUtils.characterList.length,
           itemBuilder: (context, index) {
             return _renderInitialCardSelectViewForEntity(
@@ -198,6 +260,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
       padding: const EdgeInsets.only(bottom: 10),
       child: ListView.builder(
           shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: ConstantUtils.weaponList.length,
           itemBuilder: (context, index) {
             return _renderInitialCardSelectViewForEntity(
@@ -214,6 +277,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
       padding: const EdgeInsets.only(bottom: 10),
       child: ListView.builder(
           shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: ConstantUtils.roomList.length,
           itemBuilder: (context, index) {
             return _renderInitialCardSelectViewForEntity(
@@ -447,4 +511,93 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with Automatic
       ],
     );
   }
+
+  _showHintDialogToSetupGame() {
+    final currentState = _createNewGameBloc.state;
+    if (currentState is NewGameDetailsModified) {
+      final maxCardsPerPlayer = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
+
+      showDialog(context: context, builder: (context) {
+        return Dialog(
+            child: SizedBox(
+              height: ScreenUtils.getScreenHeight(context) / 2,
+              child: Scaffold(
+                  appBar: AppBar(
+                    automaticallyImplyLeading: false,
+                    title: const Text("Game setup", style: TextStyle(color: Colors.teal),),
+                  ),
+                  body: Center(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: WidgetUtils.skipNulls([
+                          Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Center(
+                              child: Text(
+                                "This game consists of ${currentState.totalPlayers} players and ${ConstantUtils.MAX_GAME_CARDS} cards",
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal
+                                ),
+                              ),
+                            ),
+                          ),
+                          WidgetUtils.spacer(5.0),
+                          const Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Center(
+                              child: Text(
+                                "Shuffle the cards and set aside ${ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL} cards, one of each category - Character, Weapon and Room",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal
+                                ),
+                              ),
+                            ),
+                          ),
+                          WidgetUtils.spacer(5.0),
+                          Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Center(
+                              child: Text(
+                                "Shuffle the cards and distribute $maxCardsPerPlayer cards to each player. These cards can be of any category",
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal
+                                ),
+                              ),
+                            ),
+                          ),
+                          WidgetUtils.spacer(5.0),
+                          (maxCardsPerPlayer * currentState.totalPlayers) + ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL == ConstantUtils.MAX_GAME_CARDS ? null :
+                          Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Center(
+                              child: Text(
+                                "Reveal ${ConstantUtils.MAX_GAME_CARDS - (maxCardsPerPlayer * currentState.totalPlayers) - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL} cards for all to see. "
+                                    "This is required so that no one player has an unfair advantage.",
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ),
+                  )
+              ),
+            )
+        );
+      }).then((value) => KeyboardUtils.hideKeyboard(context));
+    }
+
+
+  }
+
 }

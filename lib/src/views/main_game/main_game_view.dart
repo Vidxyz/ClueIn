@@ -54,6 +54,8 @@ class MainGameViewState extends State<MainGameView> {
   bool isMarkingDialogOpen = false;
   String? selectedMarkingFromDialog;
 
+  List<MapEntry<int, String>> playerNameMapEntries = [];
+
   late GameState charactersGameState;
   late GameState weaponsGameState;
   late GameState roomsGameState;
@@ -67,15 +69,17 @@ class MainGameViewState extends State<MainGameView> {
 
     _mainGameBloc = BlocProvider.of<MainGameBloc>(context);
 
-    // todo - enforce player ordering here
-    charactersGameState = MainGameStateModified.emptyCharactersGameState(widget.gameDefinition.playerNames.values.toList());
-    weaponsGameState = MainGameStateModified.emptyWeaponsGameState(widget.gameDefinition.playerNames.values.toList());
-    roomsGameState = MainGameStateModified.emptyRoomsGameState(widget.gameDefinition.playerNames.values.toList());
+    playerNameMapEntries = List.from(widget.gameDefinition.playerNames.entries.toList());
+    playerNameMapEntries.sort((a, b) => a.key.compareTo(b.key));
+
+    charactersGameState = MainGameStateModified.emptyCharactersGameState(playerNameMapEntries.map((e) => e.value).toList());
+    weaponsGameState = MainGameStateModified.emptyWeaponsGameState(playerNameMapEntries.map((e) => e.value).toList());
+    roomsGameState = MainGameStateModified.emptyRoomsGameState(playerNameMapEntries.map((e) => e.value).toList());
 
     undoStack = OperationStack<String>([]);
     redoStack = OperationStack<String>([]);
 
-    _setupGameState();
+    _setupGameStateInitially();
   }
 
   bool _canUndo() => undoStack.isNotEmpty;
@@ -161,99 +165,109 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  _setupGameState() {
-    // todo - UI facelift after that - restrict name lengths and make uniqueness name constraint or resolve BE with UUIDs
-    // todo - let user know that they are player1
+  _setupGameStateInitially() {
+    // todo - UI facelift after that
+    // todo - replace player names (clashes) with player UUID mapping?
+
     // Mark everything as unavailable for the current user
-    ConstantUtils.allEntitites.forEach((entityName) {
-      if (ConstantUtils.roomList.contains(entityName)) {
-        roomsGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
-      }
-      else if (ConstantUtils.characterList.contains(entityName)) {
-        charactersGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
-      }
-      if (ConstantUtils.weaponList.contains(entityName)) {
-        weaponsGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
-      }
-    });
-
-    // Set state based on initial cards
-    // When a "Tick" is added, every other user is deemed to not have it
-    widget.gameDefinition.initialCards.forEach((element) {
-      if (ConstantUtils.roomList.contains(element.cardName())) {
-        roomsGameState[element.cardName()] = {
-          widget.gameDefinition.playerNames[0]!: [ConstantUtils.tick],
-          ...(
-              Map.fromEntries(
-                  widget.gameDefinition.playerNames.entries
-                      .where((element) => element.key != 0)
-                      .map((e) => e.value)
-                      .map((e) {
-                    return MapEntry(e, [ConstantUtils.cross]);
-                  })
-              )
-          )
-        };
-      }
-      else if (ConstantUtils.characterList.contains(element.cardName())) {
-        charactersGameState[element.cardName()] = {
-          widget.gameDefinition.playerNames[0]!: [ConstantUtils.tick],
-          ...(
-              Map.fromEntries(
-                  widget.gameDefinition.playerNames.entries
-                      .where((element) => element.key != 0)
-                      .map((e) => e.value)
-                      .map((e) {
-                    return MapEntry(e, [ConstantUtils.cross]);
-                  })
-              )
-          )
-        };
-      }
-      else {
-        weaponsGameState[element.cardName()] = {
-          widget.gameDefinition.playerNames[0]!: [ConstantUtils.tick],
-          ...(
-              Map.fromEntries(
-                  widget.gameDefinition.playerNames.entries
-                      .where((element) => element.key != 0)
-                      .map((e) => e.value)
-                      .map((e) {
-                    return MapEntry(e, [ConstantUtils.cross]);
-                  })
-              )
-          )
-        };
-      }
-    });
-
-
-    //
-    widget.gameDefinition.charactersGameState.entries.forEach((element) {
-      final currentCharacter = element.key;
-      element.value.entries.forEach((element2) {
-        final currentPlayer = element2.key;
-        final markings = element2.value;
-        charactersGameState[currentCharacter]![currentPlayer] = markings;
+    markEverythingAsUnableForCurrentUser() {
+      ConstantUtils.allEntitites.forEach((entityName) {
+        if (ConstantUtils.roomList.contains(entityName)) {
+          roomsGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
+        }
+        else if (ConstantUtils.characterList.contains(entityName)) {
+          charactersGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
+        }
+        if (ConstantUtils.weaponList.contains(entityName)) {
+          weaponsGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
+        }
       });
-    });
+    }
 
-    widget.gameDefinition.weaponsGameState.entries.forEach((element) {
-      final currentWeapon = element.key;
-      element.value.entries.forEach((element2) {
-        final currentPlayer = element2.key;
-        final markings = element2.value;
-        weaponsGameState[currentWeapon]![currentPlayer] = markings;
+    setStateBasedOnInitialCards() {
+      // When a "Tick" is added, every other user is deemed to not have it
+      widget.gameDefinition.initialCards.forEach((element) {
+        if (ConstantUtils.roomList.contains(element.cardName())) {
+          roomsGameState[element.cardName()] = {
+            widget.gameDefinition.playerNames[0]!: [ConstantUtils.tick],
+            ...(
+                Map.fromEntries(
+                    widget.gameDefinition.playerNames.entries
+                        .where((element) => element.key != 0)
+                        .map((e) => e.value)
+                        .map((e) {
+                      return MapEntry(e, [ConstantUtils.cross]);
+                    })
+                )
+            )
+          };
+        }
+        else if (ConstantUtils.characterList.contains(element.cardName())) {
+          charactersGameState[element.cardName()] = {
+            widget.gameDefinition.playerNames[0]!: [ConstantUtils.tick],
+            ...(
+                Map.fromEntries(
+                    widget.gameDefinition.playerNames.entries
+                        .where((element) => element.key != 0)
+                        .map((e) => e.value)
+                        .map((e) {
+                      return MapEntry(e, [ConstantUtils.cross]);
+                    })
+                )
+            )
+          };
+        }
+        else {
+          weaponsGameState[element.cardName()] = {
+            widget.gameDefinition.playerNames[0]!: [ConstantUtils.tick],
+            ...(
+                Map.fromEntries(
+                    widget.gameDefinition.playerNames.entries
+                        .where((element) => element.key != 0)
+                        .map((e) => e.value)
+                        .map((e) {
+                      return MapEntry(e, [ConstantUtils.cross]);
+                    })
+                )
+            )
+          };
+        }
       });
-    });
-    widget.gameDefinition.roomsGameState.entries.forEach((element) {
-      final currentRoom = element.key;
-      element.value.entries.forEach((element2) {
-        final currentPlayer = element2.key;
-        final markings = element2.value;
-        roomsGameState[currentRoom]![currentPlayer] = markings;
+    }
+
+
+    setStateBasedOnGameDefinitionState() {
+      widget.gameDefinition.charactersGameState.entries.forEach((element) {
+        final currentCharacter = element.key;
+        element.value.entries.forEach((element2) {
+          final currentPlayer = element2.key;
+          final markings = element2.value;
+          charactersGameState[currentCharacter]![currentPlayer] = markings;
+        });
       });
-    });
+
+      widget.gameDefinition.weaponsGameState.entries.forEach((element) {
+        final currentWeapon = element.key;
+        element.value.entries.forEach((element2) {
+          final currentPlayer = element2.key;
+          final markings = element2.value;
+          weaponsGameState[currentWeapon]![currentPlayer] = markings;
+        });
+      });
+      widget.gameDefinition.roomsGameState.entries.forEach((element) {
+        final currentRoom = element.key;
+        element.value.entries.forEach((element2) {
+          final currentPlayer = element2.key;
+          final markings = element2.value;
+          roomsGameState[currentRoom]![currentPlayer] = markings;
+        });
+      });
+    }
+
+
+    markEverythingAsUnableForCurrentUser();
+    setStateBasedOnInitialCards();
+    setStateBasedOnGameDefinitionState();
 
     _mainGameBloc.add(
         MainGameStateLoadInitial(
@@ -265,6 +279,7 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
+  // todo - make constraints programatting for UI scaling
   _mainBody() {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
@@ -469,8 +484,7 @@ class MainGameViewState extends State<MainGameView> {
     return SizedBox(
       height: 22.5,
       child: Row(
-        // todo - arrange in order
-        children: widget.gameDefinition.playerNames.values.map((e) {
+        children: playerNameMapEntries.map((e) => e.value).map((e) {
           return [
             Expanded(
               flex: 3,
@@ -490,7 +504,6 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  // todo - ensure same constriants hold for columns in landscape too - so that user can see more columns in one go without scrolling
   _generateRoomsListMarkings() {
     return ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
@@ -507,8 +520,7 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child:  Row(
-              // todo - arrange in order
-              children: widget.gameDefinition.playerNames.values.map((currentPlayerName) {
+              children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
                 return [
                   Expanded(
                     flex: 3,
@@ -552,8 +564,7 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child:  Row(
-              // todo - arrange in order
-              children: widget.gameDefinition.playerNames.values.map((currentPlayerName) {
+              children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
                 return [
                   Expanded(
                     flex: 3,
@@ -596,8 +607,7 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child: Row(
-              // todo - arrange in order
-              children: widget.gameDefinition.playerNames.values.map((currentPlayerName) {
+              children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
                 return [
                   Expanded(
                     flex: 3,
@@ -1086,9 +1096,6 @@ class MainGameViewState extends State<MainGameView> {
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 4,
                   children: [
-                    /**
-                     * todo - need to set isSelected on the basis of cell
-                     */
                     _maybeMarker("1", currentMarkings.contains("1"), () {
                       _setStateAndPop("1", context);
                     }),

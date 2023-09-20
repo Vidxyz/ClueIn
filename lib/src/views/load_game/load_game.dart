@@ -95,17 +95,64 @@ class LoadGameViewState extends State<LoadGameView> {
           shrinkWrap: true,
           itemCount: state.savedGames.length,
           itemBuilder: (context, index) {
-            return ListTile(
-              onTap: () {
-                // Show dialog to confirm openin ghits game
-                print("OnTap selected for - ${state.savedGames[index].gameName}");
-                _openSavedGame(state.savedGames[index]);
+            return Dismissible(
+              key: Key(state.savedGames[index].gameId),
+              direction: DismissDirection.endToStart,
+              confirmDismiss: (direction) {
+                // Show dialog asking confirmation
+                Widget cancelButton = TextButton(
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all<Color>(Colors.teal),
+                  ),
+                  onPressed:  () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text("Cancel"),
+                );
+                Widget continueButton = TextButton(
+                  onPressed:  () {
+                    Navigator.pop(context, true);
+                  },
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
+                  ),
+                  child: const Text("Confirm"),
+                );
+
+                AlertDialog alert = AlertDialog(
+                  title: const Text("Delete saved game confirmation"),
+                  content: const Text("Are you sure you want to delete this game? This action is irreversible!"),
+                  actions: [
+                    cancelButton,
+                    continueButton,
+                  ],
+                );
+
+                // show the dialog
+                return showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return alert;
+                  },
+                );
               },
-              title: Text(
-                state.savedGames[index].gameName,
-              ),
-              subtitle: Text(
-                timeago.format(state.savedGames[index].lastSaved),
+              onDismissed: (direction) {
+                if (direction == DismissDirection.endToStart) {
+                  _deleteCurrentGame(state.savedGames[index].gameId);
+                }
+              },
+              background: WidgetUtils.viewUnderDismissibleListTile(),
+              child: ListTile(
+                onTap: () {
+                  // Show dialog to confirm openin ghits game
+                  _openSavedGame(state.savedGames[index]);
+                },
+                title: Text(
+                  state.savedGames[index].gameName,
+                ),
+                subtitle: Text(
+                  timeago.format(state.savedGames[index].lastSaved),
+                ),
               ),
             );
           }
@@ -125,6 +172,10 @@ class LoadGameViewState extends State<LoadGameView> {
         context,
         MainGameView.route(gameDefinition: gameDefinition)
     );
+  }
+
+  _deleteCurrentGame(String gameId) {
+    loadGameBloc.add(DeleteSavedGame(gameId: gameId));
   }
 
 }

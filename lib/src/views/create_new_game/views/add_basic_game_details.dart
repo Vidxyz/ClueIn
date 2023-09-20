@@ -83,6 +83,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
     return ListView.builder(
         shrinkWrap: true,
         itemCount: totalPlayerCountState,
+        physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.all(10),
@@ -93,39 +94,62 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                     flex: 2,
                     child: Text(
                       "P${index + 1}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: index == 0 ? Colors.redAccent : null,
+                      ),
                     )
                 ),
                 Expanded(
                     flex: 8,
-                    child: TextFormField(
-                      // controller: _totalPlayersController,
-                      textCapitalization: TextCapitalization.words,
-                      onChanged: (text) {
-                        final currentState = _createNewGameBloc.state;
-                        if (currentState is NewGameDetailsModified) {
-                          Map<int, String> newList = Map.from(currentState.playerNames);
-                          newList[index] = text.trim();
-                          _createNewGameBloc.add(
-                              NewGameDetailedChanged(
-                                  gameName: currentState.gameName,
-                                  totalPlayers: currentState.totalPlayers,
-                                  playerNames: newList,
-                                  initialCards: currentState.initialCards
-                              )
-                          );
-                        }
-                      },
-                      keyboardType: TextInputType.name,
-                      decoration: InputDecoration(
-                        hintText: playerNamesHint[index],
-                        hintStyle: const TextStyle(color: Colors.grey),
-                        border: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.teal,
+                    child: Column(
+                      children: WidgetUtils.skipNulls([
+                        index == 0 ?
+                        const Padding(
+                          padding: EdgeInsets.all(5),
+                          child: Text(
+                            "This is you",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold
+                            ),
+                          ),
+                        ) : null,
+                        TextFormField(
+                          // controller: _totalPlayersController,
+                          textCapitalization: TextCapitalization.words,
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(5),
+                            ],
+                          onChanged: (text) {
+                            final currentState = _createNewGameBloc.state;
+                            if (currentState is NewGameDetailsModified) {
+                              Map<int, String> newList = Map.from(currentState.playerNames);
+                              newList[index] = text.trim();
+                              _createNewGameBloc.add(
+                                  NewGameDetailedChanged(
+                                      gameName: currentState.gameName,
+                                      totalPlayers: currentState.totalPlayers,
+                                      playerNames: newList,
+                                      initialCards: currentState.initialCards
+                                  )
+                              );
+                            }
+                          },
+                          keyboardType: TextInputType.name,
+                          decoration: InputDecoration(
+                            hintText: playerNamesHint[index],
+                            hintStyle: const TextStyle(color: Colors.grey),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.teal,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ]),
                     )
                 ),
               ],

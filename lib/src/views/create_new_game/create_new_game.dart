@@ -220,7 +220,6 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
           }
           else {
             final maxCards = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
-            print(currentState.initialCards);
             SnackbarUtils.showSnackBarShort(context, "Please select exactly $maxCards cards");
           }
         }

@@ -21,7 +21,6 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     on<RedoLastMove>(_redoLastMove);
   }
 
-  // todo - redo does not work as expected
   void _redoLastMove(RedoLastMove event, Emitter<MainGameState> emit) async {
     if (event.redoStack.isNotEmpty) {
       final newRedoStack = OperationStack(event.redoStack.list);
@@ -127,10 +126,6 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     }
   }
 
-  // todo - when undo stack increases - redo stack is erased!
-  // todo - undo redo works conceptually, but UI doesnt hcange?
-  // todo - put the right thing when undo is done
-  // todo - multi undoredo fails
   void _undoLastMove(UndoLastMove event, Emitter<MainGameState> emit) async {
     if (event.undoStack.isNotEmpty) {
       final newUndoStack = OperationStack(event.undoStack.list);
@@ -281,9 +276,6 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
 
-    // todo - undo stack off by one
-    // initial state not in stakc
-    // first move should put state BEFORE it in the stack
     if (event.undoStack.list.length < ConstantUtils.MAX_UNDO_STACK_SIZE) {
       final newStack = OperationStack(event.undoStack.list);
       newStack.push(previousState!);

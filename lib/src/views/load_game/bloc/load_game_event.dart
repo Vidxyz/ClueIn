@@ -14,6 +14,17 @@ class FetchSavedGames extends LoadGameEvent {
   List<Object> get props => [];
 }
 
+class DeleteSavedGame extends LoadGameEvent {
+  final String gameId;
+
+  const DeleteSavedGame({
+    required this.gameId
+  });
+
+  @override
+  List<Object> get props => [gameId];
+}
+
 class GameSelectedToLoad extends LoadGameEvent {
   final String selectedGameId;
 
