@@ -37,7 +37,7 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
         gameId: newGameId,
         gameName: event.gameName,
         totalPlayers: event.totalPlayers,
-        playerNames: event.playerNames,
+        playerNames: Map.fromEntries(event.playerNames.entries.map((e) => MapEntry(e.key, "${e.value}${ConstantUtils.UNIQUE_NAME_DELIMITER}${uuid.v4()}"))),
         initialCards: event.initialCards,
         lastSaved: DateTime.now(),
     );

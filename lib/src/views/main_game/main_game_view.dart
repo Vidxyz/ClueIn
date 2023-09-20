@@ -165,10 +165,8 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
+  // todo - UI facelift
   _setupGameStateInitially() {
-    // todo - UI facelift after that
-    // todo - replace player names (clashes) with player UUID mapping?
-
     // Mark everything as unavailable for the current user
     markEverythingAsUnableForCurrentUser() {
       ConstantUtils.allEntitites.forEach((entityName) {
@@ -490,7 +488,7 @@ class MainGameViewState extends State<MainGameView> {
               flex: 3,
               child: Center(
                 child: Text(
-                  e,
+                  e.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
                   style: const TextStyle(
                       fontWeight: FontWeight.bold
                   ),

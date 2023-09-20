@@ -23,4 +23,6 @@ class ConstantUtils {
   static const String SHARED_PREF_SAVED_GAMES_KEY = "cluein_saved_game";
 
   static const int MAX_UNDO_STACK_SIZE = 10;
+
+  static const String UNIQUE_NAME_DELIMITER = "_@@_";
 }
