@@ -1,5 +1,6 @@
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
+import 'package:cluein_app/src/views/load_game/load_game.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -52,6 +53,9 @@ class HomePageState extends State<HomePage> {
       child: ElevatedButton(
           onPressed: () {
             switch (title) {
+              case "Load Game":
+                _goToLoadGamePage();
+                break;
               case "New Game":
                 _goToCreateNewGamePage();
                 break;
@@ -103,6 +107,13 @@ class HomePageState extends State<HomePage> {
     Navigator.push(
         context,
         CreateNewGameView.route()
+    );
+  }
+
+  _goToLoadGamePage() {
+    Navigator.push(
+        context,
+        LoadGameView.route()
     );
   }
 

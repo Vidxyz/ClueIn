@@ -1,4 +1,5 @@
 import 'package:cluein_app/src/models/game_card.dart';
+import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
 import 'package:equatable/equatable.dart';
 
 class GameDefinition extends Equatable {
@@ -25,7 +26,12 @@ class GameDefinition extends Equatable {
   ///    }
   ///    ...
   /// }
-  final Map<String, Map<String, List<String>>> gameState;
+  ///
+  final GameState charactersGameState;
+  final GameState weaponsGameState;
+  final GameState roomsGameState;
+
+  final DateTime lastSaved;
 
   const GameDefinition({
     required this.gameId,
@@ -33,7 +39,10 @@ class GameDefinition extends Equatable {
     required this.totalPlayers,
     required this.playerNames,
     required this.initialCards,
-    this.gameState = const {},
+    required this.lastSaved,
+    this.charactersGameState = const {},
+    this.weaponsGameState = const {},
+    this.roomsGameState = const {},
   });
 
   @override
@@ -43,32 +52,97 @@ class GameDefinition extends Equatable {
     totalPlayers,
     playerNames,
     initialCards,
-    gameState,
+    charactersGameState,
+    weaponsGameState,
+    roomsGameState,
+    lastSaved,
   ];
 
   factory GameDefinition.fromJson(Map<String, dynamic> json) => GameDefinitionFromJson(json);
 
-  Map<String, dynamic> toJson() => GameDefinitionToJson(this);
+  String toJson() => GameDefinitionToJson2(this);
 
   static GameDefinition GameDefinitionFromJson(Map<String, dynamic> json) =>
       GameDefinition(
         gameId: json['gameId'] as String,
         gameName: json['gameName'] as String,
         totalPlayers: json['totalPlayers'] as int,
-        playerNames: (json['playerNames'] as Map<int, String>),
-        initialCards: (json['initialCards'] as List<String>)
-            .map((e) => GameCard.fromString(e))
+        playerNames: (json['playerNames'] as Map<String, dynamic>).map((key, value) => MapEntry(int.parse(key), value.toString())),
+        lastSaved: DateTime.parse(json['lastSaved'] as String),
+        initialCards: (json['initialCards'] as List<dynamic>)
+            .map((e) => GameCard.fromString(e.toString()))
             .toList(),
-        gameState: (json['gameState'] as Map<String, dynamic>)
+        charactersGameState: (json['charactersGameState'] as Map<String, dynamic>)
             .map((key, value) => MapEntry(
                     key,
-                    (value as Map<String, List<dynamic>>).map((key, value) => MapEntry(
+                    (value as Map<String, dynamic>).map((key, value) => MapEntry(
                         key,
-                        value.map((e) => e.toString()).toList()
+                        (value as List<dynamic>).map((e) => e.toString()).toList()
                     ))
+        )),
+        weaponsGameState: (json['weaponsGameState'] as Map<String, dynamic>)
+            .map((key, value) => MapEntry(
+            key,
+            (value as Map<String, dynamic>).map((key, value) => MapEntry(
+                key,
+                (value as List<dynamic>).map((e) => e.toString()).toList()
+            ))
+        )),
+        roomsGameState: (json['roomsGameState'] as Map<String, dynamic>)
+            .map((key, value) => MapEntry(
+            key,
+            (value as Map<String, dynamic>).map((key, value) => MapEntry(
+                key,
+                (value as List<dynamic>).map((e) => e.toString()).toList()
+            ))
         )),
       );
 
+
+  static String GameDefinitionToJson2(GameDefinition instance) =>
+    '''
+      {
+        "gameId" : "${instance.gameId}",
+        "gameName" : "${instance.gameName}",
+        "totalPlayers" : ${instance.totalPlayers},
+        "playerNames" : {
+          ${instance.playerNames.entries.map((e) {
+            return '''
+                  "${e.key}" : "${e.value}"
+                  ''';
+          }).join(",")}
+        },
+        "lastSaved" : "${DateTime.now().toIso8601String()}",
+        "initialCards" : [
+          ${instance.initialCards.map((e) => '"${e.cardName()}"').toList().join(",")}
+        ],
+        "charactersGameState" : {
+          ${gameStateToJson(instance.charactersGameState)}
+        },
+        "weaponsGameState" : {
+          ${gameStateToJson(instance.weaponsGameState)}
+        },
+        "roomsGameState" : {
+          ${gameStateToJson(instance.roomsGameState)}
+        }
+      }
+    ''';
+
+  static String gameStateToJson(GameState state) {
+    return state.entries.map((e) {
+      return '''
+        "${e.key}" : {
+          ${e.value.entries.map((e2) {
+            return '''
+              "${e2.key}" : [
+                ${e2.value.map((e3) => '"$e3"').toList().join(",")}
+              ]
+            ''';
+          }).toList().join(", ")}
+        }
+      ''';
+    }).join(", ");
+  }
 
   static Map<String, dynamic> GameDefinitionToJson(GameDefinition instance) =>
       <String, dynamic>{
@@ -76,8 +150,11 @@ class GameDefinition extends Equatable {
         'gameName': instance.gameName,
         'totalPlayers': instance.totalPlayers,
         'playerNames': instance.playerNames,
+        'lastSaved': DateTime.now().toIso8601String(),
         'initialCards': instance.initialCards.map((e) => e.cardName()),
-        'gameState': instance.gameState,
+        'charactersGameState': instance.charactersGameState,
+        'weaponsGameState': instance.weaponsGameState,
+        'roomsGameState': instance.roomsGameState,
       };
 
 }

@@ -1,13 +1,13 @@
 import 'dart:math';
 
 import 'package:cluein_app/src/models/save/game_definition.dart';
+import 'package:cluein_app/src/models/stack.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/screen_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_bloc.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_event.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -47,7 +47,6 @@ class MainGameView extends StatefulWidget {
 }
 
 
-// todo - requires player names to be unique
 class MainGameViewState extends State<MainGameView> {
 
   late MainGameBloc _mainGameBloc;
@@ -59,19 +58,64 @@ class MainGameViewState extends State<MainGameView> {
   late GameState weaponsGameState;
   late GameState roomsGameState;
 
+  late OperationStack<String> undoStack;
+  late OperationStack<String> redoStack;
+
   @override
   void initState() {
     super.initState();
 
     _mainGameBloc = BlocProvider.of<MainGameBloc>(context);
+
     // todo - enforce player ordering here
     charactersGameState = MainGameStateModified.emptyCharactersGameState(widget.gameDefinition.playerNames.values.toList());
     weaponsGameState = MainGameStateModified.emptyWeaponsGameState(widget.gameDefinition.playerNames.values.toList());
     roomsGameState = MainGameStateModified.emptyRoomsGameState(widget.gameDefinition.playerNames.values.toList());
 
-
+    undoStack = OperationStack<String>([]);
+    redoStack = OperationStack<String>([]);
 
     _setupGameState();
+  }
+
+  bool _canUndo() => undoStack.isNotEmpty;
+  bool _canRedo() => redoStack.isNotEmpty;
+
+  _performUndo() {
+    if (_canUndo()) {
+      final currentState = _mainGameBloc.state;
+      if (currentState is MainGameStateModified) {
+        _mainGameBloc.add(
+            UndoLastMove(
+                initialGame: widget.gameDefinition,
+                charactersGameState: charactersGameState,
+                weaponsGameState: weaponsGameState,
+                roomsGameState: roomsGameState,
+                undoStack: undoStack,
+                redoStack: redoStack
+            )
+        );
+      }
+    }
+  }
+
+
+  _performRedo() {
+    if (_canRedo()) {
+      final currentState = _mainGameBloc.state;
+      if (currentState is MainGameStateModified) {
+        _mainGameBloc.add(
+            RedoLastMove(
+                initialGame: widget.gameDefinition,
+                charactersGameState: charactersGameState,
+                weaponsGameState: weaponsGameState,
+                roomsGameState: roomsGameState,
+                undoStack: undoStack,
+                redoStack: redoStack
+            )
+        );
+      }
+    }
   }
 
   @override
@@ -82,43 +126,45 @@ class MainGameViewState extends State<MainGameView> {
         iconTheme: const IconThemeData(
           color: Colors.teal,
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.undo,
+              color: _canUndo() ? Colors.teal : Colors.grey,
+            ),
+            onPressed: _performUndo,
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.redo,
+              color: _canRedo() ? Colors.teal : Colors.grey,
+            ),
+            onPressed: _performRedo,
+          ),
+        ],
       ),
       body: BlocListener<MainGameBloc, MainGameState>(
         listener: (context, state) {
           if (state is MainGameStateModified) {
-            charactersGameState = state.charactersGameState;
-            weaponsGameState = state.weaponsGameState;
-            roomsGameState = state.roomsGameState;
+            setState(() {
+              charactersGameState = state.charactersGameState;
+              weaponsGameState = state.weaponsGameState;
+              roomsGameState = state.roomsGameState;
+
+              undoStack = state.undoStack;
+              redoStack = state.redoStack;
+            });
           }
         },
-        child: WillPopScope(
-          onWillPop: () {
-            // todo - ask for confirmation and notify user that game state will be saved
-            return Future.value(true);
-          },
-          child: BlocBuilder<MainGameBloc, MainGameState> (
-            builder: (context, state) {
-              if (state is MainGameStateModified) {
-                return _mainBody(state);
-              }
-              else {
-                return WidgetUtils.progressIndicator();
-              }
-            },
-          ),
-        ),
+        child: _mainBody(),
       ),
-      // floatingActionButton: dynamicActionButtons,
-      // bottomNavigationBar: WidgetUtils.wrapAdWidgetWithUpgradeToMobileTextIfNeeded(adWidget, maxHeight),
     );
   }
 
   _setupGameState() {
+    // todo - UI facelift after that - restrict name lengths and make uniqueness name constraint or resolve BE with UUIDs
+    // todo - let user know that they are player1
     // Mark everything as unavailable for the current user
-    print(roomsGameState);
-    print(charactersGameState);
-    print(weaponsGameState);
-
     ConstantUtils.allEntitites.forEach((entityName) {
       if (ConstantUtils.roomList.contains(entityName)) {
         roomsGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
@@ -131,8 +177,7 @@ class MainGameViewState extends State<MainGameView> {
       }
     });
 
-    // todo - stack of operations to then UNDO
-    // perhaps keep snapshots of it?
+    // Set state based on initial cards
     // When a "Tick" is added, every other user is deemed to not have it
     widget.gameDefinition.initialCards.forEach((element) {
       if (ConstantUtils.roomList.contains(element.cardName())) {
@@ -183,8 +228,36 @@ class MainGameViewState extends State<MainGameView> {
     });
 
 
+    //
+    widget.gameDefinition.charactersGameState.entries.forEach((element) {
+      final currentCharacter = element.key;
+      element.value.entries.forEach((element2) {
+        final currentPlayer = element2.key;
+        final markings = element2.value;
+        charactersGameState[currentCharacter]![currentPlayer] = markings;
+      });
+    });
+
+    widget.gameDefinition.weaponsGameState.entries.forEach((element) {
+      final currentWeapon = element.key;
+      element.value.entries.forEach((element2) {
+        final currentPlayer = element2.key;
+        final markings = element2.value;
+        weaponsGameState[currentWeapon]![currentPlayer] = markings;
+      });
+    });
+    widget.gameDefinition.roomsGameState.entries.forEach((element) {
+      final currentRoom = element.key;
+      element.value.entries.forEach((element2) {
+        final currentPlayer = element2.key;
+        final markings = element2.value;
+        roomsGameState[currentRoom]![currentPlayer] = markings;
+      });
+    });
+
     _mainGameBloc.add(
-        MainGameStateChanged(
+        MainGameStateLoadInitial(
+          initialGame: widget.gameDefinition,
           charactersGameState: charactersGameState,
           weaponsGameState: weaponsGameState,
           roomsGameState: roomsGameState,
@@ -192,7 +265,7 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  _mainBody(MainGameStateModified state) {
+  _mainBody() {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Row(
@@ -212,7 +285,7 @@ class MainGameViewState extends State<MainGameView> {
                   maxWidth: (ScreenUtils.getScreenWidth(context) * 2) + (ScreenUtils.getScreenWidth(context) / 3),
                 ),
                 child: IntrinsicWidth(
-                  child: _generateEntityMarkings(state),
+                  child: _generateEntityMarkings(),
                 ),
               ),
             ),
@@ -345,7 +418,7 @@ class MainGameViewState extends State<MainGameView> {
   }
 
 
-  noPlayersHaveThisCard(EntityType entityType, String currentEntity) {
+  bool noPlayersHaveThisCard(EntityType entityType, String currentEntity) {
     if (entityType == EntityType.Room) {
       return widget.gameDefinition.playerNames.entries
           .map((e) => e.value)
@@ -366,7 +439,7 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
-  _generateEntityMarkings(MainGameStateModified state) {
+  _generateEntityMarkings() {
     return SizedBox(
       width: min(
           widget.gameDefinition.totalPlayers * ScreenUtils.getScreenWidth(context) / 3,
@@ -377,15 +450,15 @@ class MainGameViewState extends State<MainGameView> {
           _divider(),
           _playerNamesHeader(),
           _divider(),
-          _generateCharactersListMarkings(state),
+          _generateCharactersListMarkings(),
           _divider(),
           _playerNamesHeader(),
           _divider(),
-          _generateWeaponsListMarkings(state),
+          _generateWeaponsListMarkings(),
           _divider(),
           _playerNamesHeader(),
           _divider(),
-          _generateRoomsListMarkings(state),
+          _generateRoomsListMarkings(),
           _divider(),
         ],
       ),
@@ -418,7 +491,7 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   // todo - ensure same constriants hold for columns in landscape too - so that user can see more columns in one go without scrolling
-  _generateRoomsListMarkings(MainGameStateModified state) {
+  _generateRoomsListMarkings() {
     return ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
@@ -450,7 +523,7 @@ class MainGameViewState extends State<MainGameView> {
                       },
                       child: Card(
                         color: Colors.grey.shade200,
-                        child: _fillInRoomCellContentsBasedOnState(currentEntity, currentPlayerName, state),
+                        child: _fillInRoomCellContentsBasedOnState(currentEntity, currentPlayerName),
                       ),
                     ),
                   ),
@@ -463,7 +536,7 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  _generateWeaponsListMarkings(MainGameStateModified state) {
+  _generateWeaponsListMarkings() {
     return ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
@@ -494,7 +567,7 @@ class MainGameViewState extends State<MainGameView> {
                       },
                       child: Card(
                         color: Colors.grey.shade200,
-                        child: _fillInWeaponCellContentsBasedOnState(currentEntity, currentPlayerName, state),
+                        child: _fillInWeaponCellContentsBasedOnState(currentEntity, currentPlayerName),
                       ),
                     ),
                   ),
@@ -507,7 +580,7 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  _generateCharactersListMarkings(MainGameStateModified state) {
+  _generateCharactersListMarkings() {
     return ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
@@ -538,7 +611,7 @@ class MainGameViewState extends State<MainGameView> {
                       },
                       child: Card(
                         color: Colors.grey.shade200,
-                        child: _fillInCharacterCellContentsBasedOnState(currentCharacter, currentPlayerName, state),
+                        child: _fillInCharacterCellContentsBasedOnState(currentCharacter, currentPlayerName),
                       ),
                     ),
                   ),
@@ -551,8 +624,8 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  _fillInCharacterCellContentsBasedOnState(String currentCharacter, String playerName, MainGameStateModified state) {
-    if (state.charactersGameState[currentCharacter]?[playerName]?.contains("Tick") ?? false) {
+  _fillInCharacterCellContentsBasedOnState(String currentCharacter, String playerName) {
+    if (charactersGameState[currentCharacter]?[playerName]?.contains("Tick") ?? false) {
       return const Center(
         child: SizedBox(
           width: 30,
@@ -562,7 +635,7 @@ class MainGameViewState extends State<MainGameView> {
         ),
       );
     }
-    if (state.charactersGameState[currentCharacter]?[playerName]?.contains("X") ?? false) {
+    if (charactersGameState[currentCharacter]?[playerName]?.contains("X") ?? false) {
       return const Center(
         child: SizedBox(
           width: 30,
@@ -573,14 +646,14 @@ class MainGameViewState extends State<MainGameView> {
         ),
       );
     }
-    if (state.charactersGameState[currentCharacter]?[playerName]?.isNotEmpty ?? false) {
+    if (charactersGameState[currentCharacter]?[playerName]?.isNotEmpty ?? false) {
       // Something has been selected
       return Center(
         child: Wrap(
           spacing: 1.5,
           runSpacing: 1.5,
-          children: (state
-              .charactersGameState[currentCharacter]?[playerName] ?? [])
+          children: (
+              charactersGameState[currentCharacter]?[playerName] ?? [])
               .map((marking) {
             return _maybeMarker2(marking, () {
               charactersGameState[currentCharacter]![playerName] =
@@ -589,16 +662,6 @@ class MainGameViewState extends State<MainGameView> {
           }).toList() ,
         ),
       );
-      return  GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 3,
-        children: (state
-            .charactersGameState[currentCharacter]?[playerName] ?? [])
-            .map((marking) {
-              return _maybeMarker2(marking, () {});
-            }).toList(),
-      );
     }
     else {
       return Center(
@@ -607,8 +670,8 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
-  _fillInRoomCellContentsBasedOnState(String currentRoom, String playerName, MainGameStateModified state) {
-    if (state.roomsGameState[currentRoom]?[playerName]?.contains("Tick") ?? false) {
+  _fillInRoomCellContentsBasedOnState(String currentRoom, String playerName) {
+    if (roomsGameState[currentRoom]?[playerName]?.contains("Tick") ?? false) {
       return const Center(
         child: SizedBox(
           width: 30,
@@ -618,7 +681,7 @@ class MainGameViewState extends State<MainGameView> {
         ),
       );
     }
-    if (state.roomsGameState[currentRoom]?[playerName]?.contains("X") ?? false) {
+    if (roomsGameState[currentRoom]?[playerName]?.contains("X") ?? false) {
       return const Center(
         child: SizedBox(
           width: 30,
@@ -629,14 +692,14 @@ class MainGameViewState extends State<MainGameView> {
         ),
       );
     }
-    if (state.roomsGameState[currentRoom]?[playerName]?.isNotEmpty ?? false) {
+    if (roomsGameState[currentRoom]?[playerName]?.isNotEmpty ?? false) {
       // Something has been selected
       return Center(
         child: Wrap(
           spacing: 2.5,
           runSpacing: 2.5,
-          children: (state
-              .roomsGameState[currentRoom]?[playerName] ?? [])
+          children: (
+              roomsGameState[currentRoom]?[playerName] ?? [])
               .map((marking) {
             return _maybeMarker2(marking, () {
               roomsGameState[currentRoom]![playerName] =
@@ -645,16 +708,6 @@ class MainGameViewState extends State<MainGameView> {
           }).toList() ,
         ),
       );
-      return  GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 3,
-        children: (state
-            .roomsGameState[currentRoom]?[playerName] ?? [])
-            .map((marking) {
-              return _maybeMarker2(marking, () {});
-        }).toList(),
-      );
     }
     else {
       return Center(
@@ -663,8 +716,8 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
-  _fillInWeaponCellContentsBasedOnState(String currentWeapon, String playerName, MainGameStateModified state) {
-    if (state.weaponsGameState[currentWeapon]?[playerName]?.contains("Tick") ?? false) {
+  _fillInWeaponCellContentsBasedOnState(String currentWeapon, String playerName) {
+    if (weaponsGameState[currentWeapon]?[playerName]?.contains("Tick") ?? false) {
       return const Center(
         child: SizedBox(
           width: 30,
@@ -674,7 +727,7 @@ class MainGameViewState extends State<MainGameView> {
         ),
       );
     }
-    if (state.weaponsGameState[currentWeapon]?[playerName]?.contains("X") ?? false) {
+    if (weaponsGameState[currentWeapon]?[playerName]?.contains("X") ?? false) {
       return const Center(
         child: SizedBox(
           width: 30,
@@ -685,14 +738,13 @@ class MainGameViewState extends State<MainGameView> {
         ),
       );
     }
-    if (state.weaponsGameState[currentWeapon]?[playerName]?.isNotEmpty ?? false) {
+    if (weaponsGameState[currentWeapon]?[playerName]?.isNotEmpty ?? false) {
       // Something has been selected
       return Center(
         child: Wrap(
           spacing: 2.5,
           runSpacing: 2.5,
-          children: (state
-              .weaponsGameState[currentWeapon]?[playerName] ?? [])
+          children: (weaponsGameState[currentWeapon]?[playerName] ?? [])
               .map((marking) {
             return _maybeMarker2(marking, () {
               weaponsGameState[currentWeapon]![playerName] =
@@ -770,7 +822,6 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  // todo - bug when numbers/letters are added afer resetting a cell?
   _markDialogAsClosedAndResetMarking(EntityType entityType, String currentEntity, String currentPlayerName) {
     if (entityType == EntityType.Character) {
       charactersGameState[currentEntity]?[currentPlayerName] = [];
@@ -784,9 +835,12 @@ class MainGameViewState extends State<MainGameView> {
 
     _mainGameBloc.add(
         MainGameStateChanged(
+          initialGame: widget.gameDefinition,
           charactersGameState: charactersGameState,
           weaponsGameState: weaponsGameState,
           roomsGameState: roomsGameState,
+          undoStack: undoStack,
+          redoStack: redoStack,
         )
     );
     setState(() {
@@ -885,9 +939,12 @@ class MainGameViewState extends State<MainGameView> {
 
       _mainGameBloc.add(
           MainGameStateChanged(
+            initialGame: widget.gameDefinition,
             charactersGameState: charactersGameState,
             weaponsGameState: weaponsGameState,
             roomsGameState: roomsGameState,
+            undoStack: undoStack,
+            redoStack: redoStack,
           )
       );
       setState(() {
@@ -1189,7 +1246,7 @@ class MainGameViewState extends State<MainGameView> {
             backgroundColor: isSelectedAlready ? Colors.redAccent : Colors.teal,
             child: Text(
                 text,
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 10,
                     color: Colors.white
                 )
@@ -1210,7 +1267,7 @@ class MainGameViewState extends State<MainGameView> {
           backgroundColor: Colors.teal,
           child: Text(
               text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 10,
               color: Colors.white
             ),

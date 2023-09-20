@@ -1,6 +1,7 @@
 import 'package:cluein_app/src/models/game_player_card.dart';
 import 'package:cluein_app/src/models/game_room_card.dart';
 import 'package:cluein_app/src/models/game_weapon_card.dart';
+import 'package:cluein_app/src/models/stack.dart';
 import 'package:equatable/equatable.dart';
 
 /// GameState stored on a per card basis
@@ -35,16 +36,28 @@ abstract class MainGameState extends Equatable {
 
 class MainGameStateInitial extends MainGameState {}
 
+class DummyState extends MainGameState {
+
+  @override
+  List<Object> get props => [];
+
+  const DummyState();
+}
 class MainGameStateModified extends MainGameState {
 
   final GameState charactersGameState;
   final GameState weaponsGameState;
   final GameState roomsGameState;
 
+  final OperationStack<String> undoStack;
+  final OperationStack<String> redoStack;
+
   const MainGameStateModified({
     required this.charactersGameState,
     required this.weaponsGameState,
     required this.roomsGameState,
+    required this.undoStack,
+    required this.redoStack,
   });
 
   @override
@@ -52,6 +65,8 @@ class MainGameStateModified extends MainGameState {
     charactersGameState,
     weaponsGameState,
     roomsGameState,
+    undoStack,
+    redoStack,
   ];
 
   static GameState emptyCharactersGameState(List<String> playerNames) {
