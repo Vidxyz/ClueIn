@@ -277,7 +277,6 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  // todo - make constraints programatting for UI scaling
   _mainBody() {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
@@ -294,12 +293,10 @@ class MainGameViewState extends State<MainGameView> {
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minWidth: ScreenUtils.getScreenWidth(context) * 2/3,
-                  maxWidth: (ScreenUtils.getScreenWidth(context) * 2) + (ScreenUtils.getScreenWidth(context) / 3),
+                  minWidth: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2/3,
+                  maxWidth: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2) + (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3),
                 ),
-                child: IntrinsicWidth(
-                  child: _generateEntityMarkings(),
-                ),
+                child: _generateEntityMarkings(),
               ),
             ),
           ),
@@ -310,7 +307,7 @@ class MainGameViewState extends State<MainGameView> {
 
   _generateEntityNamesList() {
     return SizedBox(
-      width: ScreenUtils.getScreenWidth(context) / 3,
+      width: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3,
       child: Column(
         children: [
           _divider(),
@@ -454,9 +451,9 @@ class MainGameViewState extends State<MainGameView> {
 
   _generateEntityMarkings() {
     return SizedBox(
-      width: min(
-          widget.gameDefinition.totalPlayers * ScreenUtils.getScreenWidth(context) / 3,
-          (ScreenUtils.getScreenWidth(context) * 2) - (ScreenUtils.getScreenWidth(context) / 3)
+      width: max(
+          (widget.gameDefinition.totalPlayers * ConstantUtils.CELL_SIZE_HORIZONTAL_DEFAULT).toDouble(),
+          ScreenUtils.getScreenWidth(context) - (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3)
       ),
       child: Column(
         children: [
@@ -634,20 +631,20 @@ class MainGameViewState extends State<MainGameView> {
 
   _fillInCharacterCellContentsBasedOnState(String currentCharacter, String playerName) {
     if (charactersGameState[currentCharacter]?[playerName]?.contains("Tick") ?? false) {
-      return const Center(
+      return Center(
         child: SizedBox(
-          width: 30,
-          child: CircleAvatar(
+          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
+          child: const CircleAvatar(
             child: Icon(Icons.check, size: 16,),
           ),
         ),
       );
     }
     if (charactersGameState[currentCharacter]?[playerName]?.contains("X") ?? false) {
-      return const Center(
+      return Center(
         child: SizedBox(
-          width: 30,
-          child: CircleAvatar(
+          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
+          child: const CircleAvatar(
             backgroundColor: Colors.redAccent,
             child: Icon(Icons.close, size: 16, color: Colors.white,),
           ),
@@ -680,20 +677,20 @@ class MainGameViewState extends State<MainGameView> {
 
   _fillInRoomCellContentsBasedOnState(String currentRoom, String playerName) {
     if (roomsGameState[currentRoom]?[playerName]?.contains("Tick") ?? false) {
-      return const Center(
+      return Center(
         child: SizedBox(
-          width: 30,
-          child: CircleAvatar(
+          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
+          child: const CircleAvatar(
             child: Icon(Icons.check, size: 16,),
           ),
         ),
       );
     }
     if (roomsGameState[currentRoom]?[playerName]?.contains("X") ?? false) {
-      return const Center(
+      return Center(
         child: SizedBox(
-          width: 30,
-          child: CircleAvatar(
+          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
+          child: const CircleAvatar(
             backgroundColor: Colors.redAccent,
             child: Icon(Icons.close, size: 16, color: Colors.white,),
           ),
@@ -726,20 +723,20 @@ class MainGameViewState extends State<MainGameView> {
 
   _fillInWeaponCellContentsBasedOnState(String currentWeapon, String playerName) {
     if (weaponsGameState[currentWeapon]?[playerName]?.contains("Tick") ?? false) {
-      return const Center(
+      return Center(
         child: SizedBox(
-          width: 30,
-          child: CircleAvatar(
+          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
+          child: const CircleAvatar(
             child: Icon(Icons.check, size: 16,),
           ),
         ),
       );
     }
     if (weaponsGameState[currentWeapon]?[playerName]?.contains("X") ?? false) {
-      return const Center(
+      return Center(
         child: SizedBox(
-          width: 30,
-          child: CircleAvatar(
+          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
+          child: const CircleAvatar(
             backgroundColor: Colors.redAccent,
             child: Icon(Icons.close, size: 16, color: Colors.white,),
           ),
@@ -1264,8 +1261,8 @@ class MainGameViewState extends State<MainGameView> {
 
   Widget _maybeMarker2(String text, VoidCallback onTap) {
     return SizedBox(
-      width: 15,
-      height: 15,
+      width: ConstantUtils.MARKING_DIAMETER,
+      height: ConstantUtils.MARKING_DIAMETER,
       child: GestureDetector(
         onLongPress: onTap,
         child: CircleAvatar(
@@ -1273,7 +1270,8 @@ class MainGameViewState extends State<MainGameView> {
           child: Text(
               text,
             style: const TextStyle(
-              fontSize: 10,
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
               color: Colors.white
             ),
           ),
