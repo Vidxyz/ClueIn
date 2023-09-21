@@ -531,8 +531,8 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                   body: Card(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
-                        side: BorderSide(
-                            color: Theme.of(context).primaryColor,
+                        side: const BorderSide(
+                            color: ConstantUtils.primaryAppColor,
                             width: 1
                         )
                     ),

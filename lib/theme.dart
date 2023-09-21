@@ -1,3 +1,4 @@
+import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -94,10 +95,10 @@ final ThemeData appTheme = ThemeData.light().copyWith(
     backgroundColor: ColorConstants.lightBackgroundColor,
 
     colorScheme: ThemeData.light().colorScheme.copyWith(
-      primary: ColorConstants.primary500Teal,
+      primary: ConstantUtils.primaryAppColor,
       primaryVariant: ColorConstants.primary400Red,
 
-      secondary: const Color(0xff03dac6),
+      secondary: ConstantUtils.primaryAppColor,
       secondaryVariant: const Color(0xff018786),
 
       surface: Colors.white,
