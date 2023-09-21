@@ -66,7 +66,7 @@
 //           }
 //           else {
 //             return const CircularProgressIndicator(
-//               color: Colors.teal,
+//               color: ConstantUtils.primaryAppColor,
 //             );
 //           }
 //         },
@@ -93,7 +93,7 @@
 //         child: SafeArea(
 //           child: Center(
 //             child:  CircularProgressIndicator(
-//               color: Colors.teal,
+//               color: ConstantUtils.primaryAppColor,
 //             ),
 //           ),
 //         ),

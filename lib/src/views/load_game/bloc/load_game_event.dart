@@ -24,14 +24,3 @@ class DeleteSavedGame extends LoadGameEvent {
   @override
   List<Object> get props => [gameId];
 }
-
-class GameSelectedToLoad extends LoadGameEvent {
-  final String selectedGameId;
-
-  const GameSelectedToLoad({
-    required this.selectedGameId
-  });
-
-  @override
-  List<Object> get props => [selectedGameId];
-}

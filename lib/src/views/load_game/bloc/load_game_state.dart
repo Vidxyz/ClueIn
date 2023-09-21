@@ -11,6 +11,8 @@ abstract class LoadGameState extends Equatable {
 
 class LoadGameStateInitial extends LoadGameState {}
 
+class LoadGameStateLoading extends LoadGameState {}
+
 class SavedGamesFetched extends LoadGameState {
   final List<GameDefinition> savedGames;
 

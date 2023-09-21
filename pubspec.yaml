@@ -1,5 +1,5 @@
 name: cluein_app
-description: A new Flutter project.
+description: A flutter app to track observations while playing the board game clue
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -66,6 +66,14 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_icons:
+  ios: true
+  android: true
+  image_path_ios: "assets/icon.png"
+  image_path_android: "assets/icon.png"
+  adaptive_icon_background: "assets/background.png"
+  adaptive_icon_foreground: "assets/foreground.png"
 
 # The following section is specific to Flutter packages.
 flutter:

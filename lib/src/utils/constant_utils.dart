@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 class ConstantUtils {
   static const int MAX_GAME_CARDS = 21;
   static const int MAX_CARD_UNKNOWN_BY_ALL = 3; // Murder weapon, person and room
@@ -52,4 +54,16 @@ class ConstantUtils {
   static const int MAX_UNDO_STACK_SIZE = 10;
 
   static const String UNIQUE_NAME_DELIMITER = "_@@_";
+
+  static const String appName = "ClueIn";
+  static const String playStoreUrl = "https://google.ca";
+  static const String appStoreUrl = "https://google.ca";
+  static const String creatorIconPath = "assets/creator.jpg";
+
+  static const String githubUrl = "https://github.com/Vidxyz/ClueIn";
+  static const String githubIssuesUrl = "https://github.com/Vidxyz/ClueIn/issues";
+  static const String githubIconPath = "assets/github_icon.png";
+
+
+  static const Color primaryAppColor = Color(0xff733ddf);
 }

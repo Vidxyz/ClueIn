@@ -1,3 +1,4 @@
+import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:flutter/material.dart';
 
 class WidgetUtils {
@@ -35,5 +36,5 @@ class WidgetUtils {
     );
   }
 
-  static Widget progressIndicator() => const Center(child: CircularProgressIndicator(color: Colors.teal,),);
+  static Widget progressIndicator() => const Center(child: CircularProgressIndicator(color: ConstantUtils.primaryAppColor,),);
 }

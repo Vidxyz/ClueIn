@@ -134,22 +134,22 @@ class MainGameViewState extends State<MainGameView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(gameDefinitionState.gameName, style: const TextStyle(color: Colors.teal),),
+        title: Text(gameDefinitionState.gameName, style: const TextStyle(color: ConstantUtils.primaryAppColor),),
         iconTheme: const IconThemeData(
-          color: Colors.teal,
+          color: ConstantUtils.primaryAppColor,
         ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.undo,
-              color: _canUndo() ? Colors.teal : Colors.grey,
+              color: _canUndo() ? ConstantUtils.primaryAppColor : Colors.grey,
             ),
             onPressed: _performUndo,
           ),
           IconButton(
             icon: Icon(
               Icons.redo,
-              color: _canRedo() ? Colors.teal : Colors.grey,
+              color: _canRedo() ? ConstantUtils.primaryAppColor : Colors.grey,
             ),
             onPressed: _performRedo,
           ),
@@ -488,7 +488,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.teal),
+            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
           ),
           onPressed: () async {
             Navigator.pop(context);
@@ -513,7 +513,7 @@ class MainGameViewState extends State<MainGameView> {
                 ),
                 appBar: AppBar(
                   automaticallyImplyLeading: false,
-                  title: const Text("Edit player name", style: TextStyle(color: Colors.teal),),
+                  title: const Text("Edit player name", style: TextStyle(color: ConstantUtils.primaryAppColor),),
                 ),
                 body: Center(
                   child: Padding(
@@ -533,7 +533,7 @@ class MainGameViewState extends State<MainGameView> {
                         // hintStyle: const TextStyle(color: Colors.grey),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
-                            color: Colors.teal,
+                            color: ConstantUtils.primaryAppColor,
                           ),
                         ),
                       ),
@@ -614,9 +614,6 @@ class MainGameViewState extends State<MainGameView> {
               flex: 3,
               child: InkWell(
                 onTap: () {
-                  // todo - add an about page
-                  // todo - better UI home page + icon
-                  // todo - settings page for post MVP
                   _showEditPlayerNameDialog(currentPlayerName);
                 },
                 child: Container(
@@ -912,7 +909,7 @@ class MainGameViewState extends State<MainGameView> {
       thickness: 5,
       // indent: 20,
       // endIndent: 0,
-      color: Colors.teal,
+      color: ConstantUtils.primaryAppColor,
     );
   }
 
@@ -922,7 +919,7 @@ class MainGameViewState extends State<MainGameView> {
       thickness: 2.5,
       // indent: 20,
       // endIndent: 0,
-      color: Colors.teal,
+      color: ConstantUtils.primaryAppColor,
     );
   }
 
@@ -931,7 +928,7 @@ class MainGameViewState extends State<MainGameView> {
       height: ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT.toDouble(),
       thickness: 5,
       endIndent: 0,
-      color: Colors.teal,
+      color: ConstantUtils.primaryAppColor,
     );
   }
 
@@ -941,7 +938,7 @@ class MainGameViewState extends State<MainGameView> {
       height: ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT.toDouble(),
       thickness: 2.5,
       endIndent: 0,
-      color: Colors.teal,
+      color: ConstantUtils.primaryAppColor,
     );
   }
 
@@ -959,7 +956,7 @@ class MainGameViewState extends State<MainGameView> {
       child: Text(
         text,
         style: const TextStyle(
-            color: Colors.teal,
+            color: ConstantUtils.primaryAppColor,
             fontWeight: FontWeight.bold,
             fontSize: 18
         ),
@@ -1114,7 +1111,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.teal),
+            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
           ),
           onPressed: () async {
             _markDialogAsClosedAndResetMarking(entityType, currentEntity, currentPlayerName);
@@ -1130,7 +1127,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.teal),
+            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
           ),
           onPressed: () async {
             _markDialogAsClosedAndSaveMarking(entityType, currentEntity, currentPlayerName);
@@ -1158,7 +1155,7 @@ class MainGameViewState extends State<MainGameView> {
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontWeight: FontWeight.normal,
-                        color: Colors.teal
+                        color: ConstantUtils.primaryAppColor
                       ),
                     ),
                   ),
@@ -1169,7 +1166,7 @@ class MainGameViewState extends State<MainGameView> {
                     "For sure",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.teal,
+                        color: ConstantUtils.primaryAppColor,
                         fontSize: 16,
                     ),
                 ),
@@ -1222,7 +1219,7 @@ class MainGameViewState extends State<MainGameView> {
                     "Numbers",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.teal,
+                      color: ConstantUtils.primaryAppColor,
                       fontSize: 16,
                     ),
                 ),
@@ -1287,7 +1284,7 @@ class MainGameViewState extends State<MainGameView> {
                   "Letters",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.teal,
+                    color: ConstantUtils.primaryAppColor,
                     fontSize: 16,
                   ),
                 ),
@@ -1384,7 +1381,7 @@ class MainGameViewState extends State<MainGameView> {
         child: GestureDetector(
           onTap: onTap,
           child: CircleAvatar(
-            backgroundColor: isSelectedAlready ? Colors.redAccent : Colors.teal,
+            backgroundColor: isSelectedAlready ? Colors.redAccent : ConstantUtils.primaryAppColor,
             child: Text(
                 text,
                 style: const TextStyle(
@@ -1405,7 +1402,7 @@ class MainGameViewState extends State<MainGameView> {
       child: GestureDetector(
         onLongPress: onTap,
         child: CircleAvatar(
-          backgroundColor: Colors.teal,
+          backgroundColor: ConstantUtils.primaryAppColor,
           child: Text(
               text,
             style: const TextStyle(

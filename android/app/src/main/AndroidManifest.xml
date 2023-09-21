@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="cluein_app"
+        android:label="ClueIn"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

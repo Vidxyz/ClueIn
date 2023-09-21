@@ -117,7 +117,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
             "Please select exactly the $maxCards cards that you start the game with",
             textAlign: TextAlign.center,
             style: const TextStyle(
-                color: Colors.teal,
+                color: ConstantUtils.primaryAppColor,
                 fontSize: 14,
                 fontWeight: FontWeight.bold
             ),
@@ -316,7 +316,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          final c = Theme.of(context).primaryColor;
+          const c = ConstantUtils.primaryAppColor;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -364,7 +364,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          final c = Theme.of(context).primaryColor;
+          const c = ConstantUtils.primaryAppColor;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -412,7 +412,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          final c = Theme.of(context).primaryColor;
+          const c = ConstantUtils.primaryAppColor;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -478,7 +478,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                   hintStyle: TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: Colors.teal,
+                      color: ConstantUtils.primaryAppColor,
                     ),
                   ),
                 ),
@@ -526,7 +526,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
               child: Scaffold(
                   // appBar: AppBar(
                   //   automaticallyImplyLeading: false,
-                  //   title: const Text("Game setup", style: TextStyle(color: Colors.teal),),
+                  //   title: const Text("Game setup", style: TextStyle(color: ConstantUtils.primaryAppColor),),
                   // ),
                   body: Card(
                     shape: RoundedRectangleBorder(
@@ -548,7 +548,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.teal,
+                                      color: ConstantUtils.primaryAppColor,
                                       fontSize: 20
                                   ),
                                 ),
@@ -564,7 +564,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.teal
+                                      color: ConstantUtils.primaryAppColor
                                   ),
                                 ),
                               ),
@@ -578,7 +578,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.teal
+                                      color: ConstantUtils.primaryAppColor
                                   ),
                                 ),
                               ),
@@ -592,7 +592,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.teal
+                                      color: ConstantUtils.primaryAppColor
                                   ),
                                 ),
                               ),

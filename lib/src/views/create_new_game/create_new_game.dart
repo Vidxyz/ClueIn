@@ -68,9 +68,9 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Game', style: TextStyle(color: Colors.teal),),
+        title: const Text('New Game', style: TextStyle(color: ConstantUtils.primaryAppColor),),
         iconTheme: const IconThemeData(
-          color: Colors.teal,
+          color: ConstantUtils.primaryAppColor,
         ),
       ),
       body: BlocListener<CreateNewGameBloc, CreateNewGameState>(
@@ -148,7 +148,7 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
     return FloatingActionButton(
         heroTag: "CreateNewMeetupViewbutton0",
         onPressed: _onActionButtonPress,
-        backgroundColor: Colors.teal,
+        backgroundColor: ConstantUtils.primaryAppColor,
         child: floatingActionButtonIcon
     );
   }
@@ -164,14 +164,14 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
             child: FloatingActionButton(
                 heroTag: "CreateNewMeetupViewbutton1",
                 onPressed: _onBackFloatingActionButtonPress,
-                backgroundColor: Colors.teal,
+                backgroundColor: ConstantUtils.primaryAppColor,
                 child: const Icon(Icons.navigate_before, color: Colors.white)
             ),
           ),
           FloatingActionButton(
               heroTag: "CreateNewMeetupViewbutton2",
               onPressed: _onActionButtonPress,
-              backgroundColor: Colors.teal,
+              backgroundColor: ConstantUtils.primaryAppColor,
               child: floatingActionButtonIcon
           )
         ],

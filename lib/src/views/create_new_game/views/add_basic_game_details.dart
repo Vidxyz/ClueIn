@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/keyboard_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
@@ -68,7 +69,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                           "You are P1",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: Colors.teal,
+                              color: ConstantUtils.primaryAppColor,
                               fontSize: 14,
                               fontWeight: FontWeight.bold
                           ),
@@ -110,7 +111,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: index == 0 ? Colors.teal : null,
+                          color: index == 0 ? ConstantUtils.primaryAppColor : null,
                         ),
                       ),
                     )
@@ -145,7 +146,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                             hintStyle: const TextStyle(color: Colors.grey),
                             border: const OutlineInputBorder(
                               borderSide: BorderSide(
-                                color: Colors.teal,
+                                color: ConstantUtils.primaryAppColor,
                               ),
                             ),
                           ),

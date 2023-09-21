@@ -13,7 +13,6 @@ class LoadGameBloc extends Bloc<LoadGameEvent, LoadGameState> {
   final logger = Logger("LoadGameBloc");
 
   LoadGameBloc() : super(LoadGameStateInitial()) {
-    on<GameSelectedToLoad>(_gameSelectedToLoad);
     on<FetchSavedGames>(_fetchSavedGames);
     on<DeleteSavedGame>(_deleteSavedGame);
   }
@@ -28,6 +27,7 @@ class LoadGameBloc extends Bloc<LoadGameEvent, LoadGameState> {
   }
 
   void _fetchSavedGames(FetchSavedGames event, Emitter<LoadGameState> emit) async {
+    emit(LoadGameStateLoading());
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final savedGameIds =  prefs.getStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
@@ -44,10 +44,6 @@ class LoadGameBloc extends Bloc<LoadGameEvent, LoadGameState> {
     savedGameDefinitions.sort((a, b) => b.lastSaved.compareTo(a.lastSaved));
 
     emit(SavedGamesFetched(savedGames: savedGameDefinitions));
-
-  }
-
-  void _gameSelectedToLoad(GameSelectedToLoad event, Emitter<LoadGameState> emit) async {
 
   }
 

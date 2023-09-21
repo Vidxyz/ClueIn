@@ -1,4 +1,5 @@
 import 'package:cluein_app/src/models/save/game_definition.dart';
+import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
 import 'package:cluein_app/src/views/load_game/bloc/load_game_bloc.dart';
@@ -53,15 +54,15 @@ class LoadGameViewState extends State<LoadGameView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Load game", style: TextStyle(color: Colors.teal),),
+        title: const Text("Load game", style: TextStyle(color: ConstantUtils.primaryAppColor),),
         iconTheme: const IconThemeData(
-          color: Colors.teal,
+          color: ConstantUtils.primaryAppColor,
         ),
       ),
       floatingActionButton: FloatingActionButton(
           heroTag: "CreateNewMeetupViewbuttonLoadGameView",
           onPressed: _goToCreateNewGamePage,
-          backgroundColor: Colors.teal,
+          backgroundColor: ConstantUtils.primaryAppColor,
           child: const Icon(Icons.add, color: Colors.white)
       ),
       body: BlocListener<LoadGameBloc, LoadGameState>(
@@ -102,7 +103,7 @@ class LoadGameViewState extends State<LoadGameView> {
                 // Show dialog asking confirmation
                 Widget cancelButton = TextButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(Colors.teal),
+                    foregroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
                   ),
                   onPressed:  () {
                     Navigator.pop(context, false);
