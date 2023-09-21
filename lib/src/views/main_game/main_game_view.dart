@@ -449,7 +449,6 @@ class MainGameViewState extends State<MainGameView> {
           .reduce((value, element) => value && element);
     }
     else {
-      print(charactersGameState[currentEntity]!);
       return gameDefinitionState.playerNames.entries
           .map((e) => e.value)
           .map((e) => charactersGameState[currentEntity]![e]!.contains(ConstantUtils.cross))
@@ -618,7 +617,6 @@ class MainGameViewState extends State<MainGameView> {
                   // todo - add an about page
                   // todo - better UI home page + icon
                   // todo - settings page for post MVP
-                  // todo - landscape dialog markers size is too big
                   _showEditPlayerNameDialog(currentPlayerName);
                 },
                 child: Container(
@@ -1152,13 +1150,13 @@ class MainGameViewState extends State<MainGameView> {
           body: SingleChildScrollView(
             child: Column(
               children: [
-                const Padding(
-                  padding: EdgeInsets.all(5.0),
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
                   child: Center(
                     child: Text(
-                      "Select a marker to apply to the character/player combo",
+                      "Select a marker to apply to the ${entityType.name}/Player combo",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.normal,
                         color: Colors.teal
                       ),
@@ -1231,7 +1229,7 @@ class MainGameViewState extends State<MainGameView> {
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 4,
+                  crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 4 : 8,
                   children: [
                     _maybeMarker("1", currentMarkings.contains("1"), () {
                       _setStateAndPop("1", context);
@@ -1296,56 +1294,55 @@ class MainGameViewState extends State<MainGameView> {
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 4,
-                  padding: const EdgeInsets.all(5),
+                  crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 4 : 8,
                   children: [
-                    _maybeMarker("A", currentMarkings.contains("A"),  () {
-                      _setStateAndPop("A", context);
+                    _maybeMarker("1", currentMarkings.contains("1"), () {
+                      _setStateAndPop("1", context);
                     }),
-                    _maybeMarker("B", currentMarkings.contains("B"),  () {
-                      _setStateAndPop("B", context);
+                    _maybeMarker("2", currentMarkings.contains("2"), () {
+                      _setStateAndPop("2", context);
                     }),
-                    _maybeMarker("C", currentMarkings.contains("C"), () {
-                      _setStateAndPop("C", context);
+                    _maybeMarker("3", currentMarkings.contains("3"),  () {
+                      _setStateAndPop("3", context);
                     }),
-                    _maybeMarker("D", currentMarkings.contains("D"), () {
-                      _setStateAndPop("D", context);
+                    _maybeMarker("4", currentMarkings.contains("4"), () {
+                      _setStateAndPop("4", context);
                     }),
-                    _maybeMarker("E", currentMarkings.contains("E"), () {
-                      _setStateAndPop("E", context);
+                    _maybeMarker("5", currentMarkings.contains("5"),  () {
+                      _setStateAndPop("5", context);
                     }),
-                    _maybeMarker("F", currentMarkings.contains("F"), () {
-                      _setStateAndPop("F", context);
+                    _maybeMarker("6", currentMarkings.contains("6"),  () {
+                      _setStateAndPop("6", context);
                     }),
-                    _maybeMarker("G", currentMarkings.contains("G"), () {
-                      _setStateAndPop("G", context);
+                    _maybeMarker("7", currentMarkings.contains("7"),  () {
+                      _setStateAndPop("7", context);
                     }),
-                    _maybeMarker("H", currentMarkings.contains("H"), () {
-                      _setStateAndPop("H", context);
+                    _maybeMarker("8", currentMarkings.contains("8"),  () {
+                      _setStateAndPop("8", context);
                     }),
-                    _maybeMarker("I", currentMarkings.contains("I"), () {
-                      _setStateAndPop("I", context);
+                    _maybeMarker("9", currentMarkings.contains("9"),  () {
+                      _setStateAndPop("9", context);
                     }),
-                    _maybeMarker("J", currentMarkings.contains("J"),  () {
-                      _setStateAndPop("J", context);
+                    _maybeMarker("10", currentMarkings.contains("10"),  () {
+                      _setStateAndPop("10", context);
                     }),
-                    _maybeMarker("K", currentMarkings.contains("K"), () {
-                      _setStateAndPop("K", context);
+                    _maybeMarker("11", currentMarkings.contains("11"),  () {
+                      _setStateAndPop("11", context);
                     }),
-                    _maybeMarker("L", currentMarkings.contains("L"), () {
-                      _setStateAndPop("L", context);
+                    _maybeMarker("12", currentMarkings.contains("12"),  () {
+                      _setStateAndPop("12", context);
                     }),
-                    _maybeMarker("M", currentMarkings.contains("M"), () {
-                      _setStateAndPop("M", context);
+                    _maybeMarker("13", currentMarkings.contains("13"),  () {
+                      _setStateAndPop("13", context);
                     }),
-                    _maybeMarker("N", currentMarkings.contains("N"), () {
-                      _setStateAndPop("N", context);
+                    _maybeMarker("14", currentMarkings.contains("14"),  () {
+                      _setStateAndPop("14", context);
                     }),
-                    _maybeMarker("O", currentMarkings.contains("O"),  () {
-                      _setStateAndPop("O", context);
+                    _maybeMarker("15", currentMarkings.contains("15"),  () {
+                      _setStateAndPop("15", context);
                     }),
-                    _maybeMarker("P", currentMarkings.contains("P"), () {
-                      _setStateAndPop("P", context);
+                    _maybeMarker("16", currentMarkings.contains("16"),  () {
+                      _setStateAndPop("16", context);
                     }),
                   ],
                 ),
