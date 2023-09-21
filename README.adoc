@@ -1,0 +1,36 @@
+= ClueIn flutter app
+
+A cross-platform flutter application targeting Android/iOS. This is a simple app to help you play the board game 'Clue' by providing you a means to note down your observations and infer conclusions.
+
+== Build
+
+1. `flutter pub get`
+
+== Run app on iOS Simulator
+1. `open -a Simulator.app`
+2. `flutter run` - select the right device to run on
+3. Wait for application to build and enjoy!
+
+== Run app on Android Emulator
+1. `emulator -avd Pixel_5_API_30` - substitute `Pixel_5_API_30` with emulator device name
+2. `flutter run` - select the right device to run on
+3. Wait for application to build and enjoy!
+
+== Run app on Chrome
+1. `flutter run -d chrome --web-port=5555`
+2. Wait for application to build and enjoy!
+
+== Run app on iOS device
+. Connect your iOS device to your computer
+    - You might have to trust the computer/allow USB debugging
+. `flutter run` - select the right device to run on
+. Wait for application to build and enjoy!
+
+== Run app on Android device
+. Connect your Android device to your computer
+    - You might have to allow USB debugging
+    - Ensure developer mode is turned on
+. `flutter run` - select the right device to run on
+. Wait for application to build and enjoy!
+
+

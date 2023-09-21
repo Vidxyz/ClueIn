@@ -19,6 +19,30 @@ class ConstantUtils {
 
   static const List<String> allEntitites = [...characterList, ...weaponList, ...roomList];
 
+  static const Map<String, String> entityNameToDisplayNameMap = {
+    "Scarlett": "Scarlett",
+    "Mustard": "Mustard",
+    "White": "White",
+    "Green": "Green",
+    "Peacock": "Peacock",
+    "Plum": "Plum",
+    "Dagger" : "Dagger",
+    "Candlestick" : "Candlestick",
+    "Revolver" : "Revolver",
+    "Rope" : "Rope",
+    "LeadPipe" : "Lead Pipe",
+    "Wrench" : "Wrench",
+    "Hall" : "Hall",
+    "Lounge" : "Lounge",
+    "DiningRoom" : "Dining Room",
+    "Kitchen" : "Kitchen",
+    "BallRoom" : "Ball Room",
+    "Conservatory" : "Conservatory",
+    "BilliardRoom" : "Billiards Room",
+    "Library" : "Library",
+    "Study" : "Study",
+  };
+
   static const int MAX_MARKINGS = 15;
 
 

@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
   final logger = Logger("MainGameBloc");
 
-  String? previousState;
+  String? previousStateGlobal;
 
   MainGameBloc() : super(MainGameStateInitial()) {
     on<MainGameStateChanged>(_mainGameStateChanged);
@@ -65,6 +65,8 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
         final jsonStringToSave = gameToSave.toJson();
         await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
+        previousStateGlobal = jsonStringToSave;
+
         emit(
             MainGameStateModified(
               charactersGameState: redoGameDefinition.charactersGameState,
@@ -113,6 +115,8 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
         final jsonStringToSave = gameToSave.toJson();
         await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
+        previousStateGlobal = jsonStringToSave;
+
         emit(
             MainGameStateModified(
               charactersGameState: redoGameDefinition.charactersGameState,
@@ -126,6 +130,8 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     }
   }
 
+
+  // previousState - change it
   void _undoLastMove(UndoLastMove event, Emitter<MainGameState> emit) async {
     if (event.undoStack.isNotEmpty) {
       final newUndoStack = OperationStack(event.undoStack.list);
@@ -149,7 +155,6 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
         );
         final currentStateGame = currentGame.toJson();
 
-
         newRedoStack.push(currentStateGame);
         dynamic jsonResp = jsonDecode(previousState);
         final undoGameDefinition = GameDefinition.fromJson(jsonResp);
@@ -170,6 +175,9 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         final jsonStringToSave = gameToSave.toJson();
         await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+
+
+        previousStateGlobal = jsonStringToSave;
 
         emit(
             MainGameStateModified(
@@ -219,6 +227,8 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
         final jsonStringToSave = gameToSave.toJson();
         await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
+        previousStateGlobal = jsonStringToSave;
+
         emit(
             MainGameStateModified(
               charactersGameState: undoGameDefinition.charactersGameState,
@@ -246,7 +256,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
       lastSaved: DateTime.now(),
     );
 
-    previousState = gameToSave.toJson();
+    previousStateGlobal = gameToSave.toJson();
     emit(const DummyState());
     emit(
         MainGameStateModified(
@@ -259,8 +269,9 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     );
   }
 
+  // previousState is off by one... I smell it....
   void _mainGameStateChanged(MainGameStateChanged event, Emitter<MainGameState> emit) async {
-    final gameToSave = GameDefinition(
+    final currentGameToSave = GameDefinition(
       gameId: event.initialGame.gameId,
       gameName: event.initialGame.gameName,
       totalPlayers: event.initialGame.totalPlayers,
@@ -272,14 +283,16 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
       lastSaved: DateTime.now(),
     );
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final jsonStringToSave = gameToSave.toJson();
+    final jsonStringToSave = currentGameToSave.toJson();
     await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
 
     if (event.undoStack.list.length < ConstantUtils.MAX_UNDO_STACK_SIZE) {
       final newStack = OperationStack(event.undoStack.list);
-      newStack.push(previousState!);
-      previousState = jsonStringToSave;
+      if (previousStateGlobal != null) {
+        newStack.push(previousStateGlobal!);
+      }
+      previousStateGlobal = jsonStringToSave;
       emit(const DummyState());
       emit(
           MainGameStateModified(
@@ -287,15 +300,15 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
             weaponsGameState: event.weaponsGameState,
             roomsGameState: event.roomsGameState,
             undoStack: newStack,
-            redoStack: event.redoStack,
+            redoStack: OperationStack([]),
           )
       );
     }
     else {
       final newStack = OperationStack(event.undoStack.list);
       newStack.drain();
-      newStack.push(previousState!);
-      previousState = jsonStringToSave;
+      newStack.push(previousStateGlobal!);
+      previousStateGlobal = jsonStringToSave;
       emit(const DummyState());
       emit(
           MainGameStateModified(
@@ -303,7 +316,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
             weaponsGameState: event.weaponsGameState,
             roomsGameState: event.roomsGameState,
             undoStack: newStack,
-            redoStack: event.redoStack,
+            redoStack: OperationStack([]),
           )
       );
     }

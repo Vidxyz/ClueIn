@@ -9,6 +9,7 @@ import 'package:cluein_app/src/views/main_game/bloc/main_game_bloc.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_event.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum EntityType { Character, Weapon, Room }
@@ -60,8 +61,13 @@ class MainGameViewState extends State<MainGameView> {
   late GameState weaponsGameState;
   late GameState roomsGameState;
 
+  late GameDefinition gameDefinitionState;
+
   late OperationStack<String> undoStack;
   late OperationStack<String> redoStack;
+
+  String? editedNameValue;
+
 
   @override
   void initState() {
@@ -69,7 +75,9 @@ class MainGameViewState extends State<MainGameView> {
 
     _mainGameBloc = BlocProvider.of<MainGameBloc>(context);
 
-    playerNameMapEntries = List.from(widget.gameDefinition.playerNames.entries.toList());
+    gameDefinitionState = widget.gameDefinition;
+
+    playerNameMapEntries = List.from(gameDefinitionState.playerNames.entries.toList());
     playerNameMapEntries.sort((a, b) => a.key.compareTo(b.key));
 
     charactersGameState = MainGameStateModified.emptyCharactersGameState(playerNameMapEntries.map((e) => e.value).toList());
@@ -91,7 +99,7 @@ class MainGameViewState extends State<MainGameView> {
       if (currentState is MainGameStateModified) {
         _mainGameBloc.add(
             UndoLastMove(
-                initialGame: widget.gameDefinition,
+                initialGame: gameDefinitionState,
                 charactersGameState: charactersGameState,
                 weaponsGameState: weaponsGameState,
                 roomsGameState: roomsGameState,
@@ -110,7 +118,7 @@ class MainGameViewState extends State<MainGameView> {
       if (currentState is MainGameStateModified) {
         _mainGameBloc.add(
             RedoLastMove(
-                initialGame: widget.gameDefinition,
+                initialGame: gameDefinitionState,
                 charactersGameState: charactersGameState,
                 weaponsGameState: weaponsGameState,
                 roomsGameState: roomsGameState,
@@ -126,7 +134,7 @@ class MainGameViewState extends State<MainGameView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.gameDefinition.gameName, style: const TextStyle(color: Colors.teal),),
+        title: Text(gameDefinitionState.gameName, style: const TextStyle(color: Colors.teal),),
         iconTheme: const IconThemeData(
           color: Colors.teal,
         ),
@@ -165,32 +173,31 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  // todo - UI facelift
   _setupGameStateInitially() {
     // Mark everything as unavailable for the current user
     markEverythingAsUnableForCurrentUser() {
       ConstantUtils.allEntitites.forEach((entityName) {
         if (ConstantUtils.roomList.contains(entityName)) {
-          roomsGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
+          roomsGameState[entityName]![gameDefinitionState.playerNames[0]!] = [ConstantUtils.cross];
         }
         else if (ConstantUtils.characterList.contains(entityName)) {
-          charactersGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
+          charactersGameState[entityName]![gameDefinitionState.playerNames[0]!] = [ConstantUtils.cross];
         }
         if (ConstantUtils.weaponList.contains(entityName)) {
-          weaponsGameState[entityName]![widget.gameDefinition.playerNames[0]!] = [ConstantUtils.cross];
+          weaponsGameState[entityName]![gameDefinitionState.playerNames[0]!] = [ConstantUtils.cross];
         }
       });
     }
 
     setStateBasedOnInitialCards() {
       // When a "Tick" is added, every other user is deemed to not have it
-      widget.gameDefinition.initialCards.forEach((element) {
+      gameDefinitionState.initialCards.forEach((element) {
         if (ConstantUtils.roomList.contains(element.cardName())) {
           roomsGameState[element.cardName()] = {
-            widget.gameDefinition.playerNames[0]!: [ConstantUtils.tick],
+            gameDefinitionState.playerNames[0]!: [ConstantUtils.tick],
             ...(
                 Map.fromEntries(
-                    widget.gameDefinition.playerNames.entries
+                    gameDefinitionState.playerNames.entries
                         .where((element) => element.key != 0)
                         .map((e) => e.value)
                         .map((e) {
@@ -202,10 +209,10 @@ class MainGameViewState extends State<MainGameView> {
         }
         else if (ConstantUtils.characterList.contains(element.cardName())) {
           charactersGameState[element.cardName()] = {
-            widget.gameDefinition.playerNames[0]!: [ConstantUtils.tick],
+            gameDefinitionState.playerNames[0]!: [ConstantUtils.tick],
             ...(
                 Map.fromEntries(
-                    widget.gameDefinition.playerNames.entries
+                    gameDefinitionState.playerNames.entries
                         .where((element) => element.key != 0)
                         .map((e) => e.value)
                         .map((e) {
@@ -217,10 +224,10 @@ class MainGameViewState extends State<MainGameView> {
         }
         else {
           weaponsGameState[element.cardName()] = {
-            widget.gameDefinition.playerNames[0]!: [ConstantUtils.tick],
+            gameDefinitionState.playerNames[0]!: [ConstantUtils.tick],
             ...(
                 Map.fromEntries(
-                    widget.gameDefinition.playerNames.entries
+                    gameDefinitionState.playerNames.entries
                         .where((element) => element.key != 0)
                         .map((e) => e.value)
                         .map((e) {
@@ -235,7 +242,7 @@ class MainGameViewState extends State<MainGameView> {
 
 
     setStateBasedOnGameDefinitionState() {
-      widget.gameDefinition.charactersGameState.entries.forEach((element) {
+      gameDefinitionState.charactersGameState.entries.forEach((element) {
         final currentCharacter = element.key;
         element.value.entries.forEach((element2) {
           final currentPlayer = element2.key;
@@ -244,7 +251,7 @@ class MainGameViewState extends State<MainGameView> {
         });
       });
 
-      widget.gameDefinition.weaponsGameState.entries.forEach((element) {
+      gameDefinitionState.weaponsGameState.entries.forEach((element) {
         final currentWeapon = element.key;
         element.value.entries.forEach((element2) {
           final currentPlayer = element2.key;
@@ -252,7 +259,7 @@ class MainGameViewState extends State<MainGameView> {
           weaponsGameState[currentWeapon]![currentPlayer] = markings;
         });
       });
-      widget.gameDefinition.roomsGameState.entries.forEach((element) {
+      gameDefinitionState.roomsGameState.entries.forEach((element) {
         final currentRoom = element.key;
         element.value.entries.forEach((element2) {
           final currentPlayer = element2.key;
@@ -269,7 +276,7 @@ class MainGameViewState extends State<MainGameView> {
 
     _mainGameBloc.add(
         MainGameStateLoadInitial(
-          initialGame: widget.gameDefinition,
+          initialGame: gameDefinitionState,
           charactersGameState: charactersGameState,
           weaponsGameState: weaponsGameState,
           roomsGameState: roomsGameState,
@@ -347,7 +354,7 @@ class MainGameViewState extends State<MainGameView> {
               child: Card(
                 child: Center(
                     child: Text(
-                        currentEntity,
+                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null
@@ -380,7 +387,7 @@ class MainGameViewState extends State<MainGameView> {
               child: Card(
                 child: Center(
                     child: Text(
-                        currentEntity,
+                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
                         textAlign: TextAlign.center,
                       style: TextStyle(
                           color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null
@@ -413,7 +420,7 @@ class MainGameViewState extends State<MainGameView> {
               child: Card(
                 child: Center(
                     child: Text(
-                      currentEntity,
+                      ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null
@@ -430,19 +437,20 @@ class MainGameViewState extends State<MainGameView> {
 
   bool noPlayersHaveThisCard(EntityType entityType, String currentEntity) {
     if (entityType == EntityType.Room) {
-      return widget.gameDefinition.playerNames.entries
+      return gameDefinitionState.playerNames.entries
           .map((e) => e.value)
           .map((e) => roomsGameState[currentEntity]![e]!.contains(ConstantUtils.cross))
           .reduce((value, element) => value && element);
     }
     else if (entityType == EntityType.Weapon) {
-      return widget.gameDefinition.playerNames.entries
+      return gameDefinitionState.playerNames.entries
           .map((e) => e.value)
           .map((e) => weaponsGameState[currentEntity]![e]!.contains(ConstantUtils.cross))
           .reduce((value, element) => value && element);
     }
     else {
-      return widget.gameDefinition.playerNames.entries
+      print(charactersGameState[currentEntity]!);
+      return gameDefinitionState.playerNames.entries
           .map((e) => e.value)
           .map((e) => charactersGameState[currentEntity]![e]!.contains(ConstantUtils.cross))
           .reduce((value, element) => value && element);
@@ -452,7 +460,7 @@ class MainGameViewState extends State<MainGameView> {
   _generateEntityMarkings() {
     return SizedBox(
       width: max(
-          (widget.gameDefinition.totalPlayers * ConstantUtils.CELL_SIZE_HORIZONTAL_DEFAULT).toDouble(),
+          (gameDefinitionState.totalPlayers * ConstantUtils.CELL_SIZE_HORIZONTAL_DEFAULT).toDouble(),
           ScreenUtils.getScreenWidth(context) - (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3)
       ),
       child: Column(
@@ -475,19 +483,153 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
+  _showEditPlayerNameDialog(String currentPlayerName) {
+    _dismissDialogButton() {
+      return Padding(
+        padding: const EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.teal),
+          ),
+          onPressed: () async {
+            Navigator.pop(context);
+          },
+          child: const Text("Go back", style: TextStyle(fontSize: 15, color: Colors.white)),
+        ),
+      );
+    }
+
+    final currentPlayerNameId = currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).lastOrNull ?? "";
+    showDialog(context: context, builder: (context) {
+      return Dialog(
+          child: SizedBox(
+            height: ScreenUtils.getScreenHeight(context) / 3,
+            child: Scaffold(
+                bottomNavigationBar: Row(
+                  children: [
+                    Expanded(
+                      child: _dismissDialogButton(),
+                    ),
+                  ],
+                ),
+                appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  title: const Text("Edit player name", style: TextStyle(color: Colors.teal),),
+                ),
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: TextFormField(
+                      textCapitalization: TextCapitalization.words,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(5),
+                      ],
+                      onChanged: (text) {
+                        editedNameValue = text.trim();
+                      },
+                      initialValue: currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
+                      keyboardType: TextInputType.name,
+                      decoration: const InputDecoration(
+                        // hintText: playerNamesHint[index],
+                        // hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.teal,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+            ),
+          )
+      );
+    }).then((value) {
+      if (editedNameValue != null) {
+        _updatePlayerName(editedNameValue!, currentPlayerName, currentPlayerNameId);
+      }
+    });
+  }
+
+  _updatePlayerName(String newValue, String originalPlayerNamePlusId, currentPlayerNameId) {
+    setState(() {
+      // Update game definition, and update each game state
+      String newPlayerNamePlusId = "${newValue}${ConstantUtils.UNIQUE_NAME_DELIMITER}${currentPlayerNameId}";
+      ConstantUtils.characterList.forEach((currentCharacter) {
+        final currentMarkingMap = charactersGameState[currentCharacter]!;
+        currentMarkingMap[newPlayerNamePlusId] = charactersGameState[currentCharacter]![originalPlayerNamePlusId]!;
+        currentMarkingMap.remove(originalPlayerNamePlusId);
+        charactersGameState[currentCharacter] = currentMarkingMap;
+      });
+      ConstantUtils.weaponList.forEach((currentWeapon) {
+        final currentMarkingMap = weaponsGameState[currentWeapon]!;
+        currentMarkingMap[newPlayerNamePlusId] = weaponsGameState[currentWeapon]![originalPlayerNamePlusId]!;
+        currentMarkingMap.remove(originalPlayerNamePlusId);
+        weaponsGameState[currentWeapon] = currentMarkingMap;
+      });
+      ConstantUtils.roomList.forEach((currentRoom) {
+        final currentMarkingMap = roomsGameState[currentRoom]!;
+        currentMarkingMap[newPlayerNamePlusId] = roomsGameState[currentRoom]![originalPlayerNamePlusId]!;
+        currentMarkingMap.remove(originalPlayerNamePlusId);
+        roomsGameState[currentRoom] = currentMarkingMap;
+      });
+
+      final indexOfUpdatedPlayerName =
+          gameDefinitionState.playerNames.entries.where((element) => element.value == originalPlayerNamePlusId).firstOrNull?.key ?? 0;
+
+      final newMap = gameDefinitionState.playerNames;
+      newMap[indexOfUpdatedPlayerName] = newPlayerNamePlusId;
+
+      playerNameMapEntries = newMap.entries.toList();
+
+      gameDefinitionState = GameDefinition(
+          gameId: gameDefinitionState.gameId,
+          gameName: gameDefinitionState.gameName,
+          totalPlayers: gameDefinitionState.totalPlayers,
+          playerNames: newMap,
+          initialCards: gameDefinitionState.initialCards,
+          lastSaved: gameDefinitionState.lastSaved
+      );
+    });
+
+    _mainGameBloc.add(
+        MainGameStateChanged(
+          initialGame: gameDefinitionState,
+          charactersGameState: charactersGameState,
+          weaponsGameState: weaponsGameState,
+          roomsGameState: roomsGameState,
+          undoStack: undoStack,
+          redoStack: redoStack,
+        )
+    );
+
+  }
+
   _playerNamesHeader() {
     return SizedBox(
       height: 22.5,
       child: Row(
-        children: playerNameMapEntries.map((e) => e.value).map((e) {
+        children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
           return [
             Expanded(
               flex: 3,
-              child: Center(
-                child: Text(
-                  e.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold
+              child: InkWell(
+                onTap: () {
+                  // todo - add an about page
+                  // todo - better UI home page + icon
+                  // todo - settings page for post MVP
+                  // todo - landscape dialog markers size is too big
+                  _showEditPlayerNameDialog(currentPlayerName);
+                },
+                child: Container(
+                  color: Colors.grey.shade200,
+                  child: Center(
+                    child: Text(
+                      currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -523,8 +665,8 @@ class MainGameViewState extends State<MainGameView> {
                       onTap: () {
                         final currentMarkings = roomsGameState[currentEntity]![currentPlayerName]!;
                         // Only show dialog select if not an initial card from GameDefinition
-                        if (!(currentPlayerName == widget.gameDefinition.playerNames[0]!) &&
-                            !roomsGameState[currentEntity]![widget.gameDefinition.playerNames[0]!]!.contains(ConstantUtils.tick)) {
+                        if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
+                            !roomsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
                           _showMarkerSelectDialog(EntityType.Room, currentEntity, currentPlayerName, currentMarkings);
                         }
                       },
@@ -566,8 +708,8 @@ class MainGameViewState extends State<MainGameView> {
                     child: GestureDetector(
                       onTap: () {
                         final currentMarkings = weaponsGameState[currentEntity]![currentPlayerName]!;
-                        if (!(currentPlayerName == widget.gameDefinition.playerNames[0]!) &&
-                            !weaponsGameState[currentEntity]![widget.gameDefinition.playerNames[0]!]!.contains(ConstantUtils.tick)) {
+                        if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
+                            !weaponsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
                           _showMarkerSelectDialog(EntityType.Weapon, currentEntity, currentPlayerName, currentMarkings);
                         }
                       },
@@ -609,8 +751,8 @@ class MainGameViewState extends State<MainGameView> {
                     child: GestureDetector(
                       onTap: () {
                         final currentMarkings = charactersGameState[currentCharacter]![currentPlayerName]!;
-                        if (!(currentPlayerName == widget.gameDefinition.playerNames[0]!) &&
-                            !charactersGameState[currentCharacter]![widget.gameDefinition.playerNames[0]!]!.contains(ConstantUtils.tick)) {
+                        if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
+                            !charactersGameState[currentCharacter]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
                           _showMarkerSelectDialog(EntityType.Character, currentCharacter, currentPlayerName, currentMarkings);
                         }
                       },
@@ -840,7 +982,7 @@ class MainGameViewState extends State<MainGameView> {
 
     _mainGameBloc.add(
         MainGameStateChanged(
-          initialGame: widget.gameDefinition,
+          initialGame: gameDefinitionState,
           charactersGameState: charactersGameState,
           weaponsGameState: weaponsGameState,
           roomsGameState: roomsGameState,
@@ -864,7 +1006,7 @@ class MainGameViewState extends State<MainGameView> {
           // If it is a tick, then others all get a cross as only one person can own a card at a time
           if (selectedMarkingFromDialog == ConstantUtils.tick) {
             final allPlayersExceptCurrent =
-              widget.gameDefinition.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
+              gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
             allPlayersExceptCurrent.forEach((element) {
               charactersGameState[currentEntity]?[element] = [ConstantUtils.cross];
             });
@@ -894,7 +1036,7 @@ class MainGameViewState extends State<MainGameView> {
           // If it is a tick, then others all get a cross as only one person can own a card at a time
           if (selectedMarkingFromDialog == ConstantUtils.tick) {
             final allPlayersExceptCurrent =
-            widget.gameDefinition.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
+            gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
             allPlayersExceptCurrent.forEach((element) {
               weaponsGameState[currentEntity]?[element] = [ConstantUtils.cross];
             });
@@ -922,7 +1064,7 @@ class MainGameViewState extends State<MainGameView> {
           // If it is a tick, then others all get a cross as only one person can own a card at a time
           if (selectedMarkingFromDialog == ConstantUtils.tick) {
             final allPlayersExceptCurrent =
-            widget.gameDefinition.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
+            gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
             allPlayersExceptCurrent.forEach((element) {
               roomsGameState[currentEntity]?[element] = [ConstantUtils.cross];
             });
@@ -944,7 +1086,7 @@ class MainGameViewState extends State<MainGameView> {
 
       _mainGameBloc.add(
           MainGameStateChanged(
-            initialGame: widget.gameDefinition,
+            initialGame: gameDefinitionState,
             charactersGameState: charactersGameState,
             weaponsGameState: weaponsGameState,
             roomsGameState: roomsGameState,
