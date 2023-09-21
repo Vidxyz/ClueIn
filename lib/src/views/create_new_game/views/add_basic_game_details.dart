@@ -62,6 +62,18 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                       _renderGameNameView(),
                       WidgetUtils.spacer(2.5),
                       _renderTotalPlayers(),
+                      const Padding(
+                        padding: EdgeInsets.all(5),
+                        child: Text(
+                          "You are P1",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.teal,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ),
                       WidgetUtils.spacer(2.5),
                       _renderParticipantsList(state),
                       // Move this to its own widget
@@ -91,34 +103,23 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
               mainAxisSize: MainAxisSize.max,
               children: [
                 Expanded(
-                    flex: 2,
-                    child: Text(
-                      "P${index + 1}",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: index == 0 ? Colors.redAccent : null,
+                    flex: 1,
+                    child: Center(
+                      child: Text(
+                        "P${index + 1}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: index == 0 ? Colors.teal : null,
+                        ),
                       ),
                     )
                 ),
                 Expanded(
-                    flex: 8,
+                    flex: 7,
                     child: Column(
                       children: WidgetUtils.skipNulls([
-                        index == 0 ?
-                        const Padding(
-                          padding: EdgeInsets.all(5),
-                          child: Text(
-                            "This is you",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.redAccent,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold
-                            ),
-                          ),
-                        ) : null,
                         TextFormField(
-                          // controller: _totalPlayersController,
                           textCapitalization: TextCapitalization.words,
                             inputFormatters: [
                               LengthLimitingTextInputFormatter(5),
@@ -167,9 +168,14 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
         children: [
           const Expanded(
               flex: 5,
-              child: Text(
-                "Total Players",
-                style: TextStyle(fontWeight: FontWeight.bold),
+              child: Center(
+                child: Text(
+                  "Total Players",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               )
           ),
           Expanded(
