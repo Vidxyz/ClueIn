@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 
 class CustomMarkingsLayout extends StatefulWidget {
 
+  final bool isPartOfDialog;
   final List<Widget> children;
 
   const CustomMarkingsLayout({
     super.key,
     required this.children,
+    this.isPartOfDialog = false,
   });
 
   @override
@@ -62,8 +64,11 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
   _buildSizeOneLayout() {
     return Center(
       child: SizedBox(
-        width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble()  *2,
-        child: widget.children[0],
+        width: widget.isPartOfDialog ? ConstantUtils.MARKING_ICON_DIAMETER_2 * 2 : ConstantUtils.TICK_CROSS_DIAMETER.toDouble() * 2,
+        child: FittedBox(
+          fit: BoxFit.fill,
+          child: widget.children[0]
+        ),
       ),
     );
   }
@@ -75,13 +80,19 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
           Expanded(
             child: SizedBox(
               width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-              child: widget.children[0],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: widget.children[0],
+              ),
             ),
           ),
           Expanded(
             child: SizedBox(
               width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-              child: widget.children[1],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: widget.children[1],
+              ),
             ),
           )
         ],
@@ -96,19 +107,28 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
           Expanded(
             child: SizedBox(
               width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-              child: widget.children[0],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: widget.children[0],
+              ),
             ),
           ),
           Expanded(
             child: SizedBox(
               width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-              child: widget.children[1],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: widget.children[1],
+              ),
             ),
           ),
           Expanded(
             child: SizedBox(
               width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-              child: widget.children[2],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: widget.children[2],
+              ),
             ),
           )
         ],
@@ -126,13 +146,19 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[0],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[0],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[1],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[1],
+                    ),
                   ),
                 )
               ],
@@ -144,13 +170,19 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[2],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[2],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[3],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[3],
+                    ),
                   ),
                 )
               ],
@@ -171,13 +203,19 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[0],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[0],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[1],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[1],
+                    ),
                   ),
                 )
               ],
@@ -189,7 +227,10 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[2],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[2],
+                    ),
                   ),
                 ),
               ],
@@ -201,13 +242,19 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[3],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[3],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[4],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[4],
+                    ),
                   ),
                 )
               ],
@@ -228,13 +275,19 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[0],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[0],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[1],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[1],
+                    ),
                   ),
                 )
               ],
@@ -246,13 +299,19 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[2],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[2],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[3],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[3],
+                    ),
                   ),
                 )
               ],
@@ -264,13 +323,19 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[4],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[4],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[5],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[5],
+                    ),
                   ),
                 )
               ],
@@ -291,19 +356,28 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[0],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[0],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[1],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[1],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[2],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[2],
+                    ),
                   ),
                 )
               ],
@@ -315,19 +389,28 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[3],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[3],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[4],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[4],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[5],
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: widget.children[5],
+                    ),
                   ),
                 )
               ],
@@ -338,7 +421,10 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
               children: widget.children.skip(6).map((e) => Expanded(
                 child: SizedBox(
                   width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                  child: e,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: e,
+                  ),
                 ),
               )).toList(),
             ),
@@ -358,25 +444,37 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[0],
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: widget.children[0]
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[1],
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: widget.children[1]
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[2],
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: widget.children[2]
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[3],
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: widget.children[3]
+                    ),
                   ),
                 )
               ],
@@ -388,25 +486,37 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[4],
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: widget.children[4]
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[5],
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: widget.children[5]
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[6],
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: widget.children[6]
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SizedBox(
                     width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                    child: widget.children[7],
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: widget.children[7]
+                    ),
                   ),
                 )
               ],
@@ -417,7 +527,10 @@ class CustomMarkingsLayoutState extends State<CustomMarkingsLayout> {
               children: widget.children.skip(8).map((e) => Expanded(
                 child: SizedBox(
                   width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-                  child: e,
+                  child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: e
+                  ),
                 ),
               )).toList(),
             ),

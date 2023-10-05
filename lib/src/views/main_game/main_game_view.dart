@@ -835,18 +835,6 @@ class MainGameViewState extends State<MainGameView> {
         children: children,
       ),
     );
-    return Center(
-      child: AlignedGridView.count(
-        physics: NeverScrollableScrollPhysics(),
-        crossAxisCount: 3,
-        mainAxisSpacing: 5,
-        // crossAxisSpacing: 2.5,
-        itemCount: children.length,
-        itemBuilder: (context, index) {
-          return children[index];
-        },
-        )
-      );
   }
 
   _fillInCharacterCellContentsBasedOnState(String currentCharacter, String playerName) {
@@ -1236,12 +1224,46 @@ class MainGameViewState extends State<MainGameView> {
     showDialog(context: context, builder: (context) {
       return Dialog(
         child:  Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-          ),
+          appBar: null,
           body: SingleChildScrollView(
             child: Column(
               children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Center(
+                    child: Text(
+                      "Current markings",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: ConstantUtils.primaryAppColor
+                      ),
+                    ),
+                  ),
+                ),
+                WidgetUtils.spacer(2.5),
+                Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                      side: const BorderSide(
+                          color: ConstantUtils.primaryAppColor,
+                          width: 2.5
+                      )
+                  ),
+                  child: SizedBox(
+                    height: 120,
+                    child: currentMarkings.isEmpty ? Container() : CustomMarkingsLayout(
+                      isPartOfDialog: true,
+                      children: currentMarkings.map((marking) {
+                        return _maybeMarkerVanilla(marking, () {
+                          _setStateAndPop(marking, context);
+                        });
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                WidgetUtils.spacer(2.5),
                 Padding(
                   padding: const EdgeInsets.all(5.0),
                   child: Center(
@@ -1271,7 +1293,7 @@ class MainGameViewState extends State<MainGameView> {
                     Expanded(
                         // Check marker
                         child: SizedBox(
-                          width: 50,
+                          width: 40,
                           child: GestureDetector(
                             onTap: () {
                               setState(() {
@@ -1292,7 +1314,7 @@ class MainGameViewState extends State<MainGameView> {
                     Expanded(
                       // Cross marker
                         child: SizedBox(
-                          width: 50,
+                          width: 40,
                           child: GestureDetector(
                             onTap: () {
                               setState(() {
@@ -1310,7 +1332,7 @@ class MainGameViewState extends State<MainGameView> {
                     Expanded(
                       // Cross marker
                         child: SizedBox(
-                          width: 50,
+                          width: 40,
                           child: GestureDetector(
                             onTap: () {
                               setState(() {
@@ -1340,7 +1362,7 @@ class MainGameViewState extends State<MainGameView> {
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 4 : 8,
+                  crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 6 : 12,
                   children: [
                     _maybeMarker("1", currentMarkings.contains("1"), () {
                       _setStateAndPop("1", context);
@@ -1393,7 +1415,7 @@ class MainGameViewState extends State<MainGameView> {
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 4 : 8,
+                  crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 6 : 12,
                   children: [
                     _maybeMarker("A", currentMarkings.contains("A"), () {
                       _setStateAndPop("A", context);
@@ -1485,6 +1507,77 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
+  Widget _maybeMarkerVanilla(String text, VoidCallback onTap) {
+    if (text == ConstantUtils.tick) {
+      return SizedBox(
+        width: 50,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: GestureDetector(
+            onTap: onTap,
+              child: const CircleAvatar(
+                child: Icon(Icons.check, size: ConstantUtils.MARKING_ICON_DIAMETER_2,),
+              )
+          ),
+        ),
+      );
+
+    }
+    else if (text == ConstantUtils.cross) {
+      return SizedBox(
+        width: 50,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+            child: GestureDetector(
+              onTap: onTap,
+              child: const CircleAvatar(
+                backgroundColor: Colors.redAccent,
+                child: Icon(Icons.close, size: ConstantUtils.MARKING_ICON_DIAMETER_2, color: Colors.white,),
+              ),
+            )
+        ),
+      );
+
+    }
+    else if (text == ConstantUtils.questionMark) {
+      return SizedBox(
+        width: 50,
+        child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: GestureDetector(
+              onTap: onTap,
+              child: const CircleAvatar(
+                backgroundColor: Colors.amber,
+                child: Icon(Icons.warning, size: ConstantUtils.MARKING_ICON_DIAMETER_2, color: Colors.white,),
+              ),
+            )
+        ),
+      );
+    }
+    else {
+      return SizedBox(
+        width: 50,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: GestureDetector(
+            onTap: onTap,
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              child: Text(
+                  text,
+                  style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: ConstantUtils.primaryAppColor
+                  )
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   Widget _maybeMarker2(String text, VoidCallback onTap) {
     return SizedBox(
       width: ConstantUtils.MARKING_DIAMETER,
@@ -1496,7 +1589,7 @@ class MainGameViewState extends State<MainGameView> {
           child: Text(
               text,
             style: const TextStyle(
-              fontSize: 7,
+              fontSize: 12,
               fontWeight: FontWeight.w900,
               color: ConstantUtils.primaryAppColor
             ),
