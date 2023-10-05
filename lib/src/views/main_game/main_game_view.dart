@@ -11,6 +11,7 @@ import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 enum EntityType { Character, Weapon, Room }
 
@@ -56,6 +57,8 @@ class MainGameViewState extends State<MainGameView> {
   String? selectedMarkingFromDialog;
 
   List<MapEntry<int, String>> playerNameMapEntries = [];
+
+  List<String> selectedEntityNames = [];
 
   late GameState charactersGameState;
   late GameState weaponsGameState;
@@ -296,15 +299,12 @@ class MainGameViewState extends State<MainGameView> {
           child: _verticalDivider(),
         ),
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2/3,
-                  maxWidth: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2) + (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3),
-                ),
-                child: _generateEntityMarkings(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2/3,
+                maxWidth: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2) + (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3),
               ),
+              child: _generateEntityMarkings(),
             ),
           ),
         ],
@@ -314,7 +314,7 @@ class MainGameViewState extends State<MainGameView> {
 
   _generateEntityNamesList() {
     return SizedBox(
-      width: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3,
+      width: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 4,
       child: Column(
         children: [
           _divider(),
@@ -335,6 +335,17 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
+  _updateSelectedEntityNamesState(String currentEntity) {
+    setState(() {
+      if (selectedEntityNames.contains(currentEntity)) {
+        selectedEntityNames = List.from(selectedEntityNames)..remove(currentEntity);
+      }
+      else {
+        selectedEntityNames = List.from(selectedEntityNames)..add(currentEntity);
+      }
+    });
+  }
+
   _generateCharactersList() {
     return ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
@@ -351,15 +362,24 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child: Center(
-              child: Card(
-                child: Center(
-                    child: Text(
-                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null
-                        ),
-                    )
+              child: GestureDetector(
+                onTap: () {
+                  _updateSelectedEntityNamesState(currentEntity);
+                },
+                child: Card(
+                  child: Center(
+                      child: Text(
+                          ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null,
+                              decoration: selectedEntityNames.contains(currentEntity) ? TextDecoration.lineThrough : null,
+                              decorationColor: ConstantUtils.primaryAppColor,
+                              decorationThickness: 3,
+                          ),
+                      )
+                  ),
                 ),
               ),
             ),
@@ -384,15 +404,24 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child: Center(
-              child: Card(
-                child: Center(
-                    child: Text(
-                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
-                        textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null
-                      ),
-                    )
+              child: GestureDetector(
+                onTap: () {
+                  _updateSelectedEntityNamesState(currentEntity);
+                },
+                child: Card(
+                  child: Center(
+                      child: Text(
+                          ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                          textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                            color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null,
+                            decoration: selectedEntityNames.contains(currentEntity) ? TextDecoration.lineThrough : null,
+                            decorationColor: ConstantUtils.primaryAppColor,
+                            decorationThickness: 3,
+                        ),
+                      )
+                  ),
                 ),
               ),
             ),
@@ -417,15 +446,24 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child: Center(
-              child: Card(
-                child: Center(
-                    child: Text(
-                      ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null
-                      ),
-                    )
+              child: GestureDetector(
+                onTap: () {
+                  _updateSelectedEntityNamesState(currentEntity);
+                },
+                child: Card(
+                  child: Center(
+                      child: Text(
+                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null,
+                          decoration: selectedEntityNames.contains(currentEntity) ? TextDecoration.lineThrough : null,
+                          decorationColor: ConstantUtils.primaryAppColor,
+                          decorationThickness: 3,
+                        ),
+                      )
+                  ),
                 ),
               ),
             ),
@@ -766,43 +804,82 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
+  _renderCrossIcon() {
+    return Center(
+      child: SizedBox(
+        width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
+        child: const CircleAvatar(
+          backgroundColor: Colors.redAccent,
+          child: Icon(Icons.close, size: 12, color: Colors.white,),
+        ),
+      ),
+    );
+  }
+
+  _renderTickIcon() {
+    return Center(
+      child: SizedBox(
+        width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
+        child: const CircleAvatar(
+          child: Icon(Icons.check, size: 12,),
+        ),
+      ),
+    );
+  }
+
+  _renderAllOtherMarkings(List<Widget> children) {
+    return Center(
+      child: AlignedGridView.count(
+        physics: NeverScrollableScrollPhysics(),
+        crossAxisCount: 3,
+        mainAxisSpacing: 5,
+        // crossAxisSpacing: 2.5,
+        itemCount: children.length,
+        itemBuilder: (context, index) {
+          return children[index];
+        },
+        )
+      );
+  }
+
   _fillInCharacterCellContentsBasedOnState(String currentCharacter, String playerName) {
-    if (charactersGameState[currentCharacter]?[playerName]?.contains("Tick") ?? false) {
-      return Center(
-        child: SizedBox(
-          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-          child: const CircleAvatar(
-            child: Icon(Icons.check, size: 16,),
-          ),
-        ),
-      );
-    }
-    if (charactersGameState[currentCharacter]?[playerName]?.contains("X") ?? false) {
-      return Center(
-        child: SizedBox(
-          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-          child: const CircleAvatar(
-            backgroundColor: Colors.redAccent,
-            child: Icon(Icons.close, size: 16, color: Colors.white,),
-          ),
-        ),
-      );
-    }
+    // if (charactersGameState[currentCharacter]?[playerName]?.contains("Tick") ?? false) {
+    //   return _renderTickIcon();
+    // }
+    // if (charactersGameState[currentCharacter]?[playerName]?.contains("X") ?? false) {
+    //   return _renderCrossIcon();
+    // }
     if (charactersGameState[currentCharacter]?[playerName]?.isNotEmpty ?? false) {
       // Something has been selected
-      return Center(
-        child: Wrap(
-          spacing: 1.5,
-          runSpacing: 1.5,
-          children: (
+      return _renderAllOtherMarkings(
+          (
               charactersGameState[currentCharacter]?[playerName] ?? [])
               .map((marking) {
-            return _maybeMarker2(marking, () {
-              charactersGameState[currentCharacter]![playerName] =
-                  List.from(charactersGameState[currentCharacter]?[playerName] ?? [])..remove(marking);
-            });
-          }).toList() ,
-        ),
+                if (marking == ConstantUtils.tick) {
+                  return _maybeMarker2IconTick(marking, () {
+                    charactersGameState[currentCharacter]![playerName] =
+                    List.from(charactersGameState[currentCharacter]?[playerName] ?? [])..remove(marking);
+                  });
+                }
+                else if (marking == ConstantUtils.cross) {
+                  return _maybeMarker2IconCross(marking, () {
+                    charactersGameState[currentCharacter]![playerName] =
+                    List.from(charactersGameState[currentCharacter]?[playerName] ?? [])..remove(marking);
+                  });
+                }
+                else if (marking == ConstantUtils.questionMark) {
+                  return _maybeMarker2IconWarn(marking, () {
+                    charactersGameState[currentCharacter]![playerName] =
+                    List.from(charactersGameState[currentCharacter]?[playerName] ?? [])..remove(marking);
+                  });
+                }
+                else {
+                  return _maybeMarker2(marking, () {
+                    charactersGameState[currentCharacter]![playerName] =
+                    List.from(charactersGameState[currentCharacter]?[playerName] ?? [])..remove(marking);
+                  });
+                }
+          }).toList()
       );
     }
     else {
@@ -813,42 +890,46 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _fillInRoomCellContentsBasedOnState(String currentRoom, String playerName) {
-    if (roomsGameState[currentRoom]?[playerName]?.contains("Tick") ?? false) {
-      return Center(
-        child: SizedBox(
-          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-          child: const CircleAvatar(
-            child: Icon(Icons.check, size: 16,),
-          ),
-        ),
-      );
-    }
-    if (roomsGameState[currentRoom]?[playerName]?.contains("X") ?? false) {
-      return Center(
-        child: SizedBox(
-          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-          child: const CircleAvatar(
-            backgroundColor: Colors.redAccent,
-            child: Icon(Icons.close, size: 16, color: Colors.white,),
-          ),
-        ),
-      );
-    }
+    // if (roomsGameState[currentRoom]?[playerName]?.contains("Tick") ?? false) {
+    //   return _renderTickIcon();
+    // }
+    // if (roomsGameState[currentRoom]?[playerName]?.contains("X") ?? false) {
+    //   return _renderCrossIcon();
+    // }
     if (roomsGameState[currentRoom]?[playerName]?.isNotEmpty ?? false) {
       // Something has been selected
-      return Center(
-        child: Wrap(
-          spacing: 2.5,
-          runSpacing: 2.5,
-          children: (
+      return _renderAllOtherMarkings(
+          (
               roomsGameState[currentRoom]?[playerName] ?? [])
               .map((marking) {
-            return _maybeMarker2(marking, () {
-              roomsGameState[currentRoom]![playerName] =
-              List.from(roomsGameState[currentRoom]?[playerName] ?? [])..remove(marking);
-            });
-          }).toList() ,
-        ),
+
+            if (marking == ConstantUtils.tick) {
+              return _maybeMarker2IconTick(marking, () {
+                roomsGameState[currentRoom]![playerName] =
+                List.from(roomsGameState[currentRoom]?[playerName] ?? [])..remove(marking);
+              });
+            }
+            else if (marking == ConstantUtils.cross) {
+              return _maybeMarker2IconCross(marking, () {
+                roomsGameState[currentRoom]![playerName] =
+                List.from(roomsGameState[currentRoom]?[playerName] ?? [])..remove(marking);
+              });
+            }
+            else if (marking == ConstantUtils.questionMark) {
+              return _maybeMarker2IconWarn(marking, () {
+                roomsGameState[currentRoom]![playerName] =
+                List.from(roomsGameState[currentRoom]?[playerName] ?? [])..remove(marking);
+              });
+            }
+            else {
+              return _maybeMarker2(marking, () {
+                roomsGameState[currentRoom]![playerName] =
+                List.from(roomsGameState[currentRoom]?[playerName] ?? [])..remove(marking);
+              });
+            }
+
+
+          }).toList()
       );
     }
     else {
@@ -859,41 +940,45 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _fillInWeaponCellContentsBasedOnState(String currentWeapon, String playerName) {
-    if (weaponsGameState[currentWeapon]?[playerName]?.contains("Tick") ?? false) {
-      return Center(
-        child: SizedBox(
-          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-          child: const CircleAvatar(
-            child: Icon(Icons.check, size: 16,),
-          ),
-        ),
-      );
-    }
-    if (weaponsGameState[currentWeapon]?[playerName]?.contains("X") ?? false) {
-      return Center(
-        child: SizedBox(
-          width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-          child: const CircleAvatar(
-            backgroundColor: Colors.redAccent,
-            child: Icon(Icons.close, size: 16, color: Colors.white,),
-          ),
-        ),
-      );
-    }
+    // if (weaponsGameState[currentWeapon]?[playerName]?.contains("Tick") ?? false) {
+    //   return _renderTickIcon();
+    // }
+    // if (weaponsGameState[currentWeapon]?[playerName]?.contains("X") ?? false) {
+    //   return _renderCrossIcon();
+    // }
     if (weaponsGameState[currentWeapon]?[playerName]?.isNotEmpty ?? false) {
       // Something has been selected
-      return Center(
-        child: Wrap(
-          spacing: 2.5,
-          runSpacing: 2.5,
-          children: (weaponsGameState[currentWeapon]?[playerName] ?? [])
+      return _renderAllOtherMarkings(
+          (weaponsGameState[currentWeapon]?[playerName] ?? [])
               .map((marking) {
-            return _maybeMarker2(marking, () {
-              weaponsGameState[currentWeapon]![playerName] =
-              List.from(weaponsGameState[currentWeapon]?[playerName] ?? [])..remove(marking);
-            });
-          }).toList() ,
-        ),
+
+            if (marking == ConstantUtils.tick) {
+              return _maybeMarker2IconTick(marking, () {
+                weaponsGameState[currentWeapon]![playerName] =
+                List.from(weaponsGameState[currentWeapon]?[playerName] ?? [])..remove(marking);
+              });
+            }
+            else if (marking == ConstantUtils.cross) {
+              return _maybeMarker2IconCross(marking, () {
+                weaponsGameState[currentWeapon]![playerName] =
+                List.from(weaponsGameState[currentWeapon]?[playerName] ?? [])..remove(marking);
+              });
+            }
+            else if (marking == ConstantUtils.questionMark) {
+              return _maybeMarker2IconWarn(marking, () {
+                weaponsGameState[currentWeapon]![playerName] =
+                List.from(weaponsGameState[currentWeapon]?[playerName] ?? [])..remove(marking);
+              });
+            }
+            else {
+              return _maybeMarker2(marking, () {
+                weaponsGameState[currentWeapon]![playerName] =
+                List.from(weaponsGameState[currentWeapon]?[playerName] ?? [])..remove(marking);
+              });
+            }
+
+
+          }).toList()
       );
     }
     else {
@@ -995,22 +1080,23 @@ class MainGameViewState extends State<MainGameView> {
     if (selectedMarkingFromDialog != null) {
       // Something was selected, persist it
       if (entityType == EntityType.Character) {
-        if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
-          charactersGameState[currentEntity]?[currentPlayerName] = [selectedMarkingFromDialog!];
+        // if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
+        //   charactersGameState[currentEntity]?[currentPlayerName] = [selectedMarkingFromDialog!];
 
           // If it is a tick, then others all get a cross as only one person can own a card at a time
-          if (selectedMarkingFromDialog == ConstantUtils.tick) {
-            final allPlayersExceptCurrent =
-              gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
-            allPlayersExceptCurrent.forEach((element) {
-              charactersGameState[currentEntity]?[element] = [ConstantUtils.cross];
-            });
-
-          }
-        }
-        else {
-          charactersGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
-          charactersGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
+          // Avoid inference to preserve user choices
+          // if (selectedMarkingFromDialog == ConstantUtils.tick) {
+          //   final allPlayersExceptCurrent =
+          //     gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
+          //   allPlayersExceptCurrent.forEach((element) {
+          //     charactersGameState[currentEntity]?[element] = [ConstantUtils.cross];
+          //   });
+          //
+          // }
+        // }
+        // else {
+          // charactersGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
+          // charactersGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
           if (charactersGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
             charactersGameState[currentEntity]?[currentPlayerName]?.remove(selectedMarkingFromDialog);
           }
@@ -1020,25 +1106,26 @@ class MainGameViewState extends State<MainGameView> {
             }
             charactersGameState[currentEntity]?[currentPlayerName]?.add(selectedMarkingFromDialog!);
           }
-        }
+        // }
       }
       else if (entityType == EntityType.Weapon) {
-        weaponsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
-        weaponsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
-        if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
-          weaponsGameState[currentEntity]?[currentPlayerName] = [selectedMarkingFromDialog!];
+        // weaponsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
+        // weaponsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
+        // if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
+        //   weaponsGameState[currentEntity]?[currentPlayerName] = [selectedMarkingFromDialog!];
 
           // If it is a tick, then others all get a cross as only one person can own a card at a time
-          if (selectedMarkingFromDialog == ConstantUtils.tick) {
-            final allPlayersExceptCurrent =
-            gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
-            allPlayersExceptCurrent.forEach((element) {
-              weaponsGameState[currentEntity]?[element] = [ConstantUtils.cross];
-            });
-
-          }
-        }
-        else {
+          // Avoid inference to preserve user choices
+          // if (selectedMarkingFromDialog == ConstantUtils.tick) {
+          //   final allPlayersExceptCurrent =
+          //   gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
+          //   allPlayersExceptCurrent.forEach((element) {
+          //     weaponsGameState[currentEntity]?[element] = [ConstantUtils.cross];
+          //   });
+          //
+          // }
+        // }
+        // else {
           if (weaponsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
             weaponsGameState[currentEntity]?[currentPlayerName]?.remove(selectedMarkingFromDialog);
           }
@@ -1048,25 +1135,26 @@ class MainGameViewState extends State<MainGameView> {
             }
             weaponsGameState[currentEntity]?[currentPlayerName]?.add(selectedMarkingFromDialog!);
           }
-        }
+        // }
       }
       else {
-        roomsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
-        roomsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
-        if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
-          roomsGameState[currentEntity]?[currentPlayerName] = [selectedMarkingFromDialog!];
+        // roomsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
+        // roomsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
+        // if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
+        //   roomsGameState[currentEntity]?[currentPlayerName] = [selectedMarkingFromDialog!];
 
           // If it is a tick, then others all get a cross as only one person can own a card at a time
-          if (selectedMarkingFromDialog == ConstantUtils.tick) {
-            final allPlayersExceptCurrent =
-            gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
-            allPlayersExceptCurrent.forEach((element) {
-              roomsGameState[currentEntity]?[element] = [ConstantUtils.cross];
-            });
-
-          }
-        }
-        else {
+          // Avoid inference to preserve user choices
+          // if (selectedMarkingFromDialog == ConstantUtils.tick) {
+          //   final allPlayersExceptCurrent =
+          //   gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
+          //   allPlayersExceptCurrent.forEach((element) {
+          //     roomsGameState[currentEntity]?[element] = [ConstantUtils.cross];
+          //   });
+          //
+          // }
+        // }
+        // else {
           if (roomsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
             roomsGameState[currentEntity]?[currentPlayerName]?.remove(selectedMarkingFromDialog);
           }
@@ -1076,7 +1164,7 @@ class MainGameViewState extends State<MainGameView> {
             }
             roomsGameState[currentEntity]?[currentPlayerName]?.add(selectedMarkingFromDialog!);
           }
-        }
+        // }
       }
 
       _mainGameBloc.add(
@@ -1163,13 +1251,14 @@ class MainGameViewState extends State<MainGameView> {
                 WidgetUtils.spacer(2.5),
                 _divider(),
                 const Text(
-                    "For sure",
+                    "Symbols",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: ConstantUtils.primaryAppColor,
                         fontSize: 16,
                     ),
                 ),
+                WidgetUtils.spacer(2.5),
                 Row(
                   children: [
                     Expanded(
@@ -1189,6 +1278,24 @@ class MainGameViewState extends State<MainGameView> {
                                 size: 16,
                                 color: Colors.white,
                               ),
+                            ),
+                          ),
+                        )
+                    ),
+                    Expanded(
+                      // Cross marker
+                        child: SizedBox(
+                          width: 50,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedMarkingFromDialog = ConstantUtils.questionMark;
+                              });
+                              Navigator.pop(context);
+                            },
+                            child: const CircleAvatar(
+                              backgroundColor: Colors.amber,
+                              child: Icon(Icons.warning, size: 16, color: Colors.white,),
                             ),
                           ),
                         )
@@ -1264,18 +1371,6 @@ class MainGameViewState extends State<MainGameView> {
                     _maybeMarker("12", currentMarkings.contains("12"),  () {
                       _setStateAndPop("12", context);
                     }),
-                    _maybeMarker("13", currentMarkings.contains("13"),  () {
-                      _setStateAndPop("13", context);
-                    }),
-                    _maybeMarker("14", currentMarkings.contains("14"),  () {
-                      _setStateAndPop("14", context);
-                    }),
-                    _maybeMarker("15", currentMarkings.contains("15"),  () {
-                      _setStateAndPop("15", context);
-                    }),
-                    _maybeMarker("16", currentMarkings.contains("16"),  () {
-                      _setStateAndPop("16", context);
-                    }),
                   ],
                 ),
                 WidgetUtils.spacer(2.5),
@@ -1293,53 +1388,41 @@ class MainGameViewState extends State<MainGameView> {
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 4 : 8,
                   children: [
-                    _maybeMarker("1", currentMarkings.contains("1"), () {
-                      _setStateAndPop("1", context);
+                    _maybeMarker("A", currentMarkings.contains("A"), () {
+                      _setStateAndPop("A", context);
                     }),
-                    _maybeMarker("2", currentMarkings.contains("2"), () {
-                      _setStateAndPop("2", context);
+                    _maybeMarker("B", currentMarkings.contains("B"), () {
+                      _setStateAndPop("B", context);
                     }),
-                    _maybeMarker("3", currentMarkings.contains("3"),  () {
-                      _setStateAndPop("3", context);
+                    _maybeMarker("C", currentMarkings.contains("C"),  () {
+                      _setStateAndPop("C", context);
                     }),
-                    _maybeMarker("4", currentMarkings.contains("4"), () {
-                      _setStateAndPop("4", context);
+                    _maybeMarker("D", currentMarkings.contains("D"), () {
+                      _setStateAndPop("D", context);
                     }),
-                    _maybeMarker("5", currentMarkings.contains("5"),  () {
-                      _setStateAndPop("5", context);
+                    _maybeMarker("E", currentMarkings.contains("E"),  () {
+                      _setStateAndPop("E", context);
                     }),
-                    _maybeMarker("6", currentMarkings.contains("6"),  () {
-                      _setStateAndPop("6", context);
+                    _maybeMarker("F", currentMarkings.contains("F"),  () {
+                      _setStateAndPop("F", context);
                     }),
-                    _maybeMarker("7", currentMarkings.contains("7"),  () {
-                      _setStateAndPop("7", context);
+                    _maybeMarker("G", currentMarkings.contains("G"),  () {
+                      _setStateAndPop("G", context);
                     }),
-                    _maybeMarker("8", currentMarkings.contains("8"),  () {
-                      _setStateAndPop("8", context);
+                    _maybeMarker("H", currentMarkings.contains("H"),  () {
+                      _setStateAndPop("H", context);
                     }),
-                    _maybeMarker("9", currentMarkings.contains("9"),  () {
-                      _setStateAndPop("9", context);
+                    _maybeMarker("I", currentMarkings.contains("I"),  () {
+                      _setStateAndPop("I", context);
                     }),
-                    _maybeMarker("10", currentMarkings.contains("10"),  () {
-                      _setStateAndPop("10", context);
+                    _maybeMarker("J", currentMarkings.contains("J"),  () {
+                      _setStateAndPop("J", context);
                     }),
-                    _maybeMarker("11", currentMarkings.contains("11"),  () {
-                      _setStateAndPop("11", context);
+                    _maybeMarker("K", currentMarkings.contains("K"),  () {
+                      _setStateAndPop("K", context);
                     }),
-                    _maybeMarker("12", currentMarkings.contains("12"),  () {
-                      _setStateAndPop("12", context);
-                    }),
-                    _maybeMarker("13", currentMarkings.contains("13"),  () {
-                      _setStateAndPop("13", context);
-                    }),
-                    _maybeMarker("14", currentMarkings.contains("14"),  () {
-                      _setStateAndPop("14", context);
-                    }),
-                    _maybeMarker("15", currentMarkings.contains("15"),  () {
-                      _setStateAndPop("15", context);
-                    }),
-                    _maybeMarker("16", currentMarkings.contains("16"),  () {
-                      _setStateAndPop("16", context);
+                    _maybeMarker("L", currentMarkings.contains("L"),  () {
+                      _setStateAndPop("L", context);
                     }),
                   ],
                 ),
@@ -1402,17 +1485,49 @@ class MainGameViewState extends State<MainGameView> {
       child: GestureDetector(
         onLongPress: onTap,
         child: CircleAvatar(
-          backgroundColor: ConstantUtils.primaryAppColor,
+          backgroundColor: Colors.transparent,
           child: Text(
               text,
             style: const TextStyle(
-              fontSize: 8,
-              fontWeight: FontWeight.bold,
-              color: Colors.white
+              fontSize: 6,
+              fontWeight: FontWeight.w900,
+              color: ConstantUtils.primaryAppColor
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _maybeMarker2IconTick(String text, VoidCallback onTap) {
+    return const SizedBox(
+        width: ConstantUtils.MARKING_DIAMETER,
+        height: ConstantUtils.MARKING_DIAMETER,
+        child: CircleAvatar(
+          child: Icon(Icons.check, size: 5,),
+        )
+    );
+  }
+
+  Widget _maybeMarker2IconCross(String text, VoidCallback onTap) {
+    return const SizedBox(
+        width: ConstantUtils.MARKING_DIAMETER,
+        height: ConstantUtils.MARKING_DIAMETER,
+        child: CircleAvatar(
+          backgroundColor: Colors.redAccent,
+          child: Icon(Icons.close, size: 5, color: Colors.white,),
+        )
+    );
+  }
+
+  Widget _maybeMarker2IconWarn(String text, VoidCallback onTap) {
+    return const SizedBox(
+        width: ConstantUtils.MARKING_DIAMETER,
+        height: ConstantUtils.MARKING_DIAMETER,
+        child: CircleAvatar(
+          backgroundColor: Colors.amber,
+          child: Icon(Icons.warning, size: 5, color: Colors.white,),
+        )
     );
   }
 }

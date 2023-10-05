@@ -5,9 +5,9 @@ class ConstantUtils {
   static const int MAX_CARD_UNKNOWN_BY_ALL = 3; // Murder weapon, person and room
 
   static const int CELL_SIZE_DEFAULT = 50;
-  static const int TICK_CROSS_DIAMETER = 25;
-  static const double MARKING_DIAMETER = 13;
-  static const int CELL_SIZE_HORIZONTAL_DEFAULT = 100;
+  static const int TICK_CROSS_DIAMETER = 12;
+  static const double MARKING_DIAMETER = 6;
+  static const int CELL_SIZE_HORIZONTAL_DEFAULT = 48;
   static const int HORIZONTAL_DIVIDER_SIZE_DEFAULT = 20;
 
   static const List<String> characterList = ["Scarlett", "Mustard", "White", "Green", "Peacock", "Plum"];
@@ -18,6 +18,7 @@ class ConstantUtils {
 
   static const String tick = "Tick";
   static const String cross = "X";
+  static const String questionMark = "?";
 
   static const List<String> allEntitites = [...characterList, ...weaponList, ...roomList];
 
@@ -45,7 +46,7 @@ class ConstantUtils {
     "Study" : "Study",
   };
 
-  static const int MAX_MARKINGS = 15;
+  static const int MAX_MARKINGS = 12;
 
 
   static const String SHARED_PREF_SAVED_IDS_KEY = "cluein_game_ids";
