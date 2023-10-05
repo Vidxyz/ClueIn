@@ -6,7 +6,8 @@ class ConstantUtils {
 
   static const int CELL_SIZE_DEFAULT = 50;
   static const int TICK_CROSS_DIAMETER = 12;
-  static const double MARKING_DIAMETER = 6;
+  static const double MARKING_DIAMETER = 16;
+  static const double MARKING_ICON_DIAMETER = 8;
   static const int CELL_SIZE_HORIZONTAL_DEFAULT = 48;
   static const int HORIZONTAL_DIVIDER_SIZE_DEFAULT = 20;
 

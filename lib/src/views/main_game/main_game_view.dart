@@ -8,6 +8,7 @@ import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_bloc.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_event.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
+import 'package:cluein_app/src/views/shared_components/ads/custom_markings_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -660,7 +661,8 @@ class MainGameViewState extends State<MainGameView> {
                     child: Text(
                       currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold
+                          fontWeight: FontWeight.bold,
+                        fontSize: 12
                       ),
                     ),
                   ),
@@ -828,6 +830,11 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _renderAllOtherMarkings(List<Widget> children) {
+    return Center(
+      child: CustomMarkingsLayout(
+        children: children,
+      ),
+    );
     return Center(
       child: AlignedGridView.count(
         physics: NeverScrollableScrollPhysics(),
@@ -1000,7 +1007,7 @@ class MainGameViewState extends State<MainGameView> {
 
   Widget _verticalDivider2() {
     return const VerticalDivider(
-      width: ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT / 2,
+      width: 2,
       thickness: 2.5,
       // indent: 20,
       // endIndent: 0,
@@ -1043,7 +1050,7 @@ class MainGameViewState extends State<MainGameView> {
         style: const TextStyle(
             color: ConstantUtils.primaryAppColor,
             fontWeight: FontWeight.bold,
-            fontSize: 18
+            fontSize: 16
         ),
       ),
     );
@@ -1489,7 +1496,7 @@ class MainGameViewState extends State<MainGameView> {
           child: Text(
               text,
             style: const TextStyle(
-              fontSize: 6,
+              fontSize: 7,
               fontWeight: FontWeight.w900,
               color: ConstantUtils.primaryAppColor
             ),
@@ -1504,7 +1511,7 @@ class MainGameViewState extends State<MainGameView> {
         width: ConstantUtils.MARKING_DIAMETER,
         height: ConstantUtils.MARKING_DIAMETER,
         child: CircleAvatar(
-          child: Icon(Icons.check, size: 5,),
+          child: Icon(Icons.check, size: ConstantUtils.MARKING_ICON_DIAMETER,),
         )
     );
   }
@@ -1515,7 +1522,7 @@ class MainGameViewState extends State<MainGameView> {
         height: ConstantUtils.MARKING_DIAMETER,
         child: CircleAvatar(
           backgroundColor: Colors.redAccent,
-          child: Icon(Icons.close, size: 5, color: Colors.white,),
+          child: Icon(Icons.close, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,),
         )
     );
   }
@@ -1526,7 +1533,7 @@ class MainGameViewState extends State<MainGameView> {
         height: ConstantUtils.MARKING_DIAMETER,
         child: CircleAvatar(
           backgroundColor: Colors.amber,
-          child: Icon(Icons.warning, size: 5, color: Colors.white,),
+          child: Icon(Icons.warning, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,),
         )
     );
   }
