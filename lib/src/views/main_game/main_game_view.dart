@@ -57,6 +57,7 @@ class MainGameViewState extends State<MainGameView> {
 
   bool isMarkingDialogOpen = false;
   bool isBackgroundColourDialogOpen = false;
+  bool isInferenceConfirmationDialogOpen = false;
 
   String? selectedMarkingFromDialog;
   Color? selectedBackgroundColourFromDialog;
@@ -1334,6 +1335,24 @@ class MainGameViewState extends State<MainGameView> {
     });
   }
 
+  _markInferenceConfirmationDialogAsClosedAndMarkConfirm(EntityType entityType, String currentEntity, String currentPlayerName) {
+
+    _mainGameBloc.add(
+        MainGameStateChanged(
+          initialGame: gameDefinitionState,
+          charactersGameState: charactersGameState,
+          weaponsGameState: weaponsGameState,
+          roomsGameState: roomsGameState,
+          gameBackgroundColorState: cellBackgroundColourState,
+          undoStack: undoStack,
+          redoStack: redoStack,
+        )
+    );
+    setState(() {
+      isInferenceConfirmationDialogOpen = false;
+    });
+  }
+
   _markDialogAsClosedAndResetMarking(EntityType entityType, String currentEntity, String currentPlayerName) {
     if (entityType == EntityType.Character) {
       charactersGameState[currentEntity]?[currentPlayerName] = [];
@@ -1385,26 +1404,244 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
+  _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(
+      EntityType entityType,
+      String currentPlayerName,
+      String currentEntity,
+      ) {
+    final knownWeapons = weaponsGameState.entries.where((entry) {
+      return entry.value[currentPlayerName]!.contains(ConstantUtils.tick);
+    });
+    final knownRooms = roomsGameState.entries.where((entry) {
+      return entry.value[currentPlayerName]!.contains(ConstantUtils.tick);
+    });
+    final knownCharacters = charactersGameState.entries.where((entry) {
+      return entry.value[currentPlayerName]!.contains(ConstantUtils.tick);
+    });
+    final knownCards = knownCharacters.length + knownRooms.length + knownWeapons.length;
+    final maxCardsPerPlayer =
+    ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / widget.gameDefinition.totalPlayers).floor();
+
+    if (knownCards == maxCardsPerPlayer) {
+      _showInferenceConfirmationDialog(
+          entityType,
+          currentEntity,
+          currentPlayerName,
+          _inferNoOtherRemainingCardsToDiscoverForCurrentPlayerConfirmationText(currentPlayerName, currentEntity),
+              () {
+            _markAllOtherCardsForCurrentPlayerAsNotHaving(entityType, currentPlayerName, currentEntity);
+          }
+      );
+    }
+  }
+
+  _markAllOtherRoomsAsMissing(String currentPlayerName, String currentEntity) {
+    GameState tempRooms = {};
+    roomsGameState.forEach((key, value) {
+      final newVal = {
+        ...value,
+        currentPlayerName: !(value[currentPlayerName]!.contains(ConstantUtils.tick) || value[currentPlayerName]!.contains(ConstantUtils.cross)) ?
+        [...value[currentPlayerName]!, ConstantUtils.cross] : value[currentPlayerName]!
+      };
+      tempRooms[key] = newVal;
+    });
+    roomsGameState = tempRooms;
+  }
+
+  _markAllOtherWeaponsMissing(String currentPlayerName, String currentEntity) {
+    GameState temp = {};
+    weaponsGameState.forEach((key, value) {
+      final newVal = {
+        ...value,
+        currentPlayerName: !(value[currentPlayerName]!.contains(ConstantUtils.tick) || value[currentPlayerName]!.contains(ConstantUtils.cross)) ?
+        [...value[currentPlayerName]!, ConstantUtils.cross] : value[currentPlayerName]!
+      };
+      temp[key] = newVal;
+    });
+    weaponsGameState = temp;
+  }
+
+  _markAllOtherCharactersMissing(String currentPlayerName, String currentEntity) {
+    GameState temp = {};
+    charactersGameState.forEach((key, value) {
+      final newVal = {
+        ...value,
+        currentPlayerName: !(value[currentPlayerName]!.contains(ConstantUtils.tick) || value[currentPlayerName]!.contains(ConstantUtils.cross)) ?
+        [...value[currentPlayerName]!, ConstantUtils.cross] : value[currentPlayerName]!
+      };
+      temp[key] = newVal;
+    });
+    charactersGameState = temp;
+  }
+
+  /// Marks all other "unknown" cards for the user as not having
+  /// If there is tick or cross already on it, it is untouched
+  /// Otherwise a cross is added to markings list
+  _markAllOtherCardsForCurrentPlayerAsNotHaving(EntityType entityType, String currentPlayerName, String currentEntity) {
+    setState(() {
+      _markAllOtherCharactersMissing(currentPlayerName, currentEntity);
+      _markAllOtherRoomsAsMissing(currentPlayerName, currentEntity);
+      _markAllOtherWeaponsMissing(currentPlayerName, currentEntity);
+    });
+  }
+
+  _markAllOtherPlayersAsNotHavingCharacterCard(String currentPlayerName, String currentEntity) {
+    setState(() {
+      // If it is a tick, then others all get a CROSS added as only one person can own a card at a time
+      final allPlayersExceptCurrent =
+      gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
+      allPlayersExceptCurrent.forEach((element) {
+        charactersGameState[currentEntity]?[element] =
+        List.from(charactersGameState[currentEntity]![element]!)..remove(ConstantUtils.cross)..add(ConstantUtils.cross);
+      });
+    });
+  }
+
+  _markAllOtherPlayersAsNotHavingWeaponCard(String currentPlayerName, String currentEntity) {
+    setState(() {
+      // If it is a tick, then others all get a CROSS added as only one person can own a card at a time
+      final allPlayersExceptCurrent =
+      gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
+      allPlayersExceptCurrent.forEach((element) {
+        weaponsGameState[currentEntity]?[element] =
+        List.from(weaponsGameState[currentEntity]![element]!)..remove(ConstantUtils.cross)..add(ConstantUtils.cross);
+      });
+    });
+  }
+
+  _markAllOtherPlayersAsNotHavingRoomCard(String currentPlayerName, String currentEntity) {
+    setState(() {
+      // If it is a tick, then others all get a CROSS added as only one person can own a card at a time
+      final allPlayersExceptCurrent =
+      gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
+      allPlayersExceptCurrent.forEach((element) {
+        roomsGameState[currentEntity]?[element] =
+        List.from(roomsGameState[currentEntity]![element]!)..remove(ConstantUtils.cross)..add(ConstantUtils.cross);
+      });
+    });
+  }
+
+  _refinedPlayerName(String currentPlayerName) =>
+      currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "";
+
+  _inferNoOtherPlayerHasThisCardConfirmationText(String currentPlayerName, String currentEntity) {
+    return RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+            text: "Since you have confirmed that ",
+            style: const TextStyle(
+                color: ConstantUtils.primaryAppColor,
+                fontSize: 16
+            ),
+            children: [
+              TextSpan(
+                  text: _refinedPlayerName(currentPlayerName),
+                  style: const TextStyle(
+                      color: ConstantUtils.primaryAppColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                  )
+              ),
+              const TextSpan(
+                  text: " has the ",
+                  style: TextStyle(
+                    color: ConstantUtils.primaryAppColor,
+                    fontSize: 16,
+                    // fontWeight: FontWeight.bold
+                  )
+              ),
+              TextSpan(
+                  text: currentEntity,
+                  style: const TextStyle(
+                      color: ConstantUtils.primaryAppColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                  )
+              ),
+              const TextSpan(
+                  text: " card, we infer that no other player has it!\n\nHit confirm if you'd like to mark all other players as not having this card.",
+                  style: TextStyle(
+                    color: ConstantUtils.primaryAppColor,
+                    fontSize: 16,
+                    // fontWeight: FontWeight.bold
+                  )
+              ),
+            ]
+        )
+    );
+  }
+
+  _inferNoOtherRemainingCardsToDiscoverForCurrentPlayerConfirmationText(String currentPlayerName, String currentEntity) {
+    return RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+            text: "Since you have confirmed that ",
+            style: const TextStyle(
+                color: ConstantUtils.primaryAppColor,
+                fontSize: 16
+            ),
+            children: [
+              TextSpan(
+                  text: _refinedPlayerName(currentPlayerName),
+                  style: const TextStyle(
+                      color: ConstantUtils.primaryAppColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                  )
+              ),
+              const TextSpan(
+                  text: " has the ",
+                  style: TextStyle(
+                    color: ConstantUtils.primaryAppColor,
+                    fontSize: 16,
+                    // fontWeight: FontWeight.bold
+                  )
+              ),
+              TextSpan(
+                  text: currentEntity,
+                  style: const TextStyle(
+                      color: ConstantUtils.primaryAppColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                  )
+              ),
+              const TextSpan(
+                  text: " card, we now know all the cards they posses!\n\nHit confirm if you'd like to mark all other cards for this player as missing.",
+                  style: TextStyle(
+                    color: ConstantUtils.primaryAppColor,
+                    fontSize: 16,
+                    // fontWeight: FontWeight.bold
+                  )
+              ),
+            ]
+        )
+    );
+  }
+
   _markDialogAsClosedAndSaveMarking(EntityType entityType, String currentEntity, String currentPlayerName) {
     if (selectedMarkingFromDialog != null) {
       KeyboardUtils.lightImpact();
 
       // Something was selected, persist it
       if (entityType == EntityType.Character) {
-        // if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
-        //   charactersGameState[currentEntity]?[currentPlayerName] = [selectedMarkingFromDialog!];
-
-          // If it is a tick, then others all get a cross as only one person can own a card at a time
-          // Avoid inference to preserve user choices
-          // if (selectedMarkingFromDialog == ConstantUtils.tick) {
-          //   final allPlayersExceptCurrent =
-          //     gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
-          //   allPlayersExceptCurrent.forEach((element) {
-          //     charactersGameState[currentEntity]?[element] = [ConstantUtils.cross];
-          //   });
-          //
-          // }
-        // }
+        if (selectedMarkingFromDialog == ConstantUtils.tick) {
+          if (charactersGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
+            // do nothing as we are removing
+          }
+          else {
+            // We are adding a Tick over here. Ask user for confirmation to infer
+            _showInferenceConfirmationDialog(
+              entityType,
+              currentEntity,
+              currentPlayerName,
+              _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
+              () {
+                _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
+                _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+              }
+            );
+          }
+        }
         // else {
           // charactersGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
           // charactersGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
@@ -1420,22 +1657,24 @@ class MainGameViewState extends State<MainGameView> {
         // }
       }
       else if (entityType == EntityType.Weapon) {
-        // weaponsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
-        // weaponsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
-        // if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
-        //   weaponsGameState[currentEntity]?[currentPlayerName] = [selectedMarkingFromDialog!];
-
-          // If it is a tick, then others all get a cross as only one person can own a card at a time
-          // Avoid inference to preserve user choices
-          // if (selectedMarkingFromDialog == ConstantUtils.tick) {
-          //   final allPlayersExceptCurrent =
-          //   gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
-          //   allPlayersExceptCurrent.forEach((element) {
-          //     weaponsGameState[currentEntity]?[element] = [ConstantUtils.cross];
-          //   });
-          //
-          // }
-        // }
+        if (selectedMarkingFromDialog == ConstantUtils.tick) {
+          if (weaponsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
+            // do nothing as we are removing
+          }
+          else {
+            // We are adding a Tick over here. Ask user for confirmation to infer
+            _showInferenceConfirmationDialog(
+                entityType,
+                currentEntity,
+                currentPlayerName,
+                _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
+                    () {
+                  _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
+                  _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                }
+            );
+          }
+        }
         // else {
           if (weaponsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
             weaponsGameState[currentEntity]?[currentPlayerName]?.remove(selectedMarkingFromDialog);
@@ -1449,22 +1688,24 @@ class MainGameViewState extends State<MainGameView> {
         // }
       }
       else {
-        // roomsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
-        // roomsGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
-        // if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
-        //   roomsGameState[currentEntity]?[currentPlayerName] = [selectedMarkingFromDialog!];
-
-          // If it is a tick, then others all get a cross as only one person can own a card at a time
-          // Avoid inference to preserve user choices
-          // if (selectedMarkingFromDialog == ConstantUtils.tick) {
-          //   final allPlayersExceptCurrent =
-          //   gameDefinitionState.playerNames.entries.map((e) => e.value).where((element) => element != currentPlayerName);
-          //   allPlayersExceptCurrent.forEach((element) {
-          //     roomsGameState[currentEntity]?[element] = [ConstantUtils.cross];
-          //   });
-          //
-          // }
-        // }
+        if (selectedMarkingFromDialog == ConstantUtils.tick) {
+          if (roomsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
+            // do nothing as we are removing
+          }
+          else {
+            // We are adding a Tick over here. Ask user for confirmation to infer
+            _showInferenceConfirmationDialog(
+                entityType,
+                currentEntity,
+                currentPlayerName,
+                _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
+                    () {
+                  _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
+                  _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                }
+            );
+          }
+        }
         // else {
           if (roomsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
             roomsGameState[currentEntity]?[currentPlayerName]?.remove(selectedMarkingFromDialog);
@@ -1955,6 +2196,103 @@ class MainGameViewState extends State<MainGameView> {
         ),
       );
     }).then((value) => _markCellBackgroundColourDialogDialogAsClosedAndSaveBackgoundColour(entityType, currentEntity, currentPlayerName));
+  }
+
+
+  _showInferenceConfirmationDialog(
+      EntityType entityType,
+      String currentEntity,
+      String currentPlayerName,
+      Widget confirmationTextWidget,
+      VoidCallback ifInferPermissionGranted
+      ) {
+
+    KeyboardUtils.mediumImpact();
+
+    setState(() {
+      isInferenceConfirmationDialogOpen = true;
+    });
+
+    _confirmInferenceButton() {
+      return Padding(
+        padding: const EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+          ),
+          onPressed: () async {
+            Navigator.pop(context, true);
+          },
+          child: const Text("Confirm", style: TextStyle(fontSize: 15, color: Colors.white)),
+        ),
+      );
+    }
+
+    _dismissDialogButton() {
+      return Padding(
+        padding: const EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+          ),
+          onPressed: () async {
+            Navigator.pop(context, false);
+          },
+          child: const Text("Cancel", style: TextStyle(fontSize: 15, color: Colors.white)),
+        ),
+      );
+    }
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      showDialog<bool>(context: context, builder: (context) {
+        return Dialog(
+          child:  SizedBox(
+            height: ScreenUtils.getScreenHeight(context) / 2,
+            child: Scaffold(
+              appBar: AppBar(
+                automaticallyImplyLeading: false,
+                title: const Center(child: Text("Confirm Inference", style: TextStyle(color: ConstantUtils.primaryAppColor),)),
+                iconTheme: const IconThemeData(
+                  color: ConstantUtils.primaryAppColor,
+                ),
+              ),
+              body: Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _divider(),
+                      Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Center(
+                          child: confirmationTextWidget
+                        ),
+                      ),
+                      WidgetUtils.spacer(2.5),
+                      _divider(),
+                    ],
+                  ),
+                ),
+              ),
+              bottomNavigationBar: Row(
+                children: [
+                  Expanded(
+                    child: _dismissDialogButton(),
+                  ),
+                  Expanded(
+                    child: _confirmInferenceButton(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).then((value) {
+        if (value ?? false) {
+          ifInferPermissionGranted();
+        }
+      });
+    });
   }
 
   _setStateAndPop(String text, BuildContext context) {
