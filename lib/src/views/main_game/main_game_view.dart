@@ -15,6 +15,10 @@ import 'package:cluein_app/src/views/shared_components/ads/custom_markings_layou
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+
+GlobalKey cell1Key = GlobalKey();
+GlobalKey cell2Key = GlobalKey();
 
 enum EntityType { Character, Weapon, Room }
 
@@ -80,6 +84,10 @@ class MainGameViewState extends State<MainGameView> {
 
   String? editedPlayerNameValue;
   String? editedGameNameValue;
+
+  bool hasTutorialBeenShown = false;
+  List<TargetFocus> basicTargets = [];
+  TutorialCoachMark? basicTutorialCoachMark;
 
 
   @override
@@ -2333,7 +2341,7 @@ class MainGameViewState extends State<MainGameView> {
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all( Radius.circular(50.0)),
               border: Border.all(
-                color: isSelectedAlready ? Colors.teal : Colors.transparent,
+                color: isSelectedAlready ? ConstantUtils.primaryAppColor : Colors.transparent,
                 width: 4.0,
               ),
             ),

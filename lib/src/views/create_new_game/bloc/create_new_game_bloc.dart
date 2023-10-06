@@ -2,6 +2,7 @@ import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_state.dart';
+import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,12 +38,14 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
   void _beginNewClueGame(BeginNewClueGame event, Emitter<CreateNewGameState> emit) async {
     emit(const NewGameBeingSaved());
     final newGameId = uuid.v4();
+    final newNames = Map.fromEntries(event.playerNames.entries.map((e) => MapEntry(e.key, "${e.value}${ConstantUtils.UNIQUE_NAME_DELIMITER}${uuid.v4()}")));
     final gameToSave = GameDefinition(
         gameId: newGameId,
         gameName: event.gameName,
         totalPlayers: event.totalPlayers,
-        playerNames: Map.fromEntries(event.playerNames.entries.map((e) => MapEntry(e.key, "${e.value}${ConstantUtils.UNIQUE_NAME_DELIMITER}${uuid.v4()}"))),
+        playerNames: newNames,
         initialCards: event.initialCards,
+        cellColoursState: MainGameStateModified.emptyCellBackgroundGameState(newNames.entries.map((e) => e.value).toList()),
         lastSaved: DateTime.now(),
     );
 

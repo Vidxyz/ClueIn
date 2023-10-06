@@ -8,6 +8,9 @@ import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+
+GlobalKey userPromptTextKey = GlobalKey();
 
 class AddInitialCardsView extends StatefulWidget {
   const AddInitialCardsView({
@@ -37,7 +40,10 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
 
   late CreateNewGameBloc _createNewGameBloc;
 
-  bool hasHintDialogBeenShown = false;
+  bool hasHintTutorialBeenShown = false;
+
+  List<TargetFocus> basicTargets = [];
+  TutorialCoachMark? basicTutorialCoachMark;
 
   @override
   void initState() {
@@ -53,11 +59,139 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
     }
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (!hasHintDialogBeenShown) {
-        _showHintDialogToSetupGame();
-        hasHintDialogBeenShown = true;
+      if (!hasHintTutorialBeenShown) {
+        // _showHintDialogToSetupGame();
+        createTutorial();
+        basicTutorialCoachMark?.show(context: context);
+        hasHintTutorialBeenShown = true;
       }
     });
+
+
+  }
+
+  createTutorial() {
+    final currentState = _createNewGameBloc.state;
+    if (currentState is NewGameDetailsModified) {
+      final maxCardsPerPlayer = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
+
+      basicTargets.add(
+        TargetFocus(
+          identify: "userPromptTextKey",
+          keyTarget: userPromptTextKey,
+          alignSkip: Alignment.centerRight,
+          color: ConstantUtils.primaryAppColor,
+          shape: ShapeLightFocus.RRect,
+          enableOverlayTab: true,
+          enableTargetTab: true,
+          paddingFocus: 0,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: WidgetUtils.skipNulls([
+                    const Align(
+                      child: Text(
+                        "Let's get started",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ),
+                    WidgetUtils.spacer(5),
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Center(
+                        child: Text(
+                          "This game consists of ${currentState.totalPlayers} players and ${ConstantUtils.MAX_GAME_CARDS} cards",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              // fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                    WidgetUtils.spacer(5.0),
+                    const Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Center(
+                        child: Text(
+                          "Shuffle the cards and set aside ${ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL} cards, one of each category - Character, Weapon and Room",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              // fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                    WidgetUtils.spacer(5.0),
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Center(
+                        child: Text(
+                          "Shuffle the cards and distribute $maxCardsPerPlayer cards to each player. These cards can be of any category",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              // fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                    WidgetUtils.spacer(5.0),
+                    (maxCardsPerPlayer * currentState.totalPlayers) + ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL == ConstantUtils.MAX_GAME_CARDS ? null :
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Center(
+                        child: Text(
+                          "Reveal ${ConstantUtils.MAX_GAME_CARDS - (maxCardsPerPlayer * currentState.totalPlayers) - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL} cards for all to see. "
+                              "This is required so that no one player has an unfair advantage.",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+
+
+      basicTutorialCoachMark = TutorialCoachMark(
+        targets: basicTargets,
+        colorShadow: ConstantUtils.primaryAppColor,
+        hideSkip: true,
+        showSkipInLastTarget: false,
+        focusAnimationDuration: const Duration(milliseconds: 200),
+        unFocusAnimationDuration: const Duration(milliseconds: 200),
+        paddingFocus: 10,
+        opacityShadow: 0.8,
+        onFinish: () {},
+        onClickTarget: (target) {},
+        onClickTargetWithTapPosition: (target, tapDetails) {},
+        onClickOverlay: (target) {},
+        onSkip: () {},
+      );
+    }
+
   }
 
 
@@ -112,6 +246,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       final maxCards = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
       return Center(
         child: Padding(
+          key: userPromptTextKey,
           padding: const EdgeInsets.all(5.0),
           child: Text(
             "Please select exactly the $maxCards cards that you start the game with",
@@ -510,6 +645,10 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
         )
       ],
     );
+  }
+
+  _showTutorial() {
+
   }
 
   _showHintDialogToSetupGame() {
