@@ -59,8 +59,6 @@ class MainGameViewState extends State<MainGameView> {
 
   List<MapEntry<int, String>> playerNameMapEntries = [];
 
-  List<String> selectedEntityNames = [];
-
   late GameState charactersGameState;
   late GameState weaponsGameState;
   late GameState roomsGameState;
@@ -70,7 +68,8 @@ class MainGameViewState extends State<MainGameView> {
   late OperationStack<String> undoStack;
   late OperationStack<String> redoStack;
 
-  String? editedNameValue;
+  String? editedPlayerNameValue;
+  String? editedGameNameValue;
 
 
   @override
@@ -138,7 +137,15 @@ class MainGameViewState extends State<MainGameView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(gameDefinitionState.gameName, style: const TextStyle(color: ConstantUtils.primaryAppColor),),
+        title: InkWell(
+          onTap: () {
+            _showEditGameNameDialog();
+          },
+          child: Text(
+            gameDefinitionState.gameName,
+            style: const TextStyle(color: ConstantUtils.primaryAppColor),
+          )
+        ),
         iconTheme: const IconThemeData(
           color: ConstantUtils.primaryAppColor,
         ),
@@ -289,27 +296,61 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _mainBody() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Row(
-        children: [
-          _generateEntityNamesList(),
-        SizedBox(
-          height: ((ConstantUtils.CELL_SIZE_DEFAULT * ConstantUtils.allEntitites.length ) +
-              (10 * ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT)).toDouble(),
-          child: _verticalDivider(),
-        ),
-          Expanded(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2/3,
-                maxWidth: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2) + (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3),
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(0),
+          sliver: SliverAppBar(
+            leadingWidth: 0,
+            automaticallyImplyLeading: false,
+            pinned: true,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(0),
+              child: Column(
+                children: [
+                  const Divider(
+                    height: 3,
+                    thickness: 3,
+                    endIndent: 0,
+                    color: ConstantUtils.primaryAppColor,
+                  ),
+                  _playerNamesHeaderPinned(),
+                  const Divider(
+                    height: 3,
+                    thickness: 3,
+                    endIndent: 0,
+                    color: ConstantUtils.primaryAppColor,
+                  )
+                ],
               ),
-              child: _generateEntityMarkings(),
             ),
           ),
-        ],
-      ),
+        ),
+        SliverList.list(
+          children: [
+            Row(
+              children: [
+                _generateEntityNamesList(),
+                SizedBox(
+                  height: ((ConstantUtils.CELL_SIZE_DEFAULT * ConstantUtils.allEntitites.length ) +
+                      (10 * ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT)).toDouble(),
+                  child: _verticalDivider(),
+                ),
+                Expanded(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2/3,
+                      maxWidth: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2) + (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3),
+                    ),
+                    child: _generateEntityMarkings(),
+                  ),
+                ),
+              ],
+            )
+          ],
+
+        ),
+      ],
     );
   }
 
@@ -336,17 +377,6 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
-  _updateSelectedEntityNamesState(String currentEntity) {
-    setState(() {
-      if (selectedEntityNames.contains(currentEntity)) {
-        selectedEntityNames = List.from(selectedEntityNames)..remove(currentEntity);
-      }
-      else {
-        selectedEntityNames = List.from(selectedEntityNames)..add(currentEntity);
-      }
-    });
-  }
-
   _generateCharactersList() {
     return ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
@@ -363,24 +393,19 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  _updateSelectedEntityNamesState(currentEntity);
-                },
-                child: Card(
-                  child: Center(
-                      child: Text(
-                          ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 15,
-                              color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null,
-                              decoration: selectedEntityNames.contains(currentEntity) ? TextDecoration.lineThrough : null,
-                              decorationColor: ConstantUtils.primaryAppColor,
-                              decorationThickness: 3,
-                          ),
-                      )
-                  ),
+              child: Card(
+                child: Center(
+                    child: Text(
+                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 15,
+                            color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null,
+                            decoration: anyPlayerHasThisCard(EntityType.Character, currentEntity) ? TextDecoration.lineThrough : null,
+                            decorationColor: ConstantUtils.primaryAppColor,
+                            decorationThickness: 3,
+                        ),
+                    )
                 ),
               ),
             ),
@@ -405,24 +430,19 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  _updateSelectedEntityNamesState(currentEntity);
-                },
-                child: Card(
-                  child: Center(
-                      child: Text(
-                          ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
-                          textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 15,
-                            color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null,
-                            decoration: selectedEntityNames.contains(currentEntity) ? TextDecoration.lineThrough : null,
-                            decorationColor: ConstantUtils.primaryAppColor,
-                            decorationThickness: 3,
-                        ),
-                      )
-                  ),
+              child: Card(
+                child: Center(
+                    child: Text(
+                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                        textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                          color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null,
+                          decoration: anyPlayerHasThisCard(EntityType.Weapon, currentEntity) ? TextDecoration.lineThrough : null,
+                          decorationColor: ConstantUtils.primaryAppColor,
+                          decorationThickness: 3,
+                      ),
+                    )
                 ),
               ),
             ),
@@ -447,24 +467,19 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  _updateSelectedEntityNamesState(currentEntity);
-                },
-                child: Card(
-                  child: Center(
-                      child: Text(
-                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null,
-                          decoration: selectedEntityNames.contains(currentEntity) ? TextDecoration.lineThrough : null,
-                          decorationColor: ConstantUtils.primaryAppColor,
-                          decorationThickness: 3,
-                        ),
-                      )
-                  ),
+              child: Card(
+                child: Center(
+                    child: Text(
+                      ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null,
+                        decoration: anyPlayerHasThisCard(EntityType.Room, currentEntity) ? TextDecoration.lineThrough : null,
+                        decorationColor: ConstantUtils.primaryAppColor,
+                        decorationThickness: 3,
+                      ),
+                    )
                 ),
               ),
             ),
@@ -495,6 +510,27 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
+  bool anyPlayerHasThisCard(EntityType entityType, String currentEntity) {
+    if (entityType == EntityType.Room) {
+      return gameDefinitionState.playerNames.entries
+          .map((e) => e.value)
+          .map((e) => roomsGameState[currentEntity]![e]!.contains(ConstantUtils.tick))
+          .reduce((value, element) => value || element);
+    }
+    else if (entityType == EntityType.Weapon) {
+      return gameDefinitionState.playerNames.entries
+          .map((e) => e.value)
+          .map((e) => weaponsGameState[currentEntity]![e]!.contains(ConstantUtils.tick))
+          .reduce((value, element) => value || element);
+    }
+    else {
+      return gameDefinitionState.playerNames.entries
+          .map((e) => e.value)
+          .map((e) => charactersGameState[currentEntity]![e]!.contains(ConstantUtils.tick))
+          .reduce((value, element) => value || element);
+    }
+  }
+
   _generateEntityMarkings() {
     return SizedBox(
       width: max(
@@ -519,6 +555,70 @@ class MainGameViewState extends State<MainGameView> {
         ],
       ),
     );
+  }
+
+  _showEditGameNameDialog() {
+    _dismissDialogButton() {
+      return Padding(
+        padding: const EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+          ),
+          onPressed: () async {
+            Navigator.pop(context);
+          },
+          child: const Text("Go back", style: TextStyle(fontSize: 15, color: Colors.white)),
+        ),
+      );
+    }
+
+    showDialog(context: context, builder: (context) {
+      return Dialog(
+          child: SizedBox(
+            height: ScreenUtils.getScreenHeight(context) / 3,
+            child: Scaffold(
+                bottomNavigationBar: Row(
+                  children: [
+                    Expanded(
+                      child: _dismissDialogButton(),
+                    ),
+                  ],
+                ),
+                appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  title: const Text("Edit game name", style: TextStyle(color: ConstantUtils.primaryAppColor),),
+                ),
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: TextFormField(
+                      textCapitalization: TextCapitalization.sentences,
+                      onChanged: (text) {
+                        editedGameNameValue = text.trim();
+                      },
+                      initialValue: gameDefinitionState.gameName,
+                      keyboardType: TextInputType.name,
+                      decoration: const InputDecoration(
+                        // hintText: playerNamesHint[index],
+                        // hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: ConstantUtils.primaryAppColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+            ),
+          )
+      );
+    }).then((value) {
+      if (editedGameNameValue != null) {
+        _updateGameName(editedGameNameValue!);
+      }
+    });
   }
 
   _showEditPlayerNameDialog(String currentPlayerName) {
@@ -563,7 +663,7 @@ class MainGameViewState extends State<MainGameView> {
                         LengthLimitingTextInputFormatter(5),
                       ],
                       onChanged: (text) {
-                        editedNameValue = text.trim();
+                        editedPlayerNameValue = text.trim();
                       },
                       initialValue: currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
                       keyboardType: TextInputType.name,
@@ -583,10 +683,34 @@ class MainGameViewState extends State<MainGameView> {
           )
       );
     }).then((value) {
-      if (editedNameValue != null) {
-        _updatePlayerName(editedNameValue!, currentPlayerName, currentPlayerNameId);
+      if (editedPlayerNameValue != null) {
+        _updatePlayerName(editedPlayerNameValue!, currentPlayerName, currentPlayerNameId);
       }
     });
+  }
+
+  _updateGameName(String newValue) {
+    setState(() {
+      gameDefinitionState = GameDefinition(
+          gameId: gameDefinitionState.gameId,
+          gameName: newValue,
+          totalPlayers: gameDefinitionState.totalPlayers,
+          playerNames: gameDefinitionState.playerNames,
+          initialCards: gameDefinitionState.initialCards,
+          lastSaved: gameDefinitionState.lastSaved
+      );
+    });
+
+    _mainGameBloc.add(
+        MainGameStateChanged(
+          initialGame: gameDefinitionState,
+          charactersGameState: charactersGameState,
+          weaponsGameState: weaponsGameState,
+          roomsGameState: roomsGameState,
+          undoStack: undoStack,
+          redoStack: redoStack,
+        )
+    );
   }
 
   _updatePlayerName(String newValue, String originalPlayerNamePlusId, currentPlayerNameId) {
@@ -643,39 +767,6 @@ class MainGameViewState extends State<MainGameView> {
 
   }
 
-  _playerNamesHeader() {
-    return SizedBox(
-      height: 22.5,
-      child: Row(
-        children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
-          return [
-            Expanded(
-              flex: 3,
-              child: InkWell(
-                onTap: () {
-                  _showEditPlayerNameDialog(currentPlayerName);
-                },
-                child: Container(
-                  color: Colors.grey.shade200,
-                  child: Center(
-                    child: Text(
-                      currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        fontSize: 12
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            _verticalDivider2()
-          ];
-        }).expand((element) => element).toList(),
-      ),
-    );
-  }
-
   _generateRoomsListMarkings() {
     return ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
@@ -717,6 +808,140 @@ class MainGameViewState extends State<MainGameView> {
             ),
           );
         }
+    );
+  }
+
+  _playerNamesHeaderPinned() {
+    final maxCardsPerPlayer =
+    ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / widget.gameDefinition.totalPlayers).floor();
+    return Row(
+      children: [
+        SizedBox(
+          width: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 4) + (ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT / 2),
+          height: 50,
+          child: Container(
+            color: Colors.grey.shade200,
+          ),
+        ),
+        Expanded(
+          child: SizedBox(
+            height: 50,
+            child: Column(
+              children: [
+                Row(
+                  children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
+
+                    final knownWeapons = weaponsGameState.entries.where((entry) {
+                      return entry.value[currentPlayerName]!.contains(ConstantUtils.tick);
+                    });
+                    final knownRooms = roomsGameState.entries.where((entry) {
+                      return entry.value[currentPlayerName]!.contains(ConstantUtils.tick);
+                    });
+                    final knownCharacters = charactersGameState.entries.where((entry) {
+                      return entry.value[currentPlayerName]!.contains(ConstantUtils.tick);
+                    });
+                    final knownCards = knownCharacters.length + knownRooms.length + knownWeapons.length;
+
+                    return [
+                      Expanded(
+                        flex:  3,
+                        child: InkWell(
+                          onTap: () {
+                            _showEditPlayerNameDialog(currentPlayerName);
+                          },
+                          child: Column(
+                            children: [
+                              Container(
+                                  color: Colors.grey.shade200,
+                                  width: double.infinity,
+                                  child: WidgetUtils.spacer(2.5)
+                              ),
+                              Container(
+                                color: Colors.grey.shade200,
+                                child: Center(
+                                  child: Text(
+                                    currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                color: Colors.grey.shade200,
+                                width: double.infinity,
+                                child: WidgetUtils.spacer(3.5)
+                              ),
+                              Container(
+                                color: Colors.grey.shade200,
+                                height: 15,
+                                child: Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: CircleAvatar(
+                                    backgroundColor: knownCards == 0 ? Colors.red : (knownCards == maxCardsPerPlayer ? Colors.teal : Colors.orange) ,
+                                    child: Text(
+                                      "${knownCards}/${maxCardsPerPlayer}",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 8,
+                                        color: Colors.white
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                  color: Colors.grey.shade200,
+                                  width: double.infinity,
+                                  child: WidgetUtils.spacer(3.5)
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      _verticalDivider2(),
+                    ];
+                  }).expand((element) => element).toList(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  _playerNamesHeader() {
+    return SizedBox(
+      height: 20,
+      child: Row(
+        children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
+          return [
+            Expanded(
+              flex: 3,
+              child: InkWell(
+                onTap: () {
+                  _showEditPlayerNameDialog(currentPlayerName);
+                },
+                child: Container(
+                  color: Colors.grey.shade200,
+                  // child: Center(
+                  //   child: Text(
+                  //     currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
+                  //     style: const TextStyle(
+                  //         fontWeight: FontWeight.bold,
+                  //       fontSize: 12
+                  //     ),
+                  //   ),
+                  // ),
+                ),
+              ),
+            ),
+            _verticalDivider2()
+          ];
+        }).expand((element) => element).toList(),
+      ),
     );
   }
 
