@@ -1,3 +1,4 @@
+import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/views/home_page/home_page.dart';
 import 'package:cluein_app/src/views/shared_components/ads/bloc/ad_bloc.dart';
 import 'package:cluein_app/theme.dart';
@@ -10,17 +11,23 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+
+
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider<AdBloc>(
-            create: (context) => AdBloc()
-        ),
+        RepositoryProvider<SharedPrefsRepository>(create: (context) => SharedPrefsRepository()),
       ],
-      child: AppView(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AdBloc>(
+              create: (context) => AdBloc()
+          ),
+        ],
+        child: AppView(),
+      ),
     );
   }
 }

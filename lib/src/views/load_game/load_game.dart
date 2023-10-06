@@ -1,3 +1,4 @@
+import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
@@ -25,7 +26,9 @@ class LoadGameView extends StatefulWidget {
     builder: (_) => MultiBlocProvider(
       providers: [
         BlocProvider<LoadGameBloc>(
-            create: (context) => LoadGameBloc()),
+            create: (context) => LoadGameBloc(
+                sharedPrefs: RepositoryProvider.of<SharedPrefsRepository>(context)
+            )),
       ],
       child: const LoadGameView(),
     ),

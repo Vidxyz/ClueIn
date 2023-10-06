@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:cluein_app/src/models/stack.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
@@ -36,7 +37,9 @@ class MainGameView extends StatefulWidget {
     builder: (_) => MultiBlocProvider(
       providers: [
         BlocProvider<MainGameBloc>(
-            create: (context) => MainGameBloc()),
+            create: (context) => MainGameBloc(
+                sharedPrefs: RepositoryProvider.of<SharedPrefsRepository>(context),
+            )),
       ],
       child: MainGameView(
         gameDefinition: gameDefinition,
@@ -2109,26 +2112,11 @@ class MainGameViewState extends State<MainGameView> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisCount: 6,
-                      children: [
-                        _colorMarker(Colors.grey.shade200, currentSelectedColour == Colors.grey.shade200, () {
-                          _setBackgroundColourStateAndPop(Colors.grey.shade200, context);
-                        }),
-                        _colorMarker(Colors.tealAccent, currentSelectedColour == Colors.tealAccent, () {
-                          _setBackgroundColourStateAndPop(Colors.tealAccent, context);
-                        }),
-                        _colorMarker(Colors.amber, currentSelectedColour == Colors.amber, () {
-                          _setBackgroundColourStateAndPop(Colors.amber, context);
-                        }),
-                        _colorMarker(Colors.pinkAccent.shade200, currentSelectedColour == Colors.pinkAccent.shade200, () {
-                          _setBackgroundColourStateAndPop(Colors.pinkAccent.shade200, context);
-                        }),
-                        _colorMarker(Colors.purpleAccent.shade200, currentSelectedColour == Colors.purpleAccent.shade200, () {
-                          _setBackgroundColourStateAndPop(Colors.purpleAccent.shade200, context);
-                        }),
-                        _colorMarker(Colors.cyanAccent.shade200, currentSelectedColour == Colors.cyanAccent.shade200, () {
-                          _setBackgroundColourStateAndPop(Colors.cyanAccent.shade200, context);
-                        }),
-                      ],
+                      children: ConstantUtils.cellBackgroundColorOptions.map((c) {
+                        return _colorMarker(c, currentSelectedColour == c, () {
+                          _setBackgroundColourStateAndPop(c, context);
+                        });
+                      }).toList(),
                     ),
                     WidgetUtils.spacer(2.5),
                     _divider(),

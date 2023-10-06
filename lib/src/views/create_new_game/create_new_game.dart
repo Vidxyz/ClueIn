@@ -1,3 +1,4 @@
+import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/snackbar_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
@@ -23,7 +24,9 @@ class CreateNewGameView extends StatefulWidget {
             MultiBlocProvider(
               providers: [
                 BlocProvider<CreateNewGameBloc>(
-                    create: (context) => CreateNewGameBloc()
+                    create: (context) => CreateNewGameBloc(
+                      sharedPrefs: RepositoryProvider.of<SharedPrefsRepository>(context)
+                    )
                 ),
               ],
               child: CreateNewGameView(),

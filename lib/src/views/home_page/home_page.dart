@@ -1,9 +1,11 @@
+import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/about/about_page.dart';
 import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
 import 'package:cluein_app/src/views/load_game/load_game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -21,6 +23,8 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
+    var hack = RepositoryProvider.of<SharedPrefsRepository>(context);
   }
 
   @override

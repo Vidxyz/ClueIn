@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 class ConstantUtils {
   static const int MAX_GAME_CARDS = 21;
   static const int MAX_CARD_UNKNOWN_BY_ALL = 3; // Murder weapon, person and room
@@ -69,4 +71,13 @@ class ConstantUtils {
 
 
   static const Color primaryAppColor = Color(0xff733ddf);
+
+  static List<Color> cellBackgroundColorOptions = [
+    Colors.grey.shade200,
+    Colors.tealAccent.shade100,
+    Colors.amberAccent.shade100,
+    Colors.pinkAccent.shade100,
+    Colors.purpleAccent.shade100,
+    Colors.cyanAccent.shade100,
+  ];
 }

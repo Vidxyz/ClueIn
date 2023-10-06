@@ -1,3 +1,4 @@
+import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_state.dart';
@@ -12,8 +13,11 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
   final logger = Logger("CreateNewGameBloc");
   static const uuid = Uuid();
 
+  SharedPrefsRepository sharedPrefs;
 
-  CreateNewGameBloc() : super(CreateNewGameStateInitial()) {
+  CreateNewGameBloc({
+    required this.sharedPrefs,
+  }) : super(CreateNewGameStateInitial()) {
     on<NewGameDetailedChanged>(_newGameDetailedChanged);
     on<BeginNewClueGame>(_beginNewClueGame);
   }
@@ -41,13 +45,13 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
         initialCards: event.initialCards,
         lastSaved: DateTime.now(),
     );
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final jsonStringToSave = gameToSave.toJson();
-    final existingSavedGameIds = prefs.getStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
+    final existingSavedGameIds = sharedPrefs.prefs.getStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
     existingSavedGameIds.add(newGameId);
-    await prefs.setStringList("cluein_game_ids", existingSavedGameIds);
-    await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_$newGameId", jsonStringToSave);
+
+    await sharedPrefs.prefs.setStringList("cluein_game_ids", existingSavedGameIds);
+    await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_$newGameId", jsonStringToSave);
 
     emit(
         NewGameSavedAndReadyToStart(

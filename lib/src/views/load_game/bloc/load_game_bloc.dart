@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/views/load_game/bloc/load_game_event.dart';
@@ -12,7 +13,11 @@ class LoadGameBloc extends Bloc<LoadGameEvent, LoadGameState> {
 
   final logger = Logger("LoadGameBloc");
 
-  LoadGameBloc() : super(LoadGameStateInitial()) {
+  SharedPrefsRepository sharedPrefs;
+
+  LoadGameBloc({
+    required this.sharedPrefs,
+  }) : super(LoadGameStateInitial()) {
     on<FetchSavedGames>(_fetchSavedGames);
     on<DeleteSavedGame>(_deleteSavedGame);
   }
@@ -28,13 +33,12 @@ class LoadGameBloc extends Bloc<LoadGameEvent, LoadGameState> {
 
   void _fetchSavedGames(FetchSavedGames event, Emitter<LoadGameState> emit) async {
     emit(LoadGameStateLoading());
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    final savedGameIds =  prefs.getStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
+    final savedGameIds =  sharedPrefs.prefs.getStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
     final List<GameDefinition> savedGameDefinitions = [];
 
-    savedGameIds.forEach((element) {
-      final savedJson = prefs.getString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_$element") ?? "{}";
+    savedGameIds.forEach((element) async{
+      final savedJson = sharedPrefs.prefs.getString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_$element") ?? "{}";
 
       dynamic jsonResp = jsonDecode(savedJson);
       final gameDefinition = GameDefinition.fromJson(jsonResp);

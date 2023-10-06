@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:cluein_app/src/models/stack.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
@@ -14,7 +15,11 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
 
   String? previousStateGlobal;
 
-  MainGameBloc() : super(MainGameStateInitial()) {
+  SharedPrefsRepository sharedPrefs;
+
+  MainGameBloc({
+    required this.sharedPrefs,
+  }) : super(MainGameStateInitial()) {
     on<MainGameStateChanged>(_mainGameStateChanged);
     on<MainGameStateLoadInitial>(_mainGameStateLoadInitial);
     on<UndoLastMove>(_undoLastMove);
@@ -63,9 +68,8 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           cellColoursState: redoGameDefinition.cellColoursState,
           lastSaved: DateTime.now(),
         );
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
         final jsonStringToSave = gameToSave.toJson();
-        await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+        await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
         previousStateGlobal = jsonStringToSave;
 
@@ -116,9 +120,8 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           cellColoursState: redoGameDefinition.cellColoursState,
           lastSaved: DateTime.now(),
         );
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
         final jsonStringToSave = gameToSave.toJson();
-        await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+        await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
         previousStateGlobal = jsonStringToSave;
 
@@ -180,9 +183,8 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           cellColoursState: undoGameDefinition.cellColoursState,
           lastSaved: DateTime.now(),
         );
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
         final jsonStringToSave = gameToSave.toJson();
-        await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+        await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
 
         previousStateGlobal = jsonStringToSave;
@@ -234,9 +236,8 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           cellColoursState: undoGameDefinition.cellColoursState,
           lastSaved: DateTime.now(),
         );
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
         final jsonStringToSave = gameToSave.toJson();
-        await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+        await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
         previousStateGlobal = jsonStringToSave;
 
@@ -296,9 +297,8 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
       cellColoursState: event.gameBackgroundColorState,
       lastSaved: DateTime.now(),
     );
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
     final jsonStringToSave = currentGameToSave.toJson();
-    await prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+    await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
 
     if (event.undoStack.list.length < ConstantUtils.MAX_UNDO_STACK_SIZE) {
