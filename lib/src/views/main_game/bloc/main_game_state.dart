@@ -3,6 +3,7 @@ import 'package:cluein_app/src/models/game_room_card.dart';
 import 'package:cluein_app/src/models/game_weapon_card.dart';
 import 'package:cluein_app/src/models/stack.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 /// GameState stored on a per card basis
 /// Each card has a map associated with it
@@ -25,7 +26,9 @@ import 'package:equatable/equatable.dart';
 typedef CharacterName = String;
 typedef PlayerName = String;
 typedef Marking = String;
+typedef ColorValue = int;
 typedef GameState = Map<CharacterName, Map<PlayerName, List<Marking>>>;
+typedef GameBackgroundColorState = Map<CharacterName, Map<PlayerName, ColorValue>>;
 
 abstract class MainGameState extends Equatable {
   const MainGameState();
@@ -50,6 +53,8 @@ class MainGameStateModified extends MainGameState {
   final GameState weaponsGameState;
   final GameState roomsGameState;
 
+  final GameBackgroundColorState cellColoursState;
+
   final OperationStack<String> undoStack;
   final OperationStack<String> redoStack;
 
@@ -57,6 +62,7 @@ class MainGameStateModified extends MainGameState {
     required this.charactersGameState,
     required this.weaponsGameState,
     required this.roomsGameState,
+    required this.cellColoursState,
     required this.undoStack,
     required this.redoStack,
   });
@@ -66,6 +72,7 @@ class MainGameStateModified extends MainGameState {
     charactersGameState,
     weaponsGameState,
     roomsGameState,
+    cellColoursState,
     undoStack,
     redoStack,
   ];
@@ -103,6 +110,35 @@ class MainGameStateModified extends MainGameState {
       BilliardRoom().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, []))),
       Library().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, []))),
       Study().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, []))),
+    };
+  }
+
+  static GameBackgroundColorState emptyCellBackgroundGameState(List<String> playerNames) {
+    final defaultColour = Colors.grey.shade200;
+    return {
+      Scarlett().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Mustard().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      White().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Green().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Peacock().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Plum().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+
+      Dagger().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Candlestick().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Revolver().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Rope().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      LeadPipe().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Wrench().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+
+      Hall().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Lounge().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      DiningRoom().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Kitchen().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      BallRoom().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Conservatory().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      BilliardRoom().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Library().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
+      Study().cardName() : Map.fromEntries(playerNames.map((e) => MapEntry(e, defaultColour.value))),
     };
   }
 }

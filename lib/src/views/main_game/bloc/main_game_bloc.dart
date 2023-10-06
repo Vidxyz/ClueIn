@@ -44,6 +44,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           charactersGameState: event.charactersGameState,
           weaponsGameState: event.weaponsGameState,
           roomsGameState: event.roomsGameState,
+          cellColoursState: event.cellColoursState,
           lastSaved: DateTime.now(),
         );
         final currentStateGame = currentGame.toJson();
@@ -59,6 +60,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           charactersGameState: redoGameDefinition.charactersGameState,
           weaponsGameState: redoGameDefinition.weaponsGameState,
           roomsGameState: redoGameDefinition.roomsGameState,
+          cellColoursState: redoGameDefinition.cellColoursState,
           lastSaved: DateTime.now(),
         );
         final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -72,6 +74,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
               charactersGameState: redoGameDefinition.charactersGameState,
               weaponsGameState: redoGameDefinition.weaponsGameState,
               roomsGameState: redoGameDefinition.roomsGameState,
+              cellColoursState: redoGameDefinition.cellColoursState,
               undoStack: newUndoStack,
               redoStack: newRedoStack,
             )
@@ -90,6 +93,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           charactersGameState: event.charactersGameState,
           weaponsGameState: event.weaponsGameState,
           roomsGameState: event.roomsGameState,
+          cellColoursState: event.cellColoursState,
           lastSaved: DateTime.now(),
         );
         final currentStateGame = currentGame.toJson();
@@ -109,6 +113,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           charactersGameState: redoGameDefinition.charactersGameState,
           weaponsGameState: redoGameDefinition.weaponsGameState,
           roomsGameState: redoGameDefinition.roomsGameState,
+          cellColoursState: redoGameDefinition.cellColoursState,
           lastSaved: DateTime.now(),
         );
         final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -122,6 +127,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
               charactersGameState: redoGameDefinition.charactersGameState,
               weaponsGameState: redoGameDefinition.weaponsGameState,
               roomsGameState: redoGameDefinition.roomsGameState,
+              cellColoursState: redoGameDefinition.cellColoursState,
               undoStack: newUndoStack,
               redoStack: newRedoStack,
             )
@@ -151,6 +157,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           charactersGameState: event.charactersGameState,
           weaponsGameState: event.weaponsGameState,
           roomsGameState: event.roomsGameState,
+          cellColoursState: event.cellColoursState,
           lastSaved: DateTime.now(),
         );
         final currentStateGame = currentGame.toJson();
@@ -170,6 +177,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           charactersGameState: undoGameDefinition.charactersGameState,
           weaponsGameState: undoGameDefinition.weaponsGameState,
           roomsGameState: undoGameDefinition.roomsGameState,
+          cellColoursState: undoGameDefinition.cellColoursState,
           lastSaved: DateTime.now(),
         );
         final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -184,6 +192,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
               charactersGameState: undoGameDefinition.charactersGameState,
               weaponsGameState: undoGameDefinition.weaponsGameState,
               roomsGameState: undoGameDefinition.roomsGameState,
+              cellColoursState: undoGameDefinition.cellColoursState,
               undoStack: newUndoStack,
               redoStack: newRedoStack,
             )
@@ -202,6 +211,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           charactersGameState: event.charactersGameState,
           weaponsGameState: event.weaponsGameState,
           roomsGameState: event.roomsGameState,
+          cellColoursState: event.cellColoursState,
           lastSaved: DateTime.now(),
         );
         final currentStateGame = currentGame.toJson();
@@ -221,6 +231,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           charactersGameState: undoGameDefinition.charactersGameState,
           weaponsGameState: undoGameDefinition.weaponsGameState,
           roomsGameState: undoGameDefinition.roomsGameState,
+          cellColoursState: undoGameDefinition.cellColoursState,
           lastSaved: DateTime.now(),
         );
         final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -234,6 +245,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
               charactersGameState: undoGameDefinition.charactersGameState,
               weaponsGameState: undoGameDefinition.weaponsGameState,
               roomsGameState: undoGameDefinition.roomsGameState,
+              cellColoursState: undoGameDefinition.cellColoursState,
               undoStack: newUndoStack,
               redoStack: newRedoStack,
             )
@@ -253,6 +265,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
       charactersGameState: event.charactersGameState,
       weaponsGameState: event.weaponsGameState,
       roomsGameState: event.roomsGameState,
+      cellColoursState: event.cellColoursState,
       lastSaved: DateTime.now(),
     );
 
@@ -263,13 +276,13 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           charactersGameState: event.charactersGameState,
           weaponsGameState: event.weaponsGameState,
           roomsGameState: event.roomsGameState,
+          cellColoursState: event.cellColoursState,
           undoStack: OperationStack<String>([]),
           redoStack: OperationStack<String>([]),
         )
     );
   }
 
-  // previousState is off by one... I smell it....
   void _mainGameStateChanged(MainGameStateChanged event, Emitter<MainGameState> emit) async {
     final currentGameToSave = GameDefinition(
       gameId: event.initialGame.gameId,
@@ -280,6 +293,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
       charactersGameState: event.charactersGameState,
       weaponsGameState: event.weaponsGameState,
       roomsGameState: event.roomsGameState,
+      cellColoursState: event.gameBackgroundColorState,
       lastSaved: DateTime.now(),
     );
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -299,6 +313,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
             charactersGameState: event.charactersGameState,
             weaponsGameState: event.weaponsGameState,
             roomsGameState: event.roomsGameState,
+            cellColoursState: event.gameBackgroundColorState,
             undoStack: newStack,
             redoStack: OperationStack([]),
           )
@@ -315,6 +330,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
             charactersGameState: event.charactersGameState,
             weaponsGameState: event.weaponsGameState,
             roomsGameState: event.roomsGameState,
+            cellColoursState: event.gameBackgroundColorState,
             undoStack: newStack,
             redoStack: OperationStack([]),
           )

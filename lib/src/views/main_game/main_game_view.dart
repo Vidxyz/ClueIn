@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:cluein_app/src/models/stack.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
+import 'package:cluein_app/src/utils/keyboard_utils.dart';
 import 'package:cluein_app/src/utils/screen_utils.dart';
+import 'package:cluein_app/src/utils/snackbar_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_bloc.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_event.dart';
@@ -12,7 +14,6 @@ import 'package:cluein_app/src/views/shared_components/ads/custom_markings_layou
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 enum EntityType { Character, Weapon, Room }
 
@@ -55,13 +56,18 @@ class MainGameViewState extends State<MainGameView> {
   late MainGameBloc _mainGameBloc;
 
   bool isMarkingDialogOpen = false;
+  bool isBackgroundColourDialogOpen = false;
+
   String? selectedMarkingFromDialog;
+  Color? selectedBackgroundColourFromDialog;
 
   List<MapEntry<int, String>> playerNameMapEntries = [];
 
   late GameState charactersGameState;
   late GameState weaponsGameState;
   late GameState roomsGameState;
+
+  late GameBackgroundColorState cellBackgroundColourState;
 
   late GameDefinition gameDefinitionState;
 
@@ -87,6 +93,8 @@ class MainGameViewState extends State<MainGameView> {
     weaponsGameState = MainGameStateModified.emptyWeaponsGameState(playerNameMapEntries.map((e) => e.value).toList());
     roomsGameState = MainGameStateModified.emptyRoomsGameState(playerNameMapEntries.map((e) => e.value).toList());
 
+    cellBackgroundColourState = MainGameStateModified.emptyCellBackgroundGameState(playerNameMapEntries.map((e) => e.value).toList());
+
     undoStack = OperationStack<String>([]);
     redoStack = OperationStack<String>([]);
 
@@ -107,7 +115,8 @@ class MainGameViewState extends State<MainGameView> {
                 weaponsGameState: weaponsGameState,
                 roomsGameState: roomsGameState,
                 undoStack: undoStack,
-                redoStack: redoStack
+                redoStack: redoStack,
+                cellColoursState: cellBackgroundColourState,
             )
         );
       }
@@ -126,7 +135,8 @@ class MainGameViewState extends State<MainGameView> {
                 weaponsGameState: weaponsGameState,
                 roomsGameState: roomsGameState,
                 undoStack: undoStack,
-                redoStack: redoStack
+                redoStack: redoStack,
+                cellColoursState: cellBackgroundColourState,
             )
         );
       }
@@ -173,6 +183,8 @@ class MainGameViewState extends State<MainGameView> {
               charactersGameState = state.charactersGameState;
               weaponsGameState = state.weaponsGameState;
               roomsGameState = state.roomsGameState;
+
+              cellBackgroundColourState = state.cellColoursState;
 
               undoStack = state.undoStack;
               redoStack = state.redoStack;
@@ -285,12 +297,15 @@ class MainGameViewState extends State<MainGameView> {
     setStateBasedOnInitialCards();
     setStateBasedOnGameDefinitionState();
 
+    cellBackgroundColourState = gameDefinitionState.cellColoursState;
+
     _mainGameBloc.add(
         MainGameStateLoadInitial(
           initialGame: gameDefinitionState,
           charactersGameState: charactersGameState,
           weaponsGameState: weaponsGameState,
           roomsGameState: roomsGameState,
+          cellColoursState: cellBackgroundColourState,
         )
     );
   }
@@ -707,6 +722,7 @@ class MainGameViewState extends State<MainGameView> {
           charactersGameState: charactersGameState,
           weaponsGameState: weaponsGameState,
           roomsGameState: roomsGameState,
+          gameBackgroundColorState: cellBackgroundColourState,
           undoStack: undoStack,
           redoStack: redoStack,
         )
@@ -760,6 +776,7 @@ class MainGameViewState extends State<MainGameView> {
           charactersGameState: charactersGameState,
           weaponsGameState: weaponsGameState,
           roomsGameState: roomsGameState,
+          gameBackgroundColorState: cellBackgroundColourState,
           undoStack: undoStack,
           redoStack: redoStack,
         )
@@ -784,10 +801,14 @@ class MainGameViewState extends State<MainGameView> {
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child:  Row(
               children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
+                final currentSelectedColor = Color(cellBackgroundColourState[currentEntity]![currentPlayerName]!);
                 return [
                   Expanded(
                     flex: 3,
                     child: GestureDetector(
+                      onLongPress: () {
+                        _showBackgroundColourSelectDialog(EntityType.Room, currentEntity, currentPlayerName, currentSelectedColor);
+                      },
                       onTap: () {
                         final currentMarkings = roomsGameState[currentEntity]![currentPlayerName]!;
                         // Only show dialog select if not an initial card from GameDefinition
@@ -795,9 +816,12 @@ class MainGameViewState extends State<MainGameView> {
                             !roomsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
                           _showMarkerSelectDialog(EntityType.Room, currentEntity, currentPlayerName, currentMarkings);
                         }
+                        else {
+                          SnackbarUtils.showSnackBarMedium(context, "Cannot modify markings here as this is initial game info! Long press to change background colour if needed.");
+                        }
                       },
                       child: Card(
-                        color: Colors.grey.shade200,
+                        color: Color(cellBackgroundColourState[currentEntity]![currentPlayerName]!),
                         child: _fillInRoomCellContentsBasedOnState(currentEntity, currentPlayerName),
                       ),
                     ),
@@ -817,11 +841,14 @@ class MainGameViewState extends State<MainGameView> {
     return Row(
       children: [
         SizedBox(
-          width: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 4) + (ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT / 2),
+          width: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 4) ,
           height: 50,
           child: Container(
             color: Colors.grey.shade200,
           ),
+        ),
+        SizedBox(
+          child: _verticalDivider(),
         ),
         Expanded(
           child: SizedBox(
@@ -859,11 +886,14 @@ class MainGameViewState extends State<MainGameView> {
                               Container(
                                 color: Colors.grey.shade200,
                                 child: Center(
-                                  child: Text(
-                                    currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -962,19 +992,26 @@ class MainGameViewState extends State<MainGameView> {
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child:  Row(
               children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
+                final currentSelectedColor = Color(cellBackgroundColourState[currentEntity]![currentPlayerName]!);
                 return [
                   Expanded(
                     flex: 3,
                     child: GestureDetector(
+                      onLongPress: () {
+                        _showBackgroundColourSelectDialog(EntityType.Weapon, currentEntity, currentPlayerName, currentSelectedColor);
+                      },
                       onTap: () {
                         final currentMarkings = weaponsGameState[currentEntity]![currentPlayerName]!;
                         if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
                             !weaponsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
                           _showMarkerSelectDialog(EntityType.Weapon, currentEntity, currentPlayerName, currentMarkings);
                         }
+                        else {
+                          SnackbarUtils.showSnackBarMedium(context, "Cannot modify markings here as this is initial game info! Long press to change background colour if needed.");
+                        }
                       },
                       child: Card(
-                        color: Colors.grey.shade200,
+                        color: Color(cellBackgroundColourState[currentEntity]![currentPlayerName]!),
                         child: _fillInWeaponCellContentsBasedOnState(currentEntity, currentPlayerName),
                       ),
                     ),
@@ -1005,19 +1042,27 @@ class MainGameViewState extends State<MainGameView> {
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child: Row(
               children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
+                final currentSelectedColor = Color(cellBackgroundColourState[currentCharacter]![currentPlayerName]!);
                 return [
                   Expanded(
                     flex: 3,
                     child: GestureDetector(
+                      onLongPress: () {
+                        _showBackgroundColourSelectDialog(EntityType.Weapon, currentCharacter, currentPlayerName, currentSelectedColor);
+                      },
                       onTap: () {
                         final currentMarkings = charactersGameState[currentCharacter]![currentPlayerName]!;
+                        // Check if we are not changing anything from initiral state
                         if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
                             !charactersGameState[currentCharacter]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
                           _showMarkerSelectDialog(EntityType.Character, currentCharacter, currentPlayerName, currentMarkings);
                         }
+                        else {
+                          SnackbarUtils.showSnackBarMedium(context, "Cannot modify markings here as this is initial game info! Long press to change background colour if needed.");
+                        }
                       },
                       child: Card(
-                        color: Colors.grey.shade200,
+                        color: Color(cellBackgroundColourState[currentCharacter]![currentPlayerName]!),
                         child: _fillInCharacterCellContentsBasedOnState(currentCharacter, currentPlayerName),
                       ),
                     ),
@@ -1269,6 +1314,26 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
+  _markCellBackgroundColourDialogAsClosedAndResetBackground(EntityType entityType, String currentEntity, String currentPlayerName) {
+    cellBackgroundColourState[currentEntity]?[currentPlayerName] = Colors.grey.shade200.value;
+
+    _mainGameBloc.add(
+        MainGameStateChanged(
+          initialGame: gameDefinitionState,
+          charactersGameState: charactersGameState,
+          weaponsGameState: weaponsGameState,
+          roomsGameState: roomsGameState,
+          gameBackgroundColorState: cellBackgroundColourState,
+          undoStack: undoStack,
+          redoStack: redoStack,
+        )
+    );
+    setState(() {
+      isBackgroundColourDialogOpen = false;
+      selectedBackgroundColourFromDialog = null;
+    });
+  }
+
   _markDialogAsClosedAndResetMarking(EntityType entityType, String currentEntity, String currentPlayerName) {
     if (entityType == EntityType.Character) {
       charactersGameState[currentEntity]?[currentPlayerName] = [];
@@ -1286,6 +1351,7 @@ class MainGameViewState extends State<MainGameView> {
           charactersGameState: charactersGameState,
           weaponsGameState: weaponsGameState,
           roomsGameState: roomsGameState,
+          gameBackgroundColorState: cellBackgroundColourState,
           undoStack: undoStack,
           redoStack: redoStack,
         )
@@ -1296,8 +1362,33 @@ class MainGameViewState extends State<MainGameView> {
     });
   }
 
+  _markCellBackgroundColourDialogDialogAsClosedAndSaveBackgoundColour(EntityType entityType, String currentEntity, String currentPlayerName) {
+    if (selectedBackgroundColourFromDialog != null) {
+      KeyboardUtils.lightImpact();
+      cellBackgroundColourState[currentEntity]![currentPlayerName] = selectedBackgroundColourFromDialog!.value;
+
+      _mainGameBloc.add(
+          MainGameStateChanged(
+            initialGame: gameDefinitionState,
+            charactersGameState: charactersGameState,
+            weaponsGameState: weaponsGameState,
+            roomsGameState: roomsGameState,
+            gameBackgroundColorState: cellBackgroundColourState,
+            undoStack: undoStack,
+            redoStack: redoStack,
+          )
+      );
+      setState(() {
+        isBackgroundColourDialogOpen = false;
+        selectedBackgroundColourFromDialog = null;
+      });
+    }
+  }
+
   _markDialogAsClosedAndSaveMarking(EntityType entityType, String currentEntity, String currentPlayerName) {
     if (selectedMarkingFromDialog != null) {
+      KeyboardUtils.lightImpact();
+
       // Something was selected, persist it
       if (entityType == EntityType.Character) {
         // if (selectedMarkingFromDialog == ConstantUtils.tick || selectedMarkingFromDialog == ConstantUtils.cross) {
@@ -1393,6 +1484,7 @@ class MainGameViewState extends State<MainGameView> {
             charactersGameState: charactersGameState,
             weaponsGameState: weaponsGameState,
             roomsGameState: roomsGameState,
+            gameBackgroundColorState: cellBackgroundColourState,
             undoStack: undoStack,
             redoStack: redoStack,
           )
@@ -1410,6 +1502,8 @@ class MainGameViewState extends State<MainGameView> {
       String currentPlayerName,
       List<String> currentMarkings
       ) {
+    KeyboardUtils.lightImpact();
+
     setState(() {
       isMarkingDialogOpen = true;
     });
@@ -1700,12 +1794,182 @@ class MainGameViewState extends State<MainGameView> {
     }).then((value) => _markDialogAsClosedAndSaveMarking(entityType, currentEntity, currentPlayerName));
   }
 
+  _showBackgroundColourSelectDialog(
+      EntityType entityType,
+      String currentEntity,
+      String currentPlayerName,
+      Color currentSelectedColour
+      ) {
+
+    KeyboardUtils.mediumImpact();
+
+    setState(() {
+      isBackgroundColourDialogOpen = true;
+    });
+
+    _resetCellButton() {
+      return Padding(
+        padding: const EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+          ),
+          onPressed: () async {
+            _markCellBackgroundColourDialogAsClosedAndResetBackground(entityType, currentEntity, currentPlayerName);
+            Navigator.pop(context);
+          },
+          child: const Text("Reset colour", style: TextStyle(fontSize: 15, color: Colors.white)),
+        ),
+      );
+    }
+
+    _dismissDialogButton() {
+      return Padding(
+        padding: const EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+          ),
+          onPressed: () async {
+            _markCellBackgroundColourDialogDialogAsClosedAndSaveBackgoundColour(entityType, currentEntity, currentPlayerName);
+            Navigator.pop(context);
+          },
+          child: const Text("Go back", style: TextStyle(fontSize: 15, color: Colors.white)),
+        ),
+      );
+    }
+
+    showDialog(context: context, builder: (context) {
+      return Dialog(
+        child:  SizedBox(
+          height: ScreenUtils.getScreenHeight(context) / 2,
+          child: Scaffold(
+            body: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child: Center(
+                        child: Text(
+                          "Select the colour you want to change the cell background to",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal,
+                              color: ConstantUtils.primaryAppColor
+                          ),
+                        ),
+                      ),
+                    ),
+                    WidgetUtils.spacer(5),
+                    _divider(),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 6,
+                      children: [
+                        _colorMarker(Colors.grey.shade200, currentSelectedColour == Colors.grey.shade200, () {
+                          _setBackgroundColourStateAndPop(Colors.grey.shade200, context);
+                        }),
+                        _colorMarker(Colors.tealAccent, currentSelectedColour == Colors.tealAccent, () {
+                          _setBackgroundColourStateAndPop(Colors.tealAccent, context);
+                        }),
+                        _colorMarker(Colors.amber, currentSelectedColour == Colors.amber, () {
+                          _setBackgroundColourStateAndPop(Colors.amber, context);
+                        }),
+                        _colorMarker(Colors.pinkAccent.shade200, currentSelectedColour == Colors.pinkAccent.shade200, () {
+                          _setBackgroundColourStateAndPop(Colors.pinkAccent.shade200, context);
+                        }),
+                        _colorMarker(Colors.purpleAccent.shade200, currentSelectedColour == Colors.purpleAccent.shade200, () {
+                          _setBackgroundColourStateAndPop(Colors.purpleAccent.shade200, context);
+                        }),
+                        _colorMarker(Colors.cyanAccent.shade200, currentSelectedColour == Colors.cyanAccent.shade200, () {
+                          _setBackgroundColourStateAndPop(Colors.cyanAccent.shade200, context);
+                        }),
+                      ],
+                    ),
+                    WidgetUtils.spacer(2.5),
+                    _divider(),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Container(),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: SizedBox(
+                                    width: 20,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: GestureDetector(
+                                        child: Container(
+                                          child: CircleAvatar(
+                                            backgroundColor: currentSelectedColour,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                              ),
+                              const Expanded(
+                                  child: Text(
+                                    "Current selection",
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: ConstantUtils.primaryAppColor,
+                                        fontWeight: FontWeight.w500
+                                    ),
+                                  )
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Container(),
+                        )
+                      ],
+                    ),
+                    WidgetUtils.spacer(2.5),
+                    _divider(),
+                  ],
+                ),
+              ),
+            ),
+            bottomNavigationBar: Row(
+              children: [
+                Expanded(
+                  child: _dismissDialogButton(),
+                ),
+                Expanded(
+                  child: _resetCellButton(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }).then((value) => _markCellBackgroundColourDialogDialogAsClosedAndSaveBackgoundColour(entityType, currentEntity, currentPlayerName));
+  }
+
   _setStateAndPop(String text, BuildContext context) {
     setState(() {
       selectedMarkingFromDialog = text;
       roomsGameState = roomsGameState;
       charactersGameState = charactersGameState;
       weaponsGameState = weaponsGameState;
+    });
+    Navigator.pop(context);
+  }
+
+  _setBackgroundColourStateAndPop(Color selectedColor, BuildContext context) {
+    setState(() {
+      selectedBackgroundColourFromDialog = selectedColor;
     });
     Navigator.pop(context);
   }
@@ -1725,6 +1989,30 @@ class MainGameViewState extends State<MainGameView> {
                     fontSize: 10,
                     color: Colors.white
                 )
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _colorMarker(Color color, bool isSelectedAlready, VoidCallback onTap) {
+    return SizedBox(
+      width: 30,
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all( Radius.circular(50.0)),
+              border: Border.all(
+                color: isSelectedAlready ? Colors.teal : Colors.transparent,
+                width: 4.0,
+              ),
+            ),
+            child: CircleAvatar(
+              backgroundColor: color,
             ),
           ),
         ),
@@ -1808,7 +2096,7 @@ class MainGameViewState extends State<MainGameView> {
       width: ConstantUtils.MARKING_DIAMETER,
       height: ConstantUtils.MARKING_DIAMETER,
       child: GestureDetector(
-        onLongPress: onTap,
+        // onTap: onTap,
         child: CircleAvatar(
           backgroundColor: Colors.transparent,
           child: Text(

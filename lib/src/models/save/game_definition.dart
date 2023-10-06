@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cluein_app/src/models/game_card.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
 import 'package:equatable/equatable.dart';
@@ -31,6 +33,8 @@ class GameDefinition extends Equatable {
   final GameState weaponsGameState;
   final GameState roomsGameState;
 
+  final GameBackgroundColorState cellColoursState;
+
   final DateTime lastSaved;
 
   const GameDefinition({
@@ -43,6 +47,7 @@ class GameDefinition extends Equatable {
     this.charactersGameState = const {},
     this.weaponsGameState = const {},
     this.roomsGameState = const {},
+    this.cellColoursState = const {},
   });
 
   @override
@@ -55,6 +60,7 @@ class GameDefinition extends Equatable {
     charactersGameState,
     weaponsGameState,
     roomsGameState,
+    cellColoursState,
     lastSaved,
   ];
 
@@ -96,6 +102,14 @@ class GameDefinition extends Equatable {
                 (value as List<dynamic>).map((e) => e.toString()).toList()
             ))
         )),
+        cellColoursState: (json['cellColoursState'] as Map<String, dynamic>)
+            .map((key, value) => MapEntry(
+            key,
+            (value as Map<String, dynamic>).map((key, value) => MapEntry(
+                key,
+                int.parse((value as String))
+            ))
+        )),
       );
 
 
@@ -124,6 +138,9 @@ class GameDefinition extends Equatable {
         },
         "roomsGameState" : {
           ${gameStateToJson(instance.roomsGameState)}
+        },
+        "cellColoursState" : {
+          ${cellColoursStateToJson(instance.cellColoursState)}
         }
       }
     ''';
@@ -144,17 +161,18 @@ class GameDefinition extends Equatable {
     }).join(", ");
   }
 
-  static Map<String, dynamic> GameDefinitionToJson(GameDefinition instance) =>
-      <String, dynamic>{
-        'gameId': instance.gameId,
-        'gameName': instance.gameName,
-        'totalPlayers': instance.totalPlayers,
-        'playerNames': instance.playerNames,
-        'lastSaved': DateTime.now().toIso8601String(),
-        'initialCards': instance.initialCards.map((e) => e.cardName()),
-        'charactersGameState': instance.charactersGameState,
-        'weaponsGameState': instance.weaponsGameState,
-        'roomsGameState': instance.roomsGameState,
-      };
+  static String cellColoursStateToJson(GameBackgroundColorState state) {
+    return state.entries.map((e) {
+      return '''
+        "${e.key}" : {
+          ${e.value.entries.map((e2) {
+        return '''
+              "${e2.key}" : "${e2.value}"
+            ''';
+      }).toList().join(", ")}
+        }
+      ''';
+    }).join(", ");
+  }
 
 }

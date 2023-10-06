@@ -17,11 +17,14 @@ class MainGameStateLoadInitial extends MainGameEvent {
   final GameState weaponsGameState;
   final GameState roomsGameState;
 
+  final GameBackgroundColorState cellColoursState;
+
   const MainGameStateLoadInitial({
     required this.initialGame,
     required this.charactersGameState,
     required this.weaponsGameState,
     required this.roomsGameState,
+    required this.cellColoursState,
   });
 
   @override
@@ -30,6 +33,7 @@ class MainGameStateLoadInitial extends MainGameEvent {
     charactersGameState,
     weaponsGameState,
     roomsGameState,
+    cellColoursState,
   ];
 }
 
@@ -40,6 +44,8 @@ class MainGameStateChanged extends MainGameEvent {
   final GameState weaponsGameState;
   final GameState roomsGameState;
 
+  final GameBackgroundColorState gameBackgroundColorState;
+
   final OperationStack<String> undoStack;
   final OperationStack<String> redoStack;
 
@@ -48,6 +54,7 @@ class MainGameStateChanged extends MainGameEvent {
     required this.charactersGameState,
     required this.weaponsGameState,
     required this.roomsGameState,
+    required this.gameBackgroundColorState,
     required this.undoStack,
     required this.redoStack,
   });
@@ -58,6 +65,7 @@ class MainGameStateChanged extends MainGameEvent {
     charactersGameState,
     weaponsGameState,
     roomsGameState,
+    gameBackgroundColorState,
     undoStack,
     redoStack,
   ];
@@ -71,6 +79,8 @@ class UndoLastMove extends MainGameEvent {
   final GameState weaponsGameState;
   final GameState roomsGameState;
 
+  final GameBackgroundColorState cellColoursState;
+
   final OperationStack<String> undoStack;
   final OperationStack<String> redoStack;
 
@@ -79,6 +89,7 @@ class UndoLastMove extends MainGameEvent {
     required this.charactersGameState,
     required this.weaponsGameState,
     required this.roomsGameState,
+    required this.cellColoursState,
     required this.undoStack,
     required this.redoStack,
   });
@@ -89,6 +100,7 @@ class UndoLastMove extends MainGameEvent {
     charactersGameState,
     weaponsGameState,
     roomsGameState,
+    cellColoursState,
     undoStack,
     redoStack,
   ];
@@ -101,6 +113,8 @@ class RedoLastMove extends MainGameEvent {
   final GameState weaponsGameState;
   final GameState roomsGameState;
 
+  final GameBackgroundColorState cellColoursState;
+
   final OperationStack<String> undoStack;
   final OperationStack<String> redoStack;
 
@@ -109,6 +123,7 @@ class RedoLastMove extends MainGameEvent {
     required this.charactersGameState,
     required this.weaponsGameState,
     required this.roomsGameState,
+    required this.cellColoursState,
     required this.undoStack,
     required this.redoStack,
   });
@@ -119,6 +134,7 @@ class RedoLastMove extends MainGameEvent {
     charactersGameState,
     weaponsGameState,
     roomsGameState,
+    cellColoursState,
     undoStack,
     redoStack,
   ];
