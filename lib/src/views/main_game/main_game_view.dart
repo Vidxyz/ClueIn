@@ -19,6 +19,8 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 GlobalKey cell1Key = GlobalKey();
 GlobalKey cell2Key = GlobalKey();
+GlobalKey undoKey = GlobalKey();
+GlobalKey redoKey = GlobalKey();
 GlobalKey gameNameTextKey = GlobalKey();
 
 enum EntityType { Character, Weapon, Room }
@@ -136,6 +138,7 @@ class MainGameViewState extends State<MainGameView> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: WidgetUtils.skipNulls([
+                  WidgetUtils.spacer(25),
                   const Align(
                     child: Text(
                       "Note observations and infer conclusions",
@@ -230,9 +233,9 @@ class MainGameViewState extends State<MainGameView> {
       ),
     );
 
-    // todo - Fill in contents tap on cell
+    // todo - try sembast again, post MVP settings - primary colour - clue version,
+    // todo - pretty up character names like rooms (col, Mr, Ms, etc) - same for confirm inference dialgos
     // todo - fix about page after that
-    // todo - release
     basicTargets.add(
       TargetFocus(
         identify: "cell1Key",
@@ -253,7 +256,7 @@ class MainGameViewState extends State<MainGameView> {
                 children: WidgetUtils.skipNulls([
                   const Align(
                     child: Text(
-                      "Poopidiscoop",
+                      "Tap on a cell to add or remove markings",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.white,
@@ -267,7 +270,7 @@ class MainGameViewState extends State<MainGameView> {
                     padding: EdgeInsets.all(10),
                     child: Center(
                       child: Text(
-                        "Assume there are 2 players, A and B. Assume A makes the following accusation",
+                        "When a player shows a card, add a marking next to each of the possible cards it might be",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           // fontWeight: FontWeight.bold,
@@ -282,7 +285,7 @@ class MainGameViewState extends State<MainGameView> {
                     padding: EdgeInsets.all(10),
                     child: Center(
                       child: Text(
-                        "\"I accuse Col. Mustard of killing Ms Plum in the Kitchen with the Dagger\"",
+                        "When cards accumulate multiple distinct markings, you can infer conclusions",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           // fontWeight: FontWeight.bold,
@@ -297,37 +300,7 @@ class MainGameViewState extends State<MainGameView> {
                     padding: EdgeInsets.all(10),
                     child: Center(
                       child: Text(
-                        "When B shows a card, create markings to allow for inferences later",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          // fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(10),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "For instance, add the marker \"1\" next to \"Mustard\", \"Kitchen\" and \"Dagger\"",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          // fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(10),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "If there are multiple markings over different rounds on the same card, that is evidence in favour of the respective player possessing said card.",
+                        "Tap on a marking to remove it if needed",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           // fontWeight: FontWeight.bold,
@@ -345,7 +318,7 @@ class MainGameViewState extends State<MainGameView> {
       ),
     );
 
-    // todo - Fill in contents Long press on cell
+    // Long press
     basicTargets.add(
       TargetFocus(
         identify: "cell2Key",
@@ -366,7 +339,7 @@ class MainGameViewState extends State<MainGameView> {
                 children: WidgetUtils.skipNulls([
                   const Align(
                     child: Text(
-                      "Long press poop scoop",
+                      "Long press on a cell to change background colour",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.white,
@@ -380,7 +353,7 @@ class MainGameViewState extends State<MainGameView> {
                     padding: EdgeInsets.all(10),
                     child: Center(
                       child: Text(
-                        "Assume there are 2 players, A and B. Assume A makes the following accusation",
+                        "When you show a card someone, change the background colour to indicate what you have disclosed",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           // fontWeight: FontWeight.bold,
@@ -395,52 +368,7 @@ class MainGameViewState extends State<MainGameView> {
                     padding: EdgeInsets.all(10),
                     child: Center(
                       child: Text(
-                        "\"I accuse Col. Mustard of killing Ms Plum in the Kitchen with the Dagger\"",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          // fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(10),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "When B shows a card, create markings to allow for inferences later",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          // fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(10),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "For instance, add the marker \"1\" next to \"Mustard\", \"Kitchen\" and \"Dagger\"",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          // fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(10),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "If there are multiple markings over different rounds on the same card, that is evidence in favour of the respective player possessing said card.",
+                        "Ensure you only disclose as little information as required!",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           // fontWeight: FontWeight.bold,
@@ -457,6 +385,88 @@ class MainGameViewState extends State<MainGameView> {
         ],
       ),
     );
+
+    // Undo button
+    basicTargets.add(
+      TargetFocus(
+        identify: "undoKey",
+        keyTarget: undoKey,
+        alignSkip: Alignment.topRight,
+        color: ConstantUtils.primaryAppColor,
+        shape: ShapeLightFocus.RRect,
+        enableOverlayTab: true,
+        enableTargetTab: true,
+        paddingFocus: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: WidgetUtils.skipNulls([
+                  WidgetUtils.spacer(25),
+                  const Align(
+                    child: Text(
+                      "Press this button to undo your last move",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                ]),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+
+    // Redo button
+    basicTargets.add(
+      TargetFocus(
+        identify: "redoKey",
+        keyTarget: redoKey,
+        alignSkip: Alignment.topRight,
+        color: ConstantUtils.primaryAppColor,
+        shape: ShapeLightFocus.RRect,
+        enableOverlayTab: true,
+        enableTargetTab: true,
+        paddingFocus: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: WidgetUtils.skipNulls([
+                  WidgetUtils.spacer(25),
+                  const Align(
+                    child: Text(
+                      "Press this button to redo your last move",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                ]),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+
+
 
     basicTutorialCoachMark = TutorialCoachMark(
       targets: basicTargets,
@@ -547,6 +557,7 @@ class MainGameViewState extends State<MainGameView> {
             onPressed: _performTutorial,
           ),
           IconButton(
+            key: undoKey,
             icon: Icon(
               Icons.undo,
               color: _canUndo() ? ConstantUtils.primaryAppColor : Colors.grey,
@@ -554,6 +565,7 @@ class MainGameViewState extends State<MainGameView> {
             onPressed: _performUndo,
           ),
           IconButton(
+            key: redoKey,
             icon: Icon(
               Icons.redo,
               color: _canRedo() ? ConstantUtils.primaryAppColor : Colors.grey,

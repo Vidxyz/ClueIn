@@ -71,6 +71,7 @@ class ConstantUtils {
 
 
   static const Color primaryAppColor = Color(0xff733ddf);
+  // static const Color primaryAppColor = Color(0xff1aa328);
 
   static List<Color> cellBackgroundColorOptions = [
     Colors.grey.shade200,
