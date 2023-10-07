@@ -15,10 +15,10 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
 
   String? previousStateGlobal;
 
-  SharedPrefsRepository sharedPrefs;
+  SembastRepository sembast;
 
   MainGameBloc({
-    required this.sharedPrefs,
+    required this.sembast,
   }) : super(MainGameStateInitial()) {
     on<MainGameStateChanged>(_mainGameStateChanged);
     on<MainGameStateLoadInitial>(_mainGameStateLoadInitial);
@@ -69,7 +69,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           lastSaved: DateTime.now(),
         );
         final jsonStringToSave = gameToSave.toJson();
-        await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+        await sembast.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
         previousStateGlobal = jsonStringToSave;
 
@@ -121,7 +121,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           lastSaved: DateTime.now(),
         );
         final jsonStringToSave = gameToSave.toJson();
-        await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+        await sembast.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
         previousStateGlobal = jsonStringToSave;
 
@@ -184,7 +184,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           lastSaved: DateTime.now(),
         );
         final jsonStringToSave = gameToSave.toJson();
-        await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+        await sembast.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
 
         previousStateGlobal = jsonStringToSave;
@@ -237,7 +237,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           lastSaved: DateTime.now(),
         );
         final jsonStringToSave = gameToSave.toJson();
-        await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+        await sembast.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
         previousStateGlobal = jsonStringToSave;
 
@@ -298,7 +298,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
       lastSaved: DateTime.now(),
     );
     final jsonStringToSave = currentGameToSave.toJson();
-    await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+    await sembast.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
 
 
     if (event.undoStack.list.length < ConstantUtils.MAX_UNDO_STACK_SIZE) {

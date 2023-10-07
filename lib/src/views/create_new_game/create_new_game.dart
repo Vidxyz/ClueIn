@@ -27,7 +27,7 @@ class CreateNewGameView extends StatefulWidget {
               providers: [
                 BlocProvider<CreateNewGameBloc>(
                     create: (context) => CreateNewGameBloc(
-                      sharedPrefs: RepositoryProvider.of<SharedPrefsRepository>(context)
+                      sembast: RepositoryProvider.of<SembastRepository>(context)
                     )
                 ),
               ],

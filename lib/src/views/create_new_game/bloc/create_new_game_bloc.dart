@@ -14,10 +14,10 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
   final logger = Logger("CreateNewGameBloc");
   static const uuid = Uuid();
 
-  SharedPrefsRepository sharedPrefs;
+  SembastRepository sembast;
 
   CreateNewGameBloc({
-    required this.sharedPrefs,
+    required this.sembast,
   }) : super(CreateNewGameStateInitial()) {
     on<NewGameDetailedChanged>(_newGameDetailedChanged);
     on<BeginNewClueGame>(_beginNewClueGame);
@@ -50,11 +50,11 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
     );
 
     final jsonStringToSave = gameToSave.toJson();
-    final existingSavedGameIds = sharedPrefs.prefs.getStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
+    final existingSavedGameIds =  (await sembast.readStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? []);
     existingSavedGameIds.add(newGameId);
 
-    await sharedPrefs.prefs.setStringList("cluein_game_ids", existingSavedGameIds);
-    await sharedPrefs.prefs.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_$newGameId", jsonStringToSave);
+    await sembast.writeStringList("cluein_game_ids", existingSavedGameIds);
+    await sembast.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_$newGameId", jsonStringToSave);
 
     emit(
         NewGameSavedAndReadyToStart(

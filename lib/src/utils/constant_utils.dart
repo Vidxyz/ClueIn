@@ -27,12 +27,12 @@ class ConstantUtils {
   static const List<String> allEntitites = [...characterList, ...weaponList, ...roomList];
 
   static const Map<String, String> entityNameToDisplayNameMap = {
-    "Scarlett": "Scarlett",
-    "Mustard": "Mustard",
-    "White": "White",
-    "Green": "Green",
-    "Peacock": "Peacock",
-    "Plum": "Plum",
+    "Scarlett": "Ms. Scarlett",
+    "Mustard": "Col. Mustard",
+    "White": "Mrs. White",
+    "Green": "Mr. Green",
+    "Peacock": "Mrs. Peacock",
+    "Plum": "Prof. Plum",
     "Dagger" : "Dagger",
     "Candlestick" : "Candlestick",
     "Revolver" : "Revolver",

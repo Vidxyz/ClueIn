@@ -68,49 +68,50 @@ class GameDefinition extends Equatable {
 
   String toJson() => GameDefinitionToJson2(this);
 
-  static GameDefinition GameDefinitionFromJson(Map<String, dynamic> json) =>
-      GameDefinition(
-        gameId: json['gameId'] as String,
-        gameName: json['gameName'] as String,
-        totalPlayers: json['totalPlayers'] as int,
-        playerNames: (json['playerNames'] as Map<String, dynamic>).map((key, value) => MapEntry(int.parse(key), value.toString())),
-        lastSaved: DateTime.parse(json['lastSaved'] as String),
-        initialCards: (json['initialCards'] as List<dynamic>)
-            .map((e) => GameCard.fromString(e.toString()))
-            .toList(),
-        charactersGameState: (json['charactersGameState'] as Map<String, dynamic>)
-            .map((key, value) => MapEntry(
-                    key,
-                    (value as Map<String, dynamic>).map((key, value) => MapEntry(
-                        key,
-                        (value as List<dynamic>).map((e) => e.toString()).toList()
-                    ))
-        )),
-        weaponsGameState: (json['weaponsGameState'] as Map<String, dynamic>)
-            .map((key, value) => MapEntry(
-            key,
-            (value as Map<String, dynamic>).map((key, value) => MapEntry(
-                key,
-                (value as List<dynamic>).map((e) => e.toString()).toList()
-            ))
-        )),
-        roomsGameState: (json['roomsGameState'] as Map<String, dynamic>)
-            .map((key, value) => MapEntry(
-            key,
-            (value as Map<String, dynamic>).map((key, value) => MapEntry(
-                key,
-                (value as List<dynamic>).map((e) => e.toString()).toList()
-            ))
-        )),
-        cellColoursState: (json['cellColoursState'] as Map<String, dynamic>)
-            .map((key, value) => MapEntry(
-            key,
-            (value as Map<String, dynamic>).map((key, value) => MapEntry(
-                key,
-                int.parse((value as String))
-            ))
-        )),
-      );
+  static GameDefinition GameDefinitionFromJson(Map<String, dynamic> json) {
+    return GameDefinition(
+      gameId: json['gameId'] as String,
+      gameName: json['gameName'] as String,
+      totalPlayers: json['totalPlayers'] as int,
+      playerNames: (json['playerNames'] as Map<String, dynamic>).map((key, value) => MapEntry(int.parse(key), value.toString())),
+      lastSaved: DateTime.parse(json['lastSaved'] as String),
+      initialCards: (json['initialCards'] as List<dynamic>)
+          .map((e) => GameCard.fromString(e.toString()))
+          .toList(),
+      charactersGameState: (json['charactersGameState'] as Map<String, dynamic>)
+          .map((key, value) => MapEntry(
+          key,
+          (value as Map<String, dynamic>).map((key, value) => MapEntry(
+              key,
+              (value as List<dynamic>).map((e) => e.toString()).toList()
+          ))
+      )),
+      weaponsGameState: (json['weaponsGameState'] as Map<String, dynamic>)
+          .map((key, value) => MapEntry(
+          key,
+          (value as Map<String, dynamic>).map((key, value) => MapEntry(
+              key,
+              (value as List<dynamic>).map((e) => e.toString()).toList()
+          ))
+      )),
+      roomsGameState: (json['roomsGameState'] as Map<String, dynamic>)
+          .map((key, value) => MapEntry(
+          key,
+          (value as Map<String, dynamic>).map((key, value) => MapEntry(
+              key,
+              (value as List<dynamic>).map((e) => e.toString()).toList()
+          ))
+      )),
+      cellColoursState: (json['cellColoursState'] as Map<String, dynamic>)
+          .map((key, value) => MapEntry(
+          key,
+          (value as Map<String, dynamic>).map((key, value) => MapEntry(
+              key,
+              int.parse((value as String))
+          ))
+      )),
+    );
+  }
 
 
   static String GameDefinitionToJson2(GameDefinition instance) =>

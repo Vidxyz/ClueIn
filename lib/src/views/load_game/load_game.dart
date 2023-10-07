@@ -27,7 +27,7 @@ class LoadGameView extends StatefulWidget {
       providers: [
         BlocProvider<LoadGameBloc>(
             create: (context) => LoadGameBloc(
-                sharedPrefs: RepositoryProvider.of<SharedPrefsRepository>(context)
+                sembast: RepositoryProvider.of<SembastRepository>(context)
             )),
       ],
       child: const LoadGameView(),

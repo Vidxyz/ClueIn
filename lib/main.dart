@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
 
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<SharedPrefsRepository>(create: (context) => SharedPrefsRepository()),
+        RepositoryProvider<SembastRepository>(create: (context) => SembastRepository()),
       ],
       child: MultiBlocProvider(
         providers: [

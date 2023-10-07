@@ -24,7 +24,7 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    var hack = RepositoryProvider.of<SharedPrefsRepository>(context);
+    var hack = RepositoryProvider.of<SembastRepository>(context);
   }
 
   @override

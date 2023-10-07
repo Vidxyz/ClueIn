@@ -45,7 +45,7 @@ class MainGameView extends StatefulWidget {
       providers: [
         BlocProvider<MainGameBloc>(
             create: (context) => MainGameBloc(
-                sharedPrefs: RepositoryProvider.of<SharedPrefsRepository>(context),
+                sembast: RepositoryProvider.of<SembastRepository>(context),
             )),
       ],
       child: MainGameView(
@@ -233,9 +233,6 @@ class MainGameViewState extends State<MainGameView> {
       ),
     );
 
-    // todo - try sembast again, post MVP settings - primary colour - clue version,
-    // todo - pretty up character names like rooms (col, Mr, Ms, etc) - same for confirm inference dialgos
-    // todo - fix about page after that
     basicTargets.add(
       TargetFocus(
         identify: "cell1Key",
@@ -1892,7 +1889,7 @@ class MainGameViewState extends State<MainGameView> {
                   )
               ),
               TextSpan(
-                  text: currentEntity,
+                  text: ConstantUtils.entityNameToDisplayNameMap[currentEntity],
                   style: const TextStyle(
                       color: ConstantUtils.primaryAppColor,
                       fontSize: 16,
@@ -1939,7 +1936,7 @@ class MainGameViewState extends State<MainGameView> {
                   )
               ),
               TextSpan(
-                  text: currentEntity,
+                  text: ConstantUtils.entityNameToDisplayNameMap[currentEntity],
                   style: const TextStyle(
                       color: ConstantUtils.primaryAppColor,
                       fontSize: 16,

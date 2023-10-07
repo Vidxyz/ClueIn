@@ -13,10 +13,10 @@ class LoadGameBloc extends Bloc<LoadGameEvent, LoadGameState> {
 
   final logger = Logger("LoadGameBloc");
 
-  SharedPrefsRepository sharedPrefs;
+  SembastRepository sembast;
 
   LoadGameBloc({
-    required this.sharedPrefs,
+    required this.sembast,
   }) : super(LoadGameStateInitial()) {
     on<FetchSavedGames>(_fetchSavedGames);
     on<DeleteSavedGame>(_deleteSavedGame);
@@ -34,21 +34,21 @@ class LoadGameBloc extends Bloc<LoadGameEvent, LoadGameState> {
   void _fetchSavedGames(FetchSavedGames event, Emitter<LoadGameState> emit) async {
     emit(LoadGameStateLoading());
 
-    final savedGameIds =  sharedPrefs.prefs.getStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
-    final List<GameDefinition> savedGameDefinitions = [];
-
-    savedGameIds.forEach((element) async{
-      final savedJson = sharedPrefs.prefs.getString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_$element") ?? "{}";
-
-      dynamic jsonResp = jsonDecode(savedJson);
-      final gameDefinition = GameDefinition.fromJson(jsonResp);
-      savedGameDefinitions.add(gameDefinition);
-    });
+    final List<String> savedGameIds =  (await sembast.readStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY)) ?? [];
+    List<GameDefinition> savedGameDefinitions = await fetchSavedGames(savedGameIds);
 
     savedGameDefinitions.sort((a, b) => b.lastSaved.compareTo(a.lastSaved));
-
     emit(SavedGamesFetched(savedGames: savedGameDefinitions));
 
+  }
+
+  Future<List<GameDefinition>> fetchSavedGames(List<String> savedGameIds) async {
+    return Future.wait(savedGameIds.map((element) async {
+      final savedJson = (await sembast.getString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_$element")) ?? "{}";
+
+      dynamic jsonResp = jsonDecode(savedJson);
+      return GameDefinition.fromJson(jsonResp);
+    }));
   }
 
 }
