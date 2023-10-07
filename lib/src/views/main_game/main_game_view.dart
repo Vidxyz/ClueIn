@@ -19,6 +19,7 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 GlobalKey cell1Key = GlobalKey();
 GlobalKey cell2Key = GlobalKey();
+GlobalKey gameNameTextKey = GlobalKey();
 
 enum EntityType { Character, Weapon, Room }
 
@@ -110,7 +111,369 @@ class MainGameViewState extends State<MainGameView> {
     undoStack = OperationStack<String>([]);
     redoStack = OperationStack<String>([]);
 
+    initTutorial();
     _setupGameStateInitially();
+  }
+
+  initTutorial() {
+
+    // Intro screen
+    basicTargets.add(
+      TargetFocus(
+        identify: "gameNameTextKey",
+        keyTarget: gameNameTextKey,
+        alignSkip: Alignment.topRight,
+        color: ConstantUtils.primaryAppColor,
+        shape: ShapeLightFocus.RRect,
+        enableOverlayTab: true,
+        enableTargetTab: true,
+        paddingFocus: 0,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: WidgetUtils.skipNulls([
+                  const Align(
+                    child: Text(
+                      "Note observations and infer conclusions",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(25),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "Assume there are 2 players, A and B. Assume A makes the following accusation",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "\"I accuse Col. Mustard of killing Ms Plum in the Kitchen with the Dagger\"",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "When B shows a card, create markings to allow for inferences later",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "For instance, add the marker \"1\" next to \"Mustard\", \"Kitchen\" and \"Dagger\"",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "If there are multiple markings over different rounds on the same card, that is evidence in favour of the respective player possessing said card.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ]),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    // todo - Fill in contents tap on cell
+    // todo - fix about page after that
+    // todo - release
+    basicTargets.add(
+      TargetFocus(
+        identify: "cell1Key",
+        keyTarget: cell1Key,
+        alignSkip: Alignment.topRight,
+        color: ConstantUtils.primaryAppColor,
+        shape: ShapeLightFocus.RRect,
+        enableOverlayTab: true,
+        enableTargetTab: true,
+        paddingFocus: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: WidgetUtils.skipNulls([
+                  const Align(
+                    child: Text(
+                      "Poopidiscoop",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(25),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "Assume there are 2 players, A and B. Assume A makes the following accusation",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "\"I accuse Col. Mustard of killing Ms Plum in the Kitchen with the Dagger\"",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "When B shows a card, create markings to allow for inferences later",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "For instance, add the marker \"1\" next to \"Mustard\", \"Kitchen\" and \"Dagger\"",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "If there are multiple markings over different rounds on the same card, that is evidence in favour of the respective player possessing said card.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ]),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    // todo - Fill in contents Long press on cell
+    basicTargets.add(
+      TargetFocus(
+        identify: "cell2Key",
+        keyTarget: cell2Key,
+        alignSkip: Alignment.topRight,
+        color: ConstantUtils.primaryAppColor,
+        shape: ShapeLightFocus.RRect,
+        enableOverlayTab: true,
+        enableTargetTab: true,
+        paddingFocus: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: WidgetUtils.skipNulls([
+                  const Align(
+                    child: Text(
+                      "Long press poop scoop",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(25),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "Assume there are 2 players, A and B. Assume A makes the following accusation",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "\"I accuse Col. Mustard of killing Ms Plum in the Kitchen with the Dagger\"",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "When B shows a card, create markings to allow for inferences later",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "For instance, add the marker \"1\" next to \"Mustard\", \"Kitchen\" and \"Dagger\"",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(10),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "If there are multiple markings over different rounds on the same card, that is evidence in favour of the respective player possessing said card.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ]),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    basicTutorialCoachMark = TutorialCoachMark(
+      targets: basicTargets,
+      colorShadow: ConstantUtils.primaryAppColor,
+      hideSkip: false,
+      showSkipInLastTarget: true,
+      alignSkip: Alignment.topRight,
+      focusAnimationDuration: const Duration(milliseconds: 200),
+      unFocusAnimationDuration: const Duration(milliseconds: 200),
+      paddingFocus: 10,
+      opacityShadow: 0.8,
+      onFinish: () {},
+      onClickTarget: (target) {},
+      onClickTargetWithTapPosition: (target, tapDetails) {},
+      onClickOverlay: (target) {},
+      onSkip: () {},
+    );
   }
 
   bool _canUndo() => undoStack.isNotEmpty;
@@ -135,6 +498,9 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
+  _performTutorial() {
+    basicTutorialCoachMark?.show(context: context);
+  }
 
   _performRedo() {
     if (_canRedo()) {
@@ -165,6 +531,7 @@ class MainGameViewState extends State<MainGameView> {
           },
           child: Text(
             gameDefinitionState.gameName,
+            key: gameNameTextKey,
             style: const TextStyle(color: ConstantUtils.primaryAppColor),
           )
         ),
@@ -172,6 +539,13 @@ class MainGameViewState extends State<MainGameView> {
           color: ConstantUtils.primaryAppColor,
         ),
         actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.help,
+              color: ConstantUtils.primaryAppColor,
+            ),
+            onPressed: _performTutorial,
+          ),
           IconButton(
             icon: Icon(
               Icons.undo,
@@ -1053,61 +1427,43 @@ class MainGameViewState extends State<MainGameView> {
           return SizedBox(
             height: ConstantUtils.CELL_SIZE_DEFAULT.toDouble(),
             child: Row(
-              children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
+              children: playerNameMapEntries.map((e) => e.value).toList().asMap().map((index, currentPlayerName) {
                 final currentSelectedColor = Color(cellBackgroundColourState[currentCharacter]![currentPlayerName]!);
-                return [
-                  Expanded(
-                    flex: 3,
-                    child: GestureDetector(
-                      onLongPress: () {
-                        _showBackgroundColourSelectDialog(EntityType.Weapon, currentCharacter, currentPlayerName, currentSelectedColor);
-                      },
-                      onTap: () {
-                        final currentMarkings = charactersGameState[currentCharacter]![currentPlayerName]!;
-                        // Check if we are not changing anything from initiral state
-                        if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
-                            !charactersGameState[currentCharacter]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
-                          _showMarkerSelectDialog(EntityType.Character, currentCharacter, currentPlayerName, currentMarkings);
-                        }
-                        else {
-                          SnackbarUtils.showSnackBarMedium(context, "Cannot modify markings here as this is initial game info! Long press to change background colour if needed.");
-                        }
-                      },
-                      child: Card(
-                        color: Color(cellBackgroundColourState[currentCharacter]![currentPlayerName]!),
-                        child: _fillInCharacterCellContentsBasedOnState(currentCharacter, currentPlayerName),
+                return MapEntry(
+                    index,
+                    [
+                      Expanded(
+                        flex: 3,
+                        child: GestureDetector(
+                          onLongPress: () {
+                            _showBackgroundColourSelectDialog(EntityType.Weapon, currentCharacter, currentPlayerName, currentSelectedColor);
+                          },
+                          onTap: () {
+                            final currentMarkings = charactersGameState[currentCharacter]![currentPlayerName]!;
+                            // Check if we are not changing anything from initiral state
+                            if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
+                                !charactersGameState[currentCharacter]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
+                              _showMarkerSelectDialog(EntityType.Character, currentCharacter, currentPlayerName, currentMarkings);
+                            }
+                            else {
+                              SnackbarUtils.showSnackBarMedium(context, "Cannot modify markings here as this is initial game info! Long press to change background colour if needed.");
+                            }
+                          },
+                          child: Card(
+                            key: index == 1 && currentCharacter == ConstantUtils.characterList[0] ? cell1Key :
+                                (index == 1 && currentCharacter == ConstantUtils.characterList[1] ? cell2Key : null),
+                            color: Color(cellBackgroundColourState[currentCharacter]![currentPlayerName]!),
+                            child: _fillInCharacterCellContentsBasedOnState(currentCharacter, currentPlayerName),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  _verticalDivider2()
-                ];
-              }).expand((element) => element).toList(),
+                      _verticalDivider2()
+                    ]
+                );
+              }).entries.map((e) => e.value).expand((element) => element).toList(),
             ),
           );
         }
-    );
-  }
-
-  _renderCrossIcon() {
-    return Center(
-      child: SizedBox(
-        width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-        child: const CircleAvatar(
-          backgroundColor: Colors.redAccent,
-          child: Icon(Icons.close, size: 12, color: Colors.white,),
-        ),
-      ),
-    );
-  }
-
-  _renderTickIcon() {
-    return Center(
-      child: SizedBox(
-        width: ConstantUtils.TICK_CROSS_DIAMETER.toDouble(),
-        child: const CircleAvatar(
-          child: Icon(Icons.check, size: 12,),
-        ),
-      ),
     );
   }
 
@@ -1120,12 +1476,6 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _fillInCharacterCellContentsBasedOnState(String currentCharacter, String playerName) {
-    // if (charactersGameState[currentCharacter]?[playerName]?.contains("Tick") ?? false) {
-    //   return _renderTickIcon();
-    // }
-    // if (charactersGameState[currentCharacter]?[playerName]?.contains("X") ?? false) {
-    //   return _renderCrossIcon();
-    // }
     if (charactersGameState[currentCharacter]?[playerName]?.isNotEmpty ?? false) {
       // Something has been selected
       return _renderAllOtherMarkings(
@@ -1167,12 +1517,6 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _fillInRoomCellContentsBasedOnState(String currentRoom, String playerName) {
-    // if (roomsGameState[currentRoom]?[playerName]?.contains("Tick") ?? false) {
-    //   return _renderTickIcon();
-    // }
-    // if (roomsGameState[currentRoom]?[playerName]?.contains("X") ?? false) {
-    //   return _renderCrossIcon();
-    // }
     if (roomsGameState[currentRoom]?[playerName]?.isNotEmpty ?? false) {
       // Something has been selected
       return _renderAllOtherMarkings(
@@ -1217,12 +1561,6 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _fillInWeaponCellContentsBasedOnState(String currentWeapon, String playerName) {
-    // if (weaponsGameState[currentWeapon]?[playerName]?.contains("Tick") ?? false) {
-    //   return _renderTickIcon();
-    // }
-    // if (weaponsGameState[currentWeapon]?[playerName]?.contains("X") ?? false) {
-    //   return _renderCrossIcon();
-    // }
     if (weaponsGameState[currentWeapon]?[playerName]?.isNotEmpty ?? false) {
       // Something has been selected
       return _renderAllOtherMarkings(
@@ -1253,8 +1591,6 @@ class MainGameViewState extends State<MainGameView> {
                 List.from(weaponsGameState[currentWeapon]?[playerName] ?? [])..remove(marking);
               });
             }
-
-
           }).toList()
       );
     }
@@ -1343,24 +1679,6 @@ class MainGameViewState extends State<MainGameView> {
     setState(() {
       isBackgroundColourDialogOpen = false;
       selectedBackgroundColourFromDialog = null;
-    });
-  }
-
-  _markInferenceConfirmationDialogAsClosedAndMarkConfirm(EntityType entityType, String currentEntity, String currentPlayerName) {
-
-    _mainGameBloc.add(
-        MainGameStateChanged(
-          initialGame: gameDefinitionState,
-          charactersGameState: charactersGameState,
-          weaponsGameState: weaponsGameState,
-          roomsGameState: roomsGameState,
-          gameBackgroundColorState: cellBackgroundColourState,
-          undoStack: undoStack,
-          redoStack: redoStack,
-        )
-    );
-    setState(() {
-      isInferenceConfirmationDialogOpen = false;
     });
   }
 

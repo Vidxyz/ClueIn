@@ -87,7 +87,7 @@ class LoadGameViewState extends State<LoadGameView> {
   }
 
   _goToCreateNewGamePage() {
-    Navigator.push(
+    Navigator.pushReplacement(
         context,
         CreateNewGameView.route()
     );

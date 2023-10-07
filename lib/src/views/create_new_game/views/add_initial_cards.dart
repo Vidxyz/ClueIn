@@ -6,11 +6,11 @@ import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_state.dart';
+import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
-GlobalKey userPromptTextKey = GlobalKey();
 
 class AddInitialCardsView extends StatefulWidget {
   const AddInitialCardsView({
@@ -246,7 +246,6 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       final maxCards = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
       return Center(
         child: Padding(
-          key: userPromptTextKey,
           padding: const EdgeInsets.all(5.0),
           child: Text(
             "Please select exactly the $maxCards cards that you start the game with",

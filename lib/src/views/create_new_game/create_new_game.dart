@@ -10,6 +10,8 @@ import 'package:cluein_app/src/views/main_game/main_game_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+GlobalKey userPromptTextKey = GlobalKey();
+
 class CreateNewGameView extends StatefulWidget {
   static const String routeName = 'new-game';
 
@@ -71,7 +73,11 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Game', style: TextStyle(color: ConstantUtils.primaryAppColor),),
+        title: Text(
+          'New Game',
+          key: userPromptTextKey,
+          style: const TextStyle(color: ConstantUtils.primaryAppColor),
+        ),
         iconTheme: const IconThemeData(
           color: ConstantUtils.primaryAppColor,
         ),
