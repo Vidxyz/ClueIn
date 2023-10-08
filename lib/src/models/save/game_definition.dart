@@ -11,6 +11,8 @@ class GameDefinition extends Equatable {
   final Map<int, String> playerNames;
   final List<GameCard> initialCards;
 
+  final List<GameCard> publicInfoCards;
+
   /// GameState stored on a per card basis
   /// Each card has a map associated with it
   /// Each map element is a key-value pair of playerNames -> List of string markers
@@ -44,6 +46,7 @@ class GameDefinition extends Equatable {
     required this.playerNames,
     required this.initialCards,
     required this.lastSaved,
+    required this.publicInfoCards,
     this.charactersGameState = const {},
     this.weaponsGameState = const {},
     this.roomsGameState = const {},
@@ -62,6 +65,7 @@ class GameDefinition extends Equatable {
     roomsGameState,
     cellColoursState,
     lastSaved,
+    publicInfoCards,
   ];
 
   factory GameDefinition.fromJson(Map<String, dynamic> json) => GameDefinitionFromJson(json);
@@ -75,6 +79,9 @@ class GameDefinition extends Equatable {
       totalPlayers: json['totalPlayers'] as int,
       playerNames: (json['playerNames'] as Map<String, dynamic>).map((key, value) => MapEntry(int.parse(key), value.toString())),
       lastSaved: DateTime.parse(json['lastSaved'] as String),
+      publicInfoCards: (json['publicInfoCards'] as List<dynamic>)
+        .map((e) => GameCard.fromString(e.toString()))
+        .toList(),
       initialCards: (json['initialCards'] as List<dynamic>)
           .map((e) => GameCard.fromString(e.toString()))
           .toList(),
@@ -130,6 +137,9 @@ class GameDefinition extends Equatable {
         "lastSaved" : "${DateTime.now().toIso8601String()}",
         "initialCards" : [
           ${instance.initialCards.map((e) => '"${e.cardName()}"').toList().join(",")}
+        ],
+        "publicInfoCards" : [
+          ${instance.publicInfoCards.map((e) => '"${e.cardName()}"').toList().join(",")}
         ],
         "charactersGameState" : {
           ${gameStateToJson(instance.charactersGameState)}

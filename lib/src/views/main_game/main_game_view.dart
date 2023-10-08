@@ -662,6 +662,35 @@ class MainGameViewState extends State<MainGameView> {
       });
     }
 
+    setStateBasedOnPublicInfoCards() {
+      // For all cards mentioned here, ecvery user is marked as not having it
+      gameDefinitionState.publicInfoCards.forEach((element) {
+        if (ConstantUtils.roomList.contains(element.cardName())) {
+          roomsGameState[element.cardName()] = Map.fromEntries(
+              gameDefinitionState
+                  .playerNames
+                  .entries
+                  .map((e) => MapEntry(e.value, [ConstantUtils.noOneHasThis]))
+          );
+        }
+        else if (ConstantUtils.characterList.contains(element.cardName())) {
+            charactersGameState[element.cardName()] = Map.fromEntries(
+                gameDefinitionState
+                    .playerNames
+                    .entries
+                    .map((e) => MapEntry(e.value, [ConstantUtils.noOneHasThis]))
+            );
+        }
+        else {
+          weaponsGameState[element.cardName()] = Map.fromEntries(
+          gameDefinitionState
+              .playerNames
+              .entries
+              .map((e) => MapEntry(e.value, [ConstantUtils.noOneHasThis]))
+          );
+        }
+      });
+    }
 
     setStateBasedOnGameDefinitionState() {
       gameDefinitionState.charactersGameState.entries.forEach((element) {
@@ -695,6 +724,7 @@ class MainGameViewState extends State<MainGameView> {
     markEverythingAsUnableForCurrentUser();
     setStateBasedOnInitialCards();
     setStateBasedOnGameDefinitionState();
+    setStateBasedOnPublicInfoCards();
 
     cellBackgroundColourState = gameDefinitionState.cellColoursState;
 
@@ -815,7 +845,7 @@ class MainGameViewState extends State<MainGameView> {
                         style: TextStyle(
                             fontSize: 15,
                             color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null,
-                            decoration: anyPlayerHasThisCard(EntityType.Character, currentEntity) ? TextDecoration.lineThrough : null,
+                            decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Character, currentEntity) ? TextDecoration.lineThrough : null,
                             decorationColor: ConstantUtils.primaryAppColor,
                             decorationThickness: 3,
                         ),
@@ -852,7 +882,7 @@ class MainGameViewState extends State<MainGameView> {
                       style: TextStyle(
                         fontSize: 15,
                           color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null,
-                          decoration: anyPlayerHasThisCard(EntityType.Weapon, currentEntity) ? TextDecoration.lineThrough : null,
+                          decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Weapon, currentEntity) ? TextDecoration.lineThrough : null,
                           decorationColor: ConstantUtils.primaryAppColor,
                           decorationThickness: 3,
                       ),
@@ -889,7 +919,7 @@ class MainGameViewState extends State<MainGameView> {
                       style: TextStyle(
                         fontSize: 15,
                         color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null,
-                        decoration: anyPlayerHasThisCard(EntityType.Room, currentEntity) ? TextDecoration.lineThrough : null,
+                        decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Room, currentEntity) ? TextDecoration.lineThrough : null,
                         decorationColor: ConstantUtils.primaryAppColor,
                         decorationThickness: 3,
                       ),
@@ -924,23 +954,32 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
-  bool anyPlayerHasThisCard(EntityType entityType, String currentEntity) {
+  bool anyPlayerHasThisCardOrCardIsPublicInfo(EntityType entityType, String currentEntity) {
     if (entityType == EntityType.Room) {
       return gameDefinitionState.playerNames.entries
           .map((e) => e.value)
-          .map((e) => roomsGameState[currentEntity]![e]!.contains(ConstantUtils.tick))
-          .reduce((value, element) => value || element);
+          .map((e) {
+            final markings = roomsGameState[currentEntity]![e]!;
+            return markings.contains(ConstantUtils.tick) || markings.contains(ConstantUtils.noOneHasThis);
+      })
+      .reduce((value, element) => value || element);
     }
     else if (entityType == EntityType.Weapon) {
       return gameDefinitionState.playerNames.entries
           .map((e) => e.value)
-          .map((e) => weaponsGameState[currentEntity]![e]!.contains(ConstantUtils.tick))
+          .map((e) {
+        final markings = weaponsGameState[currentEntity]![e]!;
+        return markings.contains(ConstantUtils.tick) || markings.contains(ConstantUtils.noOneHasThis);
+      })
           .reduce((value, element) => value || element);
     }
     else {
       return gameDefinitionState.playerNames.entries
           .map((e) => e.value)
-          .map((e) => charactersGameState[currentEntity]![e]!.contains(ConstantUtils.tick))
+          .map((e) {
+        final markings = charactersGameState[currentEntity]![e]!;
+        return markings.contains(ConstantUtils.tick) || markings.contains(ConstantUtils.noOneHasThis);
+      })
           .reduce((value, element) => value || element);
     }
   }
@@ -1111,7 +1150,8 @@ class MainGameViewState extends State<MainGameView> {
           totalPlayers: gameDefinitionState.totalPlayers,
           playerNames: gameDefinitionState.playerNames,
           initialCards: gameDefinitionState.initialCards,
-          lastSaved: gameDefinitionState.lastSaved
+          lastSaved: gameDefinitionState.lastSaved,
+          publicInfoCards: gameDefinitionState.publicInfoCards,
       );
     });
 
@@ -1165,7 +1205,8 @@ class MainGameViewState extends State<MainGameView> {
           totalPlayers: gameDefinitionState.totalPlayers,
           playerNames: newMap,
           initialCards: gameDefinitionState.initialCards,
-          lastSaved: gameDefinitionState.lastSaved
+          lastSaved: gameDefinitionState.lastSaved,
+          publicInfoCards: gameDefinitionState.publicInfoCards,
       );
     });
 
@@ -1212,7 +1253,9 @@ class MainGameViewState extends State<MainGameView> {
                         final currentMarkings = roomsGameState[currentEntity]![currentPlayerName]!;
                         // Only show dialog select if not an initial card from GameDefinition
                         if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
-                            !roomsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
+                            !roomsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick) &&
+                            !roomsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.noOneHasThis)
+                        ) {
                           _showMarkerSelectDialog(EntityType.Room, currentEntity, currentPlayerName, currentMarkings);
                         }
                         else {
@@ -1402,7 +1445,9 @@ class MainGameViewState extends State<MainGameView> {
                       onTap: () {
                         final currentMarkings = weaponsGameState[currentEntity]![currentPlayerName]!;
                         if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
-                            !weaponsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
+                            !weaponsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick) &&
+                            !weaponsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.noOneHasThis)
+                        ) {
                           _showMarkerSelectDialog(EntityType.Weapon, currentEntity, currentPlayerName, currentMarkings);
                         }
                         else {
@@ -1455,7 +1500,9 @@ class MainGameViewState extends State<MainGameView> {
                             final currentMarkings = charactersGameState[currentCharacter]![currentPlayerName]!;
                             // Check if we are not changing anything from initiral state
                             if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
-                                !charactersGameState[currentCharacter]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick)) {
+                                !charactersGameState[currentCharacter]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick) &&
+                                !charactersGameState[currentCharacter]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.noOneHasThis)
+                            ) {
                               _showMarkerSelectDialog(EntityType.Character, currentCharacter, currentPlayerName, currentMarkings);
                             }
                             else {
@@ -1513,6 +1560,12 @@ class MainGameViewState extends State<MainGameView> {
                     List.from(charactersGameState[currentCharacter]?[playerName] ?? [])..remove(marking);
                   });
                 }
+                else if (marking == ConstantUtils.noOneHasThis) {
+                  return _maybeMarker2IconNoOneHasThis(marking, () {
+                    charactersGameState[currentCharacter]![playerName] =
+                    List.from(charactersGameState[currentCharacter]?[playerName] ?? [])..remove(marking);
+                  });
+                }
                 else {
                   return _maybeMarker2(marking, () {
                     charactersGameState[currentCharacter]![playerName] =
@@ -1551,6 +1604,12 @@ class MainGameViewState extends State<MainGameView> {
             }
             else if (marking == ConstantUtils.questionMark) {
               return _maybeMarker2IconWarn(marking, () {
+                roomsGameState[currentRoom]![playerName] =
+                List.from(roomsGameState[currentRoom]?[playerName] ?? [])..remove(marking);
+              });
+            }
+            else if (marking == ConstantUtils.noOneHasThis) {
+              return _maybeMarker2IconNoOneHasThis(marking, () {
                 roomsGameState[currentRoom]![playerName] =
                 List.from(roomsGameState[currentRoom]?[playerName] ?? [])..remove(marking);
               });
@@ -1596,6 +1655,12 @@ class MainGameViewState extends State<MainGameView> {
               return _maybeMarker2IconWarn(marking, () {
                 weaponsGameState[currentWeapon]![playerName] =
                 List.from(weaponsGameState[currentWeapon]?[playerName] ?? [])..remove(marking);
+              });
+            }
+            else if (marking == ConstantUtils.noOneHasThis) {
+              return _maybeMarker2IconNoOneHasThis(marking, () {
+                weaponsGameState[currentWeapon]![playerName] =
+                List.from(charactersGameState[currentWeapon]?[playerName] ?? [])..remove(marking);
               });
             }
             else {
@@ -2896,6 +2961,17 @@ class MainGameViewState extends State<MainGameView> {
         child: CircleAvatar(
           backgroundColor: Colors.amber,
           child: Icon(Icons.warning, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,),
+        )
+    );
+  }
+
+  Widget _maybeMarker2IconNoOneHasThis(String text, VoidCallback onTap) {
+    return const SizedBox(
+        width: ConstantUtils.MARKING_DIAMETER,
+        height: ConstantUtils.MARKING_DIAMETER,
+        child: CircleAvatar(
+          backgroundColor: ConstantUtils.primaryAppColor,
+          child: Icon(Icons.not_interested, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,),
         )
     );
   }

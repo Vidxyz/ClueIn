@@ -5,7 +5,6 @@ import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_state.
 import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'create_new_game_event.dart';
 import 'package:uuid/uuid.dart';
@@ -30,6 +29,7 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
             totalPlayers: event.totalPlayers,
             playerNames: event.playerNames,
             initialCards: event.initialCards,
+            publicInfoCards: event.publicInfoCards,
         )
     );
   }
@@ -45,6 +45,7 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
         totalPlayers: event.totalPlayers,
         playerNames: newNames,
         initialCards: event.initialCards,
+        publicInfoCards: event.publicInfoCards,
         cellColoursState: MainGameStateModified.emptyCellBackgroundGameState(newNames.entries.map((e) => e.value).toList()),
         lastSaved: DateTime.now(),
     );

@@ -8,7 +8,6 @@ import 'package:cluein_app/src/views/main_game/bloc/main_game_event.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
   final logger = Logger("MainGameBloc");
@@ -46,6 +45,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           totalPlayers: event.initialGame.totalPlayers,
           playerNames: event.initialGame.playerNames,
           initialCards: event.initialGame.initialCards,
+          publicInfoCards: event.initialGame.publicInfoCards,
           charactersGameState: event.charactersGameState,
           weaponsGameState: event.weaponsGameState,
           roomsGameState: event.roomsGameState,
@@ -62,6 +62,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           totalPlayers: event.initialGame.totalPlayers,
           playerNames: event.initialGame.playerNames,
           initialCards: event.initialGame.initialCards,
+          publicInfoCards: event.initialGame.publicInfoCards,
           charactersGameState: redoGameDefinition.charactersGameState,
           weaponsGameState: redoGameDefinition.weaponsGameState,
           roomsGameState: redoGameDefinition.roomsGameState,
@@ -94,6 +95,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           totalPlayers: event.initialGame.totalPlayers,
           playerNames: event.initialGame.playerNames,
           initialCards: event.initialGame.initialCards,
+          publicInfoCards: event.initialGame.publicInfoCards,
           charactersGameState: event.charactersGameState,
           weaponsGameState: event.weaponsGameState,
           roomsGameState: event.roomsGameState,
@@ -114,6 +116,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           totalPlayers: event.initialGame.totalPlayers,
           playerNames: event.initialGame.playerNames,
           initialCards: event.initialGame.initialCards,
+          publicInfoCards: event.initialGame.publicInfoCards,
           charactersGameState: redoGameDefinition.charactersGameState,
           weaponsGameState: redoGameDefinition.weaponsGameState,
           roomsGameState: redoGameDefinition.roomsGameState,
@@ -157,6 +160,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           totalPlayers: event.initialGame.totalPlayers,
           playerNames: event.initialGame.playerNames,
           initialCards: event.initialGame.initialCards,
+          publicInfoCards: event.initialGame.publicInfoCards,
           charactersGameState: event.charactersGameState,
           weaponsGameState: event.weaponsGameState,
           roomsGameState: event.roomsGameState,
@@ -177,6 +181,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           totalPlayers: event.initialGame.totalPlayers,
           playerNames: event.initialGame.playerNames,
           initialCards: event.initialGame.initialCards,
+          publicInfoCards: event.initialGame.publicInfoCards,
           charactersGameState: undoGameDefinition.charactersGameState,
           weaponsGameState: undoGameDefinition.weaponsGameState,
           roomsGameState: undoGameDefinition.roomsGameState,
@@ -210,6 +215,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           totalPlayers: event.initialGame.totalPlayers,
           playerNames: event.initialGame.playerNames,
           initialCards: event.initialGame.initialCards,
+          publicInfoCards: event.initialGame.publicInfoCards,
           charactersGameState: event.charactersGameState,
           weaponsGameState: event.weaponsGameState,
           roomsGameState: event.roomsGameState,
@@ -230,6 +236,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
           totalPlayers: event.initialGame.totalPlayers,
           playerNames: event.initialGame.playerNames,
           initialCards: event.initialGame.initialCards,
+          publicInfoCards: event.initialGame.publicInfoCards,
           charactersGameState: undoGameDefinition.charactersGameState,
           weaponsGameState: undoGameDefinition.weaponsGameState,
           roomsGameState: undoGameDefinition.roomsGameState,
@@ -263,6 +270,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
       totalPlayers: event.initialGame.totalPlayers,
       playerNames: event.initialGame.playerNames,
       initialCards: event.initialGame.initialCards,
+      publicInfoCards: event.initialGame.publicInfoCards,
       charactersGameState: event.charactersGameState,
       weaponsGameState: event.weaponsGameState,
       roomsGameState: event.roomsGameState,
@@ -295,6 +303,7 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
       weaponsGameState: event.weaponsGameState,
       roomsGameState: event.roomsGameState,
       cellColoursState: event.gameBackgroundColorState,
+      publicInfoCards: event.initialGame.publicInfoCards,
       lastSaved: DateTime.now(),
     );
     final jsonStringToSave = currentGameToSave.toJson();

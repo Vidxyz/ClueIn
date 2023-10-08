@@ -35,12 +35,14 @@ class NewGameDetailsModified extends CreateNewGameState {
   final Map<int, String> playerNames;
 
   final List<GameCard> initialCards;
+  final List<GameCard> publicInfoCards;
 
   const NewGameDetailsModified({
     required this.gameName,
     required this.totalPlayers,
     required this.playerNames,
     this.initialCards = const [],
+    this.publicInfoCards = const [],
   });
 
   @override
@@ -49,5 +51,6 @@ class NewGameDetailsModified extends CreateNewGameState {
     totalPlayers,
     playerNames,
     initialCards,
+    publicInfoCards,
   ];
 }

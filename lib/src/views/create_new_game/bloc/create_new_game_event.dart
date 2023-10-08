@@ -14,12 +14,14 @@ class BeginNewClueGame extends CreateNewGameEvent {
   final Map<int, String> playerNames;
 
   final List<GameCard> initialCards;
+  final List<GameCard> publicInfoCards;
 
   const BeginNewClueGame({
     required this.gameName,
     required this.totalPlayers,
     required this.playerNames,
     required this.initialCards,
+    this.publicInfoCards = const [],
   });
 
   @override
@@ -28,6 +30,7 @@ class BeginNewClueGame extends CreateNewGameEvent {
     totalPlayers,
     playerNames,
     initialCards,
+    publicInfoCards,
   ];
 }
 
@@ -37,12 +40,14 @@ class NewGameDetailedChanged extends CreateNewGameEvent {
   final Map<int, String> playerNames;
 
   final List<GameCard> initialCards;
+  final List<GameCard> publicInfoCards;
 
   const NewGameDetailedChanged({
     required this.gameName,
     required this.totalPlayers,
     required this.playerNames,
     required this.initialCards,
+    this.publicInfoCards = const [],
   });
 
   @override
@@ -51,6 +56,7 @@ class NewGameDetailedChanged extends CreateNewGameEvent {
     totalPlayers,
     playerNames,
     initialCards,
+    publicInfoCards,
   ];
 }
 

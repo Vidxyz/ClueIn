@@ -23,6 +23,7 @@ class ConstantUtils {
   static const String tick = "Tick";
   static const String cross = "X";
   static const String questionMark = "?";
+  static const String noOneHasThis = "*";
 
   static const List<String> allEntitites = [...characterList, ...weaponList, ...roomList];
 
