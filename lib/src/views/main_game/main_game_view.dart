@@ -162,7 +162,7 @@ class MainGameViewState extends State<MainGameView> {
                         "Assume there are 2 players, A and B. Assume A makes the following accusation",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -177,7 +177,7 @@ class MainGameViewState extends State<MainGameView> {
                         "\"I accuse Col. Mustard of killing Ms Plum in the Kitchen with the Dagger\"",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -192,7 +192,7 @@ class MainGameViewState extends State<MainGameView> {
                         "When B shows a card, create markings to allow for inferences later",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -207,7 +207,7 @@ class MainGameViewState extends State<MainGameView> {
                         "For instance, add the marker \"1\" next to \"Mustard\", \"Kitchen\" and \"Dagger\"",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -222,7 +222,7 @@ class MainGameViewState extends State<MainGameView> {
                         "If there are multiple markings over different rounds on the same card, that is evidence in favour of the respective player possessing said card.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -274,7 +274,7 @@ class MainGameViewState extends State<MainGameView> {
                         "When a player shows a card, add a marking next to each of the possible cards it might be",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -289,7 +289,7 @@ class MainGameViewState extends State<MainGameView> {
                         "When cards accumulate multiple distinct markings, you can infer conclusions",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -304,7 +304,7 @@ class MainGameViewState extends State<MainGameView> {
                         "Tap on a marking to remove it if needed",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -357,7 +357,7 @@ class MainGameViewState extends State<MainGameView> {
                         "When you show a card someone, change the background colour to indicate what you have disclosed",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -372,7 +372,7 @@ class MainGameViewState extends State<MainGameView> {
                         "Ensure you only disclose as little information as required!",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          // fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 15,
                         ),
@@ -392,7 +392,7 @@ class MainGameViewState extends State<MainGameView> {
       TargetFocus(
         identify: "undoKey",
         keyTarget: undoKey,
-        alignSkip: Alignment.topRight,
+        alignSkip: Alignment.centerRight,
         color: ConstantUtils.primaryAppColor,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
@@ -432,7 +432,7 @@ class MainGameViewState extends State<MainGameView> {
       TargetFocus(
         identify: "redoKey",
         keyTarget: redoKey,
-        alignSkip: Alignment.topRight,
+        alignSkip: Alignment.centerRight,
         color: ConstantUtils.primaryAppColor,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
@@ -839,16 +839,19 @@ class MainGameViewState extends State<MainGameView> {
             child: Center(
               child: Card(
                 child: Center(
-                    child: Text(
-                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 15,
-                            color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null,
-                            decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Character, currentEntity) ? TextDecoration.lineThrough : null,
-                            decorationColor: ConstantUtils.primaryAppColor,
-                            decorationThickness: 3,
-                        ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                          ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null,
+                              decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Character, currentEntity) ? TextDecoration.lineThrough : null,
+                              decorationColor: ConstantUtils.primaryAppColor,
+                              decorationThickness: 3,
+                          ),
+                      ),
                     )
                 ),
               ),
@@ -876,15 +879,18 @@ class MainGameViewState extends State<MainGameView> {
             child: Center(
               child: Card(
                 child: Center(
-                    child: Text(
-                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
-                        textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                          color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null,
-                          decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Weapon, currentEntity) ? TextDecoration.lineThrough : null,
-                          decorationColor: ConstantUtils.primaryAppColor,
-                          decorationThickness: 3,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                          ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                          textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                            color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null,
+                            decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Weapon, currentEntity) ? TextDecoration.lineThrough : null,
+                            decorationColor: ConstantUtils.primaryAppColor,
+                            decorationThickness: 3,
+                        ),
                       ),
                     )
                 ),
@@ -913,15 +919,18 @@ class MainGameViewState extends State<MainGameView> {
             child: Center(
               child: Card(
                 child: Center(
-                    child: Text(
-                      ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null,
-                        decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Room, currentEntity) ? TextDecoration.lineThrough : null,
-                        decorationColor: ConstantUtils.primaryAppColor,
-                        decorationThickness: 3,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null,
+                          decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Room, currentEntity) ? TextDecoration.lineThrough : null,
+                          decorationColor: ConstantUtils.primaryAppColor,
+                          decorationThickness: 3,
+                        ),
                       ),
                     )
                 ),
@@ -1287,6 +1296,15 @@ class MainGameViewState extends State<MainGameView> {
           height: 50,
           child: Container(
             color: Colors.grey.shade200,
+            child: const Center(
+              child: Text(
+                "Names",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+            ),
           ),
         ),
         SizedBox(
@@ -1343,7 +1361,7 @@ class MainGameViewState extends State<MainGameView> {
                               Container(
                                 color: Colors.grey.shade200,
                                 width: double.infinity,
-                                child: WidgetUtils.spacer(3.5)
+                                child: WidgetUtils.spacer(3)
                               ),
                               Container(
                                 color: Colors.grey.shade200,
@@ -1366,7 +1384,7 @@ class MainGameViewState extends State<MainGameView> {
                               Container(
                                   color: Colors.grey.shade200,
                                   width: double.infinity,
-                                  child: WidgetUtils.spacer(3.5)
+                                  child: WidgetUtils.spacer(3)
                               ),
                             ],
                           ),
@@ -2066,7 +2084,7 @@ class MainGameViewState extends State<MainGameView> {
                   _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
                       () {
                     _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
-                    Future.delayed(Duration(milliseconds: 200), () {
+                    Future.delayed(const Duration(milliseconds: 200), () {
                       _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
                     });
                   }
@@ -2074,7 +2092,7 @@ class MainGameViewState extends State<MainGameView> {
             }
             else {
               _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
-              Future.delayed(Duration(milliseconds: 200), () {
+              Future.delayed(const Duration(milliseconds: 200), () {
                 _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
               });
             }
@@ -2110,7 +2128,7 @@ class MainGameViewState extends State<MainGameView> {
                   _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
                       () {
                     _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
-                    Future.delayed(Duration(milliseconds: 200), () {
+                    Future.delayed(const Duration(milliseconds: 200), () {
                       _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
                     });
                   }
@@ -2118,7 +2136,7 @@ class MainGameViewState extends State<MainGameView> {
             }
             else {
               _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
-              Future.delayed(Duration(milliseconds: 200), () {
+              Future.delayed(const Duration(milliseconds: 200), () {
                 _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
               });
             }
@@ -2152,7 +2170,7 @@ class MainGameViewState extends State<MainGameView> {
                   _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
                       () {
                     _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
-                    Future.delayed(Duration(milliseconds: 200), () {
+                    Future.delayed(const Duration(milliseconds: 200), () {
                       _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
                     });
                   }
@@ -2160,7 +2178,7 @@ class MainGameViewState extends State<MainGameView> {
             }
             else {
               _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
-              Future.delayed(Duration(milliseconds: 200), () {
+              Future.delayed(const Duration(milliseconds: 200), () {
                 _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
               });
             }
@@ -2322,6 +2340,7 @@ class MainGameViewState extends State<MainGameView> {
                               Navigator.pop(context);
                             },
                             child: const CircleAvatar(
+                              backgroundColor: Colors.teal,
                               child: Icon(
                                 Icons.check,
                                 size: 16,
@@ -2850,7 +2869,8 @@ class MainGameViewState extends State<MainGameView> {
           child: GestureDetector(
             onTap: onTap,
               child: const CircleAvatar(
-                child: Icon(Icons.check, size: ConstantUtils.MARKING_ICON_DIAMETER_2,),
+                backgroundColor: Colors.teal,
+                child: Icon(Icons.check, color: Colors.white, size: ConstantUtils.MARKING_ICON_DIAMETER_2,),
               )
           ),
         ),
@@ -2938,7 +2958,8 @@ class MainGameViewState extends State<MainGameView> {
         width: ConstantUtils.MARKING_DIAMETER,
         height: ConstantUtils.MARKING_DIAMETER,
         child: CircleAvatar(
-          child: Icon(Icons.check, size: ConstantUtils.MARKING_ICON_DIAMETER,),
+          backgroundColor: Colors.teal,
+          child: Center(child: Icon(Icons.check, color: Colors.white, size: ConstantUtils.MARKING_ICON_DIAMETER,)),
         )
     );
   }
@@ -2949,7 +2970,7 @@ class MainGameViewState extends State<MainGameView> {
         height: ConstantUtils.MARKING_DIAMETER,
         child: CircleAvatar(
           backgroundColor: Colors.redAccent,
-          child: Icon(Icons.close, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,),
+          child: Center(child: Icon(Icons.close, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,)),
         )
     );
   }
@@ -2960,7 +2981,7 @@ class MainGameViewState extends State<MainGameView> {
         height: ConstantUtils.MARKING_DIAMETER,
         child: CircleAvatar(
           backgroundColor: Colors.amber,
-          child: Icon(Icons.warning, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,),
+          child: Center(child: Icon(Icons.warning, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,)),
         )
     );
   }
@@ -2971,7 +2992,7 @@ class MainGameViewState extends State<MainGameView> {
         height: ConstantUtils.MARKING_DIAMETER,
         child: CircleAvatar(
           backgroundColor: ConstantUtils.primaryAppColor,
-          child: Icon(Icons.not_interested, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,),
+          child: Center(child: Icon(Icons.not_interested, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,)),
         )
     );
   }

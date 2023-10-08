@@ -1,7 +1,9 @@
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
+import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/views/home_page/home_page.dart';
 import 'package:cluein_app/src/views/shared_components/ads/bloc/ad_bloc.dart';
 import 'package:cluein_app/theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,8 +29,26 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: AppView(),
+        // child: renderAppView(),
       ),
     );
+  }
+
+  // Use this to restrict web app width - unused right now because of problems with tutorial screen
+  renderAppView() {
+    if (kIsWeb) {
+      return Center(
+        child: ClipRect(
+          child: SizedBox(
+              width: ConstantUtils.WEB_APP_MAX_WIDTH,
+              child: AppView()
+          ),
+        ),
+      );
+    }
+    else {
+      return AppView();
+    }
   }
 }
 

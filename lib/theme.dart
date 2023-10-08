@@ -88,9 +88,9 @@ final BorderRadius radius = BorderRadius.circular(6.0);
 
 final ThemeData appTheme = ThemeData.light().copyWith(
     scaffoldBackgroundColor: ColorConstants.lightBackgroundColor,
-    primaryColor: ColorConstants.primary500Teal,
-    primaryColorDark: ColorConstants.primary700Teal,
-    primaryColorLight: ColorConstants.primary300Teal,
+    primaryColor: ConstantUtils.primaryAppColor,
+    primaryColorDark: ConstantUtils.primaryAppColor,
+    primaryColorLight: ConstantUtils.primaryAppColor,
     brightness: Brightness.light,
     backgroundColor: ColorConstants.lightBackgroundColor,
 

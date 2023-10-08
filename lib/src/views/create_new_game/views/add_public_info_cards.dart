@@ -316,23 +316,25 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             flex: 8,
             child: InkWell(
               onTap: () {
-                if (entityType == EntityType.Room) {
-                  setState(() {
-                    roomNameToBoolMap[entityName] = !(roomNameToBoolMap[entityName] ?? false);
-                  });
-                  _updateBlocState(entityName, roomNameToBoolMap[entityName]);
-                }
-                if (entityType == EntityType.Weapon) {
-                  setState(() {
-                    weaponNameToBoolMap[entityName] = !(weaponNameToBoolMap[entityName] ?? false);
-                  });
-                  _updateBlocState(entityName, weaponNameToBoolMap[entityName]);
-                }
-                else {
-                  setState(() {
-                    characterNameToBoolMap[entityName] = !(characterNameToBoolMap[entityName] ?? false);
-                  });
-                  _updateBlocState(entityName, characterNameToBoolMap[entityName]);
+                if (!isDisabled) {
+                  if (entityType == EntityType.Room) {
+                    setState(() {
+                      roomNameToBoolMap[entityName] = !(roomNameToBoolMap[entityName] ?? false);
+                    });
+                    _updateBlocState(entityName, roomNameToBoolMap[entityName]);
+                  }
+                  if (entityType == EntityType.Weapon) {
+                    setState(() {
+                      weaponNameToBoolMap[entityName] = !(weaponNameToBoolMap[entityName] ?? false);
+                    });
+                    _updateBlocState(entityName, weaponNameToBoolMap[entityName]);
+                  }
+                  else {
+                    setState(() {
+                      characterNameToBoolMap[entityName] = !(characterNameToBoolMap[entityName] ?? false);
+                    });
+                    _updateBlocState(entityName, characterNameToBoolMap[entityName]);
+                  }
                 }
               },
               child: Text(

@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class ConstantUtils {
+  static const double WEB_APP_MAX_WIDTH = 600;
+
   static const int MAX_GAME_CARDS = 21;
   static const int MAX_CARD_UNKNOWN_BY_ALL = 3; // Murder weapon, person and room
 
