@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:sembast/sembast.dart';
 import 'package:sembast/src/api/v2/database.dart';
 import 'package:sembast/src/type.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
+import 'package:sembast_web/sembast_web.dart';
 
 class SembastRepository {
 
@@ -11,11 +13,17 @@ class SembastRepository {
   late StoreRef<Key?, Value?> store;
 
   init() async {
-    var dir = await getApplicationDocumentsDirectory();
-    await dir.create(recursive: true);
-    var dbPath = join(dir.path, 'cluein_games.db');
     store = StoreRef.main();
-    db = await databaseFactoryIo.openDatabase(dbPath);
+
+    if (foundation.kIsWeb) {
+      db = await databaseFactoryWeb.openDatabase('cluein_games.db');
+    }
+    else {
+      var dir = await getApplicationDocumentsDirectory();
+      await dir.create(recursive: true);
+      var dbPath = join(dir.path, 'cluein_games.db');
+      db = await databaseFactoryIo.openDatabase(dbPath);
+    }
   }
 
   Future<String?> getString(String key) async {

@@ -24,6 +24,7 @@ GlobalKey redoKey = GlobalKey();
 GlobalKey gameNameTextKey = GlobalKey();
 
 enum EntityType { Character, Weapon, Room }
+enum InferenceType { NoOtherPlayerHasThisCard, ThisPlayerHasNoOtherCards }
 
 class MainGameView extends StatefulWidget {
   static const String routeName = "game";
@@ -68,6 +69,9 @@ class MainGameViewState extends State<MainGameView> {
   bool isMarkingDialogOpen = false;
   bool isBackgroundColourDialogOpen = false;
   bool isInferenceConfirmationDialogOpen = false;
+
+  bool dontAskAgainForInferenceNoOtherPlayerHasThisCard = false;
+  bool dontAskAgainForInferenceThisPlayerHasNoOtherCards = false;
 
   String? selectedMarkingFromDialog;
   Color? selectedBackgroundColourFromDialog;
@@ -1761,15 +1765,21 @@ class MainGameViewState extends State<MainGameView> {
     ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / widget.gameDefinition.totalPlayers).floor();
 
     if (knownCards == maxCardsPerPlayer) {
-      _showInferenceConfirmationDialog(
-          entityType,
-          currentEntity,
-          currentPlayerName,
-          _inferNoOtherRemainingCardsToDiscoverForCurrentPlayerConfirmationText(currentPlayerName, currentEntity),
-              () {
-            _markAllOtherCardsForCurrentPlayerAsNotHaving(entityType, currentPlayerName, currentEntity);
-          }
-      );
+      if (!dontAskAgainForInferenceThisPlayerHasNoOtherCards) {
+        _showInferenceConfirmationDialog(
+            InferenceType.ThisPlayerHasNoOtherCards,
+            entityType,
+            currentEntity,
+            currentPlayerName,
+            _inferNoOtherRemainingCardsToDiscoverForCurrentPlayerConfirmationText(currentPlayerName, currentEntity),
+                () {
+              _markAllOtherCardsForCurrentPlayerAsNotHaving(entityType, currentPlayerName, currentEntity);
+            }
+        );
+      }
+      else {
+        _markAllOtherCardsForCurrentPlayerAsNotHaving(entityType, currentPlayerName, currentEntity);
+      }
     }
   }
 
@@ -1909,6 +1919,20 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
+  _updateBlocState() {
+    _mainGameBloc.add(
+        MainGameStateChanged(
+          initialGame: gameDefinitionState,
+          charactersGameState: charactersGameState,
+          weaponsGameState: weaponsGameState,
+          roomsGameState: roomsGameState,
+          gameBackgroundColorState: cellBackgroundColourState,
+          undoStack: undoStack,
+          redoStack: redoStack,
+        )
+    );
+  }
+
   _inferNoOtherRemainingCardsToDiscoverForCurrentPlayerConfirmationText(String currentPlayerName, String currentEntity) {
     return RichText(
         textAlign: TextAlign.center,
@@ -1968,16 +1992,27 @@ class MainGameViewState extends State<MainGameView> {
           }
           else {
             // We are adding a Tick over here. Ask user for confirmation to infer
-            _showInferenceConfirmationDialog(
-              entityType,
-              currentEntity,
-              currentPlayerName,
-              _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
-              () {
-                _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
+            if (!dontAskAgainForInferenceNoOtherPlayerHasThisCard) {
+              _showInferenceConfirmationDialog(
+                  InferenceType.NoOtherPlayerHasThisCard,
+                  entityType,
+                  currentEntity,
+                  currentPlayerName,
+                  _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
+                      () {
+                    _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
+                    Future.delayed(Duration(milliseconds: 200), () {
+                      _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                    });
+                  }
+              );
+            }
+            else {
+              _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
+              Future.delayed(Duration(milliseconds: 200), () {
                 _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
-              }
-            );
+              });
+            }
           }
         }
         // else {
@@ -2001,16 +2036,27 @@ class MainGameViewState extends State<MainGameView> {
           }
           else {
             // We are adding a Tick over here. Ask user for confirmation to infer
-            _showInferenceConfirmationDialog(
-                entityType,
-                currentEntity,
-                currentPlayerName,
-                _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
-                    () {
-                  _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
-                  _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
-                }
-            );
+            if (!dontAskAgainForInferenceNoOtherPlayerHasThisCard) {
+              _showInferenceConfirmationDialog(
+                  InferenceType.NoOtherPlayerHasThisCard,
+                  entityType,
+                  currentEntity,
+                  currentPlayerName,
+                  _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
+                      () {
+                    _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
+                    Future.delayed(Duration(milliseconds: 200), () {
+                      _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                    });
+                  }
+              );
+            }
+            else {
+              _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
+              Future.delayed(Duration(milliseconds: 200), () {
+                _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+              });
+            }
           }
         }
         // else {
@@ -2032,16 +2078,27 @@ class MainGameViewState extends State<MainGameView> {
           }
           else {
             // We are adding a Tick over here. Ask user for confirmation to infer
-            _showInferenceConfirmationDialog(
-                entityType,
-                currentEntity,
-                currentPlayerName,
-                _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
-                    () {
-                  _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
-                  _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
-                }
-            );
+            if (!dontAskAgainForInferenceNoOtherPlayerHasThisCard) {
+              _showInferenceConfirmationDialog(
+                  InferenceType.NoOtherPlayerHasThisCard,
+                  entityType,
+                  currentEntity,
+                  currentPlayerName,
+                  _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
+                      () {
+                    _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
+                    Future.delayed(Duration(milliseconds: 200), () {
+                      _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                    });
+                  }
+              );
+            }
+            else {
+              _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
+              Future.delayed(Duration(milliseconds: 200), () {
+                _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+              });
+            }
           }
         }
         // else {
@@ -2096,7 +2153,7 @@ class MainGameViewState extends State<MainGameView> {
           ),
           onPressed: () async {
             _markDialogAsClosedAndResetMarking(entityType, currentEntity, currentPlayerName);
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           },
           child: const Text("Reset cell", style: TextStyle(fontSize: 15, color: Colors.white)),
         ),
@@ -2112,14 +2169,14 @@ class MainGameViewState extends State<MainGameView> {
           ),
           onPressed: () async {
             _markDialogAsClosedAndSaveMarking(entityType, currentEntity, currentPlayerName);
-            Navigator.pop(context);
+            Navigator.pop(context, false);
           },
           child: const Text("Go back", style: TextStyle(fontSize: 15, color: Colors.white)),
         ),
       );
     }
 
-    showDialog(context: context, builder: (context) {
+    showDialog<bool>(context: context, builder: (context) {
       return Dialog(
         child:  Scaffold(
           appBar: null,
@@ -2523,12 +2580,13 @@ class MainGameViewState extends State<MainGameView> {
 
 
   _showInferenceConfirmationDialog(
+      InferenceType inferenceType,
       EntityType entityType,
       String currentEntity,
       String currentPlayerName,
       Widget confirmationTextWidget,
       VoidCallback ifInferPermissionGranted
-      ) {
+    ) {
 
     KeyboardUtils.mediumImpact();
 
@@ -2590,6 +2648,43 @@ class MainGameViewState extends State<MainGameView> {
                         child: Center(
                           child: confirmationTextWidget
                         ),
+                      ),
+                      WidgetUtils.spacer(2.5),
+                      _divider(),
+                      Row(
+                        children: [
+                          StatefulBuilder(
+                          builder: (BuildContext context, StateSetter setState) {
+                            return Checkbox(
+                              // checkColor: Colors.white,
+                              // value: true,
+                                value: inferenceType == InferenceType.NoOtherPlayerHasThisCard ?
+                                dontAskAgainForInferenceNoOtherPlayerHasThisCard :
+                                dontAskAgainForInferenceThisPlayerHasNoOtherCards,
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      if (inferenceType == InferenceType.NoOtherPlayerHasThisCard) {
+                                        dontAskAgainForInferenceNoOtherPlayerHasThisCard = value;
+                                      }
+                                      else {
+                                        dontAskAgainForInferenceThisPlayerHasNoOtherCards = value;
+                                      }
+                                    });
+                                  }
+                                });
+                            }
+                          ),
+                          WidgetUtils.spacer(5),
+                          const Text(
+                            "Do not ask again",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: ConstantUtils.primaryAppColor
+                            ),
+                          )
+                        ],
                       ),
                       WidgetUtils.spacer(2.5),
                       _divider(),
