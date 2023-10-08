@@ -7,6 +7,7 @@ import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.d
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_state.dart';
 import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
+import 'package:cluein_app/src/views/main_game/main_game_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
@@ -27,7 +28,7 @@ class AddInitialCardsView extends StatefulWidget {
 class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBindingObserver {
 
 
-  Map<String, bool> personNameToBoolMap = {};
+  Map<String, bool> characterNameToBoolMap = {};
   Map<String, bool> weaponNameToBoolMap = {};
   Map<String, bool> roomNameToBoolMap = {};
 
@@ -381,6 +382,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
           itemCount: ConstantUtils.characterList.length,
           itemBuilder: (context, index) {
             return _renderInitialCardSelectViewForEntity(
+                EntityType.Character,
                 ConstantUtils.characterList[index],
                 _checkBoxPersons(ConstantUtils.characterList[index])
             );
@@ -398,6 +400,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
           itemCount: ConstantUtils.weaponList.length,
           itemBuilder: (context, index) {
             return _renderInitialCardSelectViewForEntity(
+                EntityType.Weapon,
                 ConstantUtils.weaponList[index],
                 _checkBoxWeapons(ConstantUtils.weaponList[index])
             );
@@ -415,6 +418,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
           itemCount: ConstantUtils.roomList.length,
           itemBuilder: (context, index) {
             return _renderInitialCardSelectViewForEntity(
+                EntityType.Room,
                 ConstantUtils.roomList[index],
                 _checkBoxRooms(ConstantUtils.roomList[index])
             );
@@ -423,7 +427,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
     );
   }
 
-  _renderInitialCardSelectViewForEntity(String entityName, Widget child) {
+  _renderInitialCardSelectViewForEntity(EntityType entityType, String entityName, Widget child) {
     return Row(
       children: [
         Expanded(
@@ -432,11 +436,33 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
         ),
         Expanded(
             flex: 8,
-            child: Text(
-              entityName,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            child: InkWell(
+              onTap: () {
+                if (entityType == EntityType.Room) {
+                  setState(() {
+                    roomNameToBoolMap[entityName] = !(roomNameToBoolMap[entityName] ?? false);
+                  });
+                  _updateBlocState(entityName, roomNameToBoolMap[entityName]);
+                }
+                if (entityType == EntityType.Weapon) {
+                  setState(() {
+                    weaponNameToBoolMap[entityName] = !(weaponNameToBoolMap[entityName] ?? false);
+                  });
+                  _updateBlocState(entityName, weaponNameToBoolMap[entityName]);
+                }
+                else {
+                  setState(() {
+                    characterNameToBoolMap[entityName] = !(characterNameToBoolMap[entityName] ?? false);
+                  });
+                  _updateBlocState(entityName, characterNameToBoolMap[entityName]);
+                }
+              },
+              child: Text(
+                entityName,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
         ),
@@ -456,40 +482,44 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
           }
           return c;
         }),
-        value: personNameToBoolMap[characterName] ?? false,
+        value: characterNameToBoolMap[characterName] ?? false,
         shape: const CircleBorder(),
         onChanged: (bool? value) {
           setState(() {
-            personNameToBoolMap[characterName] = value!;
+            characterNameToBoolMap[characterName] = value!;
           });
-          final currentState = _createNewGameBloc.state;
-          if (currentState is NewGameDetailsModified) {
-            if (value!) {
-              _createNewGameBloc.add(
-                  NewGameDetailedChanged(
-                      gameName: currentState.gameName,
-                      totalPlayers: currentState.totalPlayers,
-                      playerNames: currentState.playerNames,
-                      initialCards: {...currentState.initialCards.map((e) => e.cardName()).toSet(), characterName}
-                          .map((e) => GameCard.fromString(e))
-                          .toList()
-                  )
-              );
-            }
-            else {
-              _createNewGameBloc.add(
-                  NewGameDetailedChanged(
-                      gameName: currentState.gameName,
-                      totalPlayers: currentState.totalPlayers,
-                      playerNames: currentState.playerNames,
-                      initialCards: currentState.initialCards.where((element) => element.cardName() != characterName).toList()
-                  )
-              );
-            }
-          }
+          _updateBlocState(characterName, value);
         },
       ),
     );
+  }
+
+  _updateBlocState(String cardName, bool? value) {
+    final currentState = _createNewGameBloc.state;
+    if (currentState is NewGameDetailsModified) {
+      if (value!) {
+        _createNewGameBloc.add(
+            NewGameDetailedChanged(
+                gameName: currentState.gameName,
+                totalPlayers: currentState.totalPlayers,
+                playerNames: currentState.playerNames,
+                initialCards: {...currentState.initialCards.map((e) => e.cardName()).toSet(), cardName}
+                    .map((e) => GameCard.fromString(e))
+                    .toList()
+            )
+        );
+      }
+      else {
+        _createNewGameBloc.add(
+            NewGameDetailedChanged(
+                gameName: currentState.gameName,
+                totalPlayers: currentState.totalPlayers,
+                playerNames: currentState.playerNames,
+                initialCards: currentState.initialCards.where((element) => element.cardName() != cardName).toList()
+            )
+        );
+      }
+    }
   }
 
   _checkBoxWeapons(String weaponName) {
@@ -510,31 +540,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
           setState(() {
             weaponNameToBoolMap[weaponName] = value!;
           });
-          final currentState = _createNewGameBloc.state;
-          if (currentState is NewGameDetailsModified) {
-            if (value!) {
-              _createNewGameBloc.add(
-                  NewGameDetailedChanged(
-                      gameName: currentState.gameName,
-                      totalPlayers: currentState.totalPlayers,
-                      playerNames: currentState.playerNames,
-                      initialCards: {...currentState.initialCards.map((e) => e.cardName()).toSet(), weaponName}
-                          .map((e) => GameCard.fromString(e))
-                          .toList()
-                  )
-              );
-            }
-            else {
-              _createNewGameBloc.add(
-                  NewGameDetailedChanged(
-                      gameName: currentState.gameName,
-                      totalPlayers: currentState.totalPlayers,
-                      playerNames: currentState.playerNames,
-                      initialCards: currentState.initialCards.where((element) => element.cardName() != weaponName).toList()
-                  )
-              );
-            }
-          }
+          _updateBlocState(weaponName, value);
         },
       ),
     );
@@ -558,31 +564,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
           setState(() {
             roomNameToBoolMap[roomName] = value!;
           });
-          final currentState = _createNewGameBloc.state;
-          if (currentState is NewGameDetailsModified) {
-            if (value!) {
-              _createNewGameBloc.add(
-                  NewGameDetailedChanged(
-                      gameName: currentState.gameName,
-                      totalPlayers: currentState.totalPlayers,
-                      playerNames: currentState.playerNames,
-                      initialCards: {...currentState.initialCards.map((e) => e.cardName()).toSet(), roomName}
-                          .map((e) => GameCard.fromString(e))
-                          .toList()
-                  )
-              );
-            }
-            else {
-              _createNewGameBloc.add(
-                  NewGameDetailedChanged(
-                      gameName: currentState.gameName,
-                      totalPlayers: currentState.totalPlayers,
-                      playerNames: currentState.playerNames,
-                      initialCards: currentState.initialCards.where((element) => element.cardName() != roomName).toList()
-                  )
-              );
-            }
-          }
+          _updateBlocState(roomName, value);
         },
       ),
     );

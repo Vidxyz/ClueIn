@@ -6,6 +6,7 @@ import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_state.dart';
+import 'package:cluein_app/src/views/main_game/main_game_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -249,6 +250,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
           itemBuilder: (context, index) {
             final isDisabled = state.initialCards.map((e) => e.cardName()).contains(ConstantUtils.characterList[index]);
             return _renderInitialCardSelectViewForEntity(
+                EntityType.Character,
                 ConstantUtils.characterList[index],
                 _checkBoxPersons(ConstantUtils.characterList[index], isDisabled: isDisabled),
                 isDisabled: isDisabled
@@ -268,6 +270,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
           itemBuilder: (context, index) {
             final isDisabled = state.initialCards.map((e) => e.cardName()).contains(ConstantUtils.weaponList[index]);
             return _renderInitialCardSelectViewForEntity(
+                EntityType.Weapon,
                 ConstantUtils.weaponList[index],
                 _checkBoxWeapons(ConstantUtils.weaponList[index], isDisabled: isDisabled),
                 isDisabled: isDisabled
@@ -287,6 +290,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
           itemBuilder: (context, index) {
             final isDisabled = state.initialCards.map((e) => e.cardName()).contains(ConstantUtils.roomList[index]);
             return _renderInitialCardSelectViewForEntity(
+                EntityType.Room,
                 ConstantUtils.roomList[index],
                 _checkBoxRooms(ConstantUtils.roomList[index], isDisabled: isDisabled),
                 isDisabled: isDisabled
@@ -296,7 +300,12 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
     );
   }
 
-  _renderInitialCardSelectViewForEntity(String entityName, Widget child, {bool isDisabled = false}) {
+  _renderInitialCardSelectViewForEntity(
+      EntityType entityType,
+      String entityName,
+      Widget child,
+      {bool isDisabled = false}
+      ) {
     return Row(
       children: [
         Expanded(
@@ -305,12 +314,34 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
         ),
         Expanded(
             flex: 8,
-            child: Text(
-              entityName,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDisabled ? Colors.grey : null
+            child: InkWell(
+              onTap: () {
+                if (entityType == EntityType.Room) {
+                  setState(() {
+                    roomNameToBoolMap[entityName] = !(roomNameToBoolMap[entityName] ?? false);
+                  });
+                  _updateBlocState(entityName, roomNameToBoolMap[entityName]);
+                }
+                if (entityType == EntityType.Weapon) {
+                  setState(() {
+                    weaponNameToBoolMap[entityName] = !(weaponNameToBoolMap[entityName] ?? false);
+                  });
+                  _updateBlocState(entityName, weaponNameToBoolMap[entityName]);
+                }
+                else {
+                  setState(() {
+                    characterNameToBoolMap[entityName] = !(characterNameToBoolMap[entityName] ?? false);
+                  });
+                  _updateBlocState(entityName, characterNameToBoolMap[entityName]);
+                }
+              },
+              child: Text(
+                entityName,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDisabled ? Colors.grey : null
+                ),
               ),
             )
         ),
@@ -337,37 +368,41 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             setState(() {
               characterNameToBoolMap[characterName] = value!;
             });
-            final currentState = _createNewGameBloc.state;
-            if (currentState is NewGameDetailsModified) {
-              if (value!) {
-                _createNewGameBloc.add(
-                    NewGameDetailedChanged(
-                        gameName: currentState.gameName,
-                        totalPlayers: currentState.totalPlayers,
-                        playerNames: currentState.playerNames,
-                        initialCards: currentState.initialCards,
-                        publicInfoCards: {...currentState.publicInfoCards.map((e) => e.cardName()).toSet(), characterName}
-                            .map((e) => GameCard.fromString(e))
-                            .toList()
-                    )
-                );
-              }
-              else {
-                _createNewGameBloc.add(
-                    NewGameDetailedChanged(
-                        gameName: currentState.gameName,
-                        totalPlayers: currentState.totalPlayers,
-                        playerNames: currentState.playerNames,
-                        initialCards: currentState.initialCards,
-                        publicInfoCards: currentState.publicInfoCards.where((element) => element.cardName() != characterName).toList()
-                    )
-                );
-              }
-            }
+            _updateBlocState(characterName, value);
           }
         },
       ),
     );
+  }
+
+  _updateBlocState(String entityName, bool? value) {
+    final currentState = _createNewGameBloc.state;
+    if (currentState is NewGameDetailsModified) {
+      if (value!) {
+        _createNewGameBloc.add(
+            NewGameDetailedChanged(
+                gameName: currentState.gameName,
+                totalPlayers: currentState.totalPlayers,
+                playerNames: currentState.playerNames,
+                initialCards: currentState.initialCards,
+                publicInfoCards: {...currentState.publicInfoCards.map((e) => e.cardName()).toSet(), entityName}
+                    .map((e) => GameCard.fromString(e))
+                    .toList()
+            )
+        );
+      }
+      else {
+        _createNewGameBloc.add(
+            NewGameDetailedChanged(
+                gameName: currentState.gameName,
+                totalPlayers: currentState.totalPlayers,
+                playerNames: currentState.playerNames,
+                initialCards: currentState.initialCards,
+                publicInfoCards: currentState.publicInfoCards.where((element) => element.cardName() != entityName).toList()
+            )
+        );
+      }
+    }
   }
 
   _checkBoxWeapons(String weaponName, {bool isDisabled = false}) {
@@ -389,33 +424,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             setState(() {
               weaponNameToBoolMap[weaponName] = value!;
             });
-            final currentState = _createNewGameBloc.state;
-            if (currentState is NewGameDetailsModified) {
-              if (value!) {
-                _createNewGameBloc.add(
-                    NewGameDetailedChanged(
-                        gameName: currentState.gameName,
-                        totalPlayers: currentState.totalPlayers,
-                        playerNames: currentState.playerNames,
-                        initialCards: currentState.initialCards,
-                        publicInfoCards: {...currentState.publicInfoCards.map((e) => e.cardName()).toSet(), weaponName}
-                            .map((e) => GameCard.fromString(e))
-                            .toList()
-                    )
-                );
-              }
-              else {
-                _createNewGameBloc.add(
-                    NewGameDetailedChanged(
-                        gameName: currentState.gameName,
-                        totalPlayers: currentState.totalPlayers,
-                        playerNames: currentState.playerNames,
-                        initialCards: currentState.initialCards,
-                        publicInfoCards: currentState.publicInfoCards.where((element) => element.cardName() != weaponName).toList()
-                    )
-                );
-              }
-            }
+            _updateBlocState(weaponName, value);
           }
         },
       ),
@@ -441,33 +450,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             setState(() {
               roomNameToBoolMap[roomName] = value!;
             });
-            final currentState = _createNewGameBloc.state;
-            if (currentState is NewGameDetailsModified) {
-              if (value!) {
-                _createNewGameBloc.add(
-                    NewGameDetailedChanged(
-                        gameName: currentState.gameName,
-                        totalPlayers: currentState.totalPlayers,
-                        playerNames: currentState.playerNames,
-                        initialCards: currentState.initialCards,
-                        publicInfoCards: {...currentState.publicInfoCards.map((e) => e.cardName()).toSet(), roomName}
-                            .map((e) => GameCard.fromString(e))
-                            .toList()
-                    )
-                );
-              }
-              else {
-                _createNewGameBloc.add(
-                    NewGameDetailedChanged(
-                        gameName: currentState.gameName,
-                        totalPlayers: currentState.totalPlayers,
-                        playerNames: currentState.playerNames,
-                        initialCards: currentState.initialCards,
-                        publicInfoCards: currentState.publicInfoCards.where((element) => element.cardName() != roomName).toList()
-                    )
-                );
-              }
-            }
+            _updateBlocState(roomName, value);
           }
         },
       ),
