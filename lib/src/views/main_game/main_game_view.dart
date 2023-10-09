@@ -1346,21 +1346,26 @@ class MainGameViewState extends State<MainGameView> {
                               Container(
                                 color: Colors.grey.shade200,
                                 width: double.infinity,
-                                child: WidgetUtils.spacer(3)
+                                child: WidgetUtils.spacer(2)
                               ),
                               Container(
                                 color: Colors.grey.shade200,
-                                height: 15,
+                                height: 17.5,
                                 child: Align(
                                   alignment: Alignment.bottomRight,
                                   child: CircleAvatar(
                                     backgroundColor: knownCards == 0 ? Colors.red : (knownCards == maxCardsPerPlayer ? Colors.teal : Colors.orange) ,
-                                    child: Text(
-                                      "${knownCards}/${maxCardsPerPlayer}",
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 8,
-                                        color: Colors.white
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Center(
+                                        child: Text(
+                                          "${knownCards}/${maxCardsPerPlayer}",
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 9,
+                                            color: Colors.white
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1369,7 +1374,7 @@ class MainGameViewState extends State<MainGameView> {
                               Container(
                                   color: Colors.grey.shade200,
                                   width: double.infinity,
-                                  child: WidgetUtils.spacer(3)
+                                  child: WidgetUtils.spacer(2)
                               ),
                             ],
                           ),
