@@ -2816,8 +2816,9 @@ class MainGameViewState extends State<MainGameView> {
             child: Text(
                 text,
                 style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.white
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
                 )
             ),
           ),
