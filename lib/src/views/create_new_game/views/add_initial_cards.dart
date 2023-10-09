@@ -281,7 +281,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                     });
                   },
                   title: const Text(
-                    "Persons",
+                    "Characters",
                     style:  TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,

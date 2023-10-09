@@ -148,7 +148,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
                     });
                   },
                   title: const Text(
-                    "Persons",
+                    "Characters",
                     style:  TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
