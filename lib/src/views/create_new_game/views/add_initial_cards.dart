@@ -105,7 +105,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                         ),
                       ),
                     ),
-                    WidgetUtils.spacer(5),
+                    WidgetUtils.spacer(25),
                     Padding(
                       padding: const EdgeInsets.all(10),
                       child: Center(
@@ -113,14 +113,14 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                           "This game consists of ${currentState.totalPlayers} players and ${ConstantUtils.MAX_GAME_CARDS} cards",
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              // fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontSize: 15,
                           ),
                         ),
                       ),
                     ),
-                    WidgetUtils.spacer(5.0),
+                    WidgetUtils.spacer(10),
                     const Padding(
                       padding: EdgeInsets.all(10),
                       child: Center(
@@ -128,14 +128,14 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                           "Shuffle the cards and set aside ${ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL} cards, one of each category - Character, Weapon and Room",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              // fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontSize: 15,
                           ),
                         ),
                       ),
                     ),
-                    WidgetUtils.spacer(5.0),
+                    WidgetUtils.spacer(10),
                     Padding(
                       padding: const EdgeInsets.all(10),
                       child: Center(
@@ -143,14 +143,14 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                           "Shuffle the cards and distribute $maxCardsPerPlayer cards to each player. These cards can be of any category",
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              // fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontSize: 15,
                           ),
                         ),
                       ),
                     ),
-                    WidgetUtils.spacer(5.0),
+                    WidgetUtils.spacer(10),
                     (maxCardsPerPlayer * currentState.totalPlayers) + ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL == ConstantUtils.MAX_GAME_CARDS ? null :
                     Padding(
                       padding: const EdgeInsets.all(10),
@@ -162,7 +162,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            fontSize: 15,
+                            fontSize: 18,
                           ),
                         ),
                       ),
@@ -626,125 +626,6 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
         )
       ],
     );
-  }
-
-  _showTutorial() {
-
-  }
-
-  _showHintDialogToSetupGame() {
-    final currentState = _createNewGameBloc.state;
-    if (currentState is NewGameDetailsModified) {
-      final maxCardsPerPlayer = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
-
-      showDialog(context: context, builder: (context) {
-        return Dialog(
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: SizedBox(
-              height: ScreenUtils.getScreenHeight(context) / 2,
-              child: Scaffold(
-                  // appBar: AppBar(
-                  //   automaticallyImplyLeading: false,
-                  //   title: const Text("Game setup", style: TextStyle(color: ConstantUtils.primaryAppColor),),
-                  // ),
-                  body: Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                        side: const BorderSide(
-                            color: ConstantUtils.primaryAppColor,
-                            width: 1
-                        )
-                    ),
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: WidgetUtils.skipNulls([
-                            const Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Center(
-                                child: Text(
-                                  "Lets get started",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: ConstantUtils.primaryAppColor,
-                                      fontSize: 20
-                                  ),
-                                ),
-                              ),
-                            ),
-                            WidgetUtils.spacer(5.0),
-
-                            Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Center(
-                                child: Text(
-                                  "This game consists of ${currentState.totalPlayers} players and ${ConstantUtils.MAX_GAME_CARDS} cards",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: ConstantUtils.primaryAppColor
-                                  ),
-                                ),
-                              ),
-                            ),
-                            WidgetUtils.spacer(5.0),
-                            const Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Center(
-                                child: Text(
-                                  "Shuffle the cards and set aside ${ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL} cards, one of each category - Character, Weapon and Room",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: ConstantUtils.primaryAppColor
-                                  ),
-                                ),
-                              ),
-                            ),
-                            WidgetUtils.spacer(5.0),
-                            Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Center(
-                                child: Text(
-                                  "Shuffle the cards and distribute $maxCardsPerPlayer cards to each player. These cards can be of any category",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: ConstantUtils.primaryAppColor
-                                  ),
-                                ),
-                              ),
-                            ),
-                            WidgetUtils.spacer(5.0),
-                            (maxCardsPerPlayer * currentState.totalPlayers) + ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL == ConstantUtils.MAX_GAME_CARDS ? null :
-                            Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Center(
-                                child: Text(
-                                  "Reveal ${ConstantUtils.MAX_GAME_CARDS - (maxCardsPerPlayer * currentState.totalPlayers) - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL} cards for all to see. "
-                                      "This is required so that no one player has an unfair advantage.",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.redAccent
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ]),
-                        ),
-                      ),
-                    ),
-                  )
-              ),
-            )
-        );
-      }).then((value) => KeyboardUtils.hideKeyboard(context));
-    }
-
-
   }
 
 }

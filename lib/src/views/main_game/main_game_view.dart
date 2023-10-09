@@ -159,7 +159,7 @@ class MainGameViewState extends State<MainGameView> {
                     padding: EdgeInsets.all(10),
                     child: Center(
                       child: Text(
-                        "Assume there are 2 players, A and B. Assume A makes the following accusation",
+                        "When another player shows a card, it can typically be one of three options",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -174,22 +174,7 @@ class MainGameViewState extends State<MainGameView> {
                     padding: EdgeInsets.all(10),
                     child: Center(
                       child: Text(
-                        "\"I accuse Col. Mustard of killing Ms Plum in the Kitchen with the Dagger\"",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(10),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "When B shows a card, create markings to allow for inferences later",
+                        "In this case, add a distinct new marking corresponding to the current round",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -219,7 +204,7 @@ class MainGameViewState extends State<MainGameView> {
                     padding: EdgeInsets.all(10),
                     child: Center(
                       child: Text(
-                        "If there are multiple markings over different rounds on the same card, that is evidence in favour of the respective player possessing said card.",
+                        "If there are multiple distinct markings over different rounds on the same card, that means the respective player could possess it.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
