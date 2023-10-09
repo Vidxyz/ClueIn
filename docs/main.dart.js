@@ -46389,7 +46389,7 @@ A.a0L.prototype={
 $0(){this.a.r=!this.b},
 $S:0}
 A.a0N.prototype={
-$2(a,b){return A.ud(new A.a0M(this.a,b),null,B.z8)},
+$2(a,b){return A.ud(new A.a0M(this.a,b),null,B.z7)},
 $S:52}
 A.a0M.prototype={
 $0(){var s=this.a
@@ -46406,7 +46406,7 @@ A.a0V.prototype={
 $0(){this.a.w=!this.b},
 $S:0}
 A.a0X.prototype={
-$2(a,b){return A.ud(new A.a0W(this.a,b),null,B.z7)},
+$2(a,b){return A.ud(new A.a0W(this.a,b),null,B.z8)},
 $S:52}
 A.a0W.prototype={
 $0(){var s=this.a
@@ -46603,7 +46603,7 @@ A.a1t.prototype={
 $0(){this.a.r=!this.b},
 $S:0}
 A.a1v.prototype={
-$2(a,b){return A.ud(new A.a1u(this.a,b),null,B.z8)},
+$2(a,b){return A.ud(new A.a1u(this.a,b),null,B.z7)},
 $S:52}
 A.a1u.prototype={
 $0(){var s=this.a
@@ -46620,7 +46620,7 @@ A.a1D.prototype={
 $0(){this.a.w=!this.b},
 $S:0}
 A.a1F.prototype={
-$2(a,b){return A.ud(new A.a1E(this.a,b),null,B.z7)},
+$2(a,b){return A.ud(new A.a1E(this.a,b),null,B.z8)},
 $S:52}
 A.a1E.prototype={
 $0(){var s=this.a
@@ -96190,14 +96190,14 @@ B.z6=new A.bg("Rooms",null,B.ku,null,null,null,null,null,null)
 B.Th=new A.bg("Edit game name",null,B.cp,null,null,null,null,null,null)
 B.Tl=new A.bg("Symbols",null,B.bL,null,null,null,null,null,null)
 B.Tr=new A.bg("Numbers",null,B.bL,null,null,null,null,null,null)
+B.z7=new A.bg("Characters",null,B.ku,null,null,null,null,null,null)
 B.Ts=new A.bg("Are you sure you want to delete this game? This action is irreversible!",null,null,null,null,null,null,null,null)
 B.Tu=new A.bg("Cancel",null,B.cq,null,null,null,null,null,null)
-B.z7=new A.bg("Weapons",null,B.ku,null,null,null,null,null,null)
+B.z8=new A.bg("Weapons",null,B.ku,null,null,null,null,null,null)
 B.Tx=new A.bg("Confirm",null,null,null,null,null,null,null,null)
 B.TA=new A.bg("Confirm",null,B.cq,null,null,null,null,null,null)
 B.TC=new A.bg("Edit player name",null,B.cp,null,null,null,null,null,null)
 B.TD=new A.bg("About",null,B.cp,null,null,null,null,null,null)
-B.z8=new A.bg("Persons",null,B.ku,null,null,null,null,null,null)
 B.Rl=new A.q(!0,null,null,null,null,null,16,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.kv=new A.bg("Game name",null,B.Rl,null,null,null,null,null,null)
 B.hO=new A.bg("Go back",null,B.cq,null,null,null,null,null,null)
