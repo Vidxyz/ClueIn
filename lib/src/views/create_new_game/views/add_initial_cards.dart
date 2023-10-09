@@ -444,7 +444,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                   });
                   _updateBlocState(entityName, roomNameToBoolMap[entityName]);
                 }
-                if (entityType == EntityType.Weapon) {
+                else if (entityType == EntityType.Weapon) {
                   setState(() {
                     weaponNameToBoolMap[entityName] = !(weaponNameToBoolMap[entityName] ?? false);
                   });

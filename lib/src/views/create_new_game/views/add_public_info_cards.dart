@@ -323,7 +323,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
                     });
                     _updateBlocState(entityName, roomNameToBoolMap[entityName]);
                   }
-                  if (entityType == EntityType.Weapon) {
+                  else if (entityType == EntityType.Weapon) {
                     setState(() {
                       weaponNameToBoolMap[entityName] = !(weaponNameToBoolMap[entityName] ?? false);
                     });
