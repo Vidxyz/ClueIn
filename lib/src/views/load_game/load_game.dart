@@ -1,6 +1,6 @@
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/save/game_definition.dart';
-import 'package:cluein_app/src/utils/constant_utils.dart';
+import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
 import 'package:cluein_app/src/views/load_game/bloc/load_game_bloc.dart';
@@ -12,16 +12,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class LoadGameView extends StatefulWidget {
-  final Color primaryAppColorSettingsValue;
+  final GameSettings gameSettings;
 
   static const String routeName = "load-game";
 
   const LoadGameView({
     super.key,
-    required this.primaryAppColorSettingsValue,
+    required this.gameSettings,
   });
 
-  static Route<bool> route(Color primaryAppColorSettingsValue) => MaterialPageRoute(
+  static Route<bool> route(GameSettings gameSettings) => MaterialPageRoute(
     settings: const RouteSettings(
         name: routeName
     ),
@@ -32,7 +32,7 @@ class LoadGameView extends StatefulWidget {
                 sembast: RepositoryProvider.of<SembastRepository>(context)
             )),
       ],
-      child: LoadGameView(primaryAppColorSettingsValue: primaryAppColorSettingsValue),
+      child: LoadGameView(gameSettings: gameSettings),
     ),
   );
 
@@ -59,15 +59,15 @@ class LoadGameViewState extends State<LoadGameView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Load game", style: TextStyle(color: widget.primaryAppColorSettingsValue),),
+        title: Text("Load game", style: TextStyle(color: widget.gameSettings.primaryColorSetting),),
         iconTheme: IconThemeData(
-          color: widget.primaryAppColorSettingsValue,
+          color: widget.gameSettings.primaryColorSetting,
         ),
       ),
       floatingActionButton: FloatingActionButton(
           heroTag: "CreateNewMeetupViewbuttonLoadGameView",
           onPressed: _goToCreateNewGamePage,
-          backgroundColor: widget.primaryAppColorSettingsValue,
+          backgroundColor: widget.gameSettings.primaryColorSetting,
           child: const Icon(Icons.add, color: Colors.white)
       ),
       body: BlocListener<LoadGameBloc, LoadGameState>(
@@ -80,7 +80,7 @@ class LoadGameViewState extends State<LoadGameView> {
               return _showSavedGamesListView(state);
             }
             else {
-              return WidgetUtils.progressIndicator();
+              return WidgetUtils.progressIndicator(widget.gameSettings.primaryColorSetting);
             }
           },
         ),
@@ -89,10 +89,13 @@ class LoadGameViewState extends State<LoadGameView> {
   }
 
   _goToCreateNewGamePage() {
-    Navigator.pushReplacement(
-        context,
-        CreateNewGameView.route(widget.primaryAppColorSettingsValue)
-    );
+    final currentState = loadGameBloc.state;
+    if (currentState is SavedGamesFetched) {
+      Navigator.pushReplacement(
+          context,
+          CreateNewGameView.route(widget.gameSettings,  currentState.savedGames.length)
+      );
+    }
   }
 
   _showSavedGamesListView(SavedGamesFetched state) {
@@ -108,7 +111,7 @@ class LoadGameViewState extends State<LoadGameView> {
                 // Show dialog asking confirmation
                 Widget cancelButton = TextButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorSettingsValue),
+                    foregroundColor: MaterialStateProperty.all<Color>(widget.gameSettings.primaryColorSetting),
                   ),
                   onPressed:  () {
                     Navigator.pop(context, false);
@@ -178,7 +181,7 @@ class LoadGameViewState extends State<LoadGameView> {
         context,
         MainGameView.route(
             gameDefinition: gameDefinition,
-            primaryAppColorFromSetting: widget.primaryAppColorSettingsValue,
+            gameSettings: widget.gameSettings,
         )
     );
   }

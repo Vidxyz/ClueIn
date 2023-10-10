@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/save/game_definition.dart';
+import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:cluein_app/src/models/stack.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/keyboard_utils.dart';
@@ -11,6 +12,8 @@ import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_bloc.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_event.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
+import 'package:cluein_app/src/views/main_game/views/markings_view.dart';
+import 'package:cluein_app/src/views/settings/settings_view.dart';
 import 'package:cluein_app/src/views/shared_components/ads/custom_markings_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,17 +33,17 @@ class MainGameView extends StatefulWidget {
   static const String routeName = "game";
 
   final GameDefinition gameDefinition;
-  final Color primaryAppColorFromSetting;
+  final GameSettings gameSettings;
 
   const MainGameView({
     super.key,
     required this.gameDefinition,
-    required this.primaryAppColorFromSetting,
+    required this.gameSettings,
   });
 
   static Route<bool> route({
     required GameDefinition gameDefinition,
-    required Color primaryAppColorFromSetting,
+    required GameSettings gameSettings,
   }) => MaterialPageRoute(
     settings: const RouteSettings(
         name: routeName
@@ -54,7 +57,7 @@ class MainGameView extends StatefulWidget {
       ],
       child: MainGameView(
         gameDefinition: gameDefinition,
-        primaryAppColorFromSetting: primaryAppColorFromSetting,
+        gameSettings: gameSettings,
       ),
     ),
   );
@@ -77,7 +80,7 @@ class MainGameViewState extends State<MainGameView> {
   bool dontAskAgainForInferenceNoOtherPlayerHasThisCard = false;
   bool dontAskAgainForInferenceThisPlayerHasNoOtherCards = false;
 
-  String? selectedMarkingFromDialog;
+  List<String> selectedMarkingsFromDialog = [];
   Color? selectedBackgroundColourFromDialog;
 
   List<MapEntry<int, String>> playerNameMapEntries = [];
@@ -100,6 +103,8 @@ class MainGameViewState extends State<MainGameView> {
   List<TargetFocus> basicTargets = [];
   TutorialCoachMark? basicTutorialCoachMark;
 
+  Color primaryColorSettingState = ConstantUtils.primaryAppColor;
+  bool selectMultipleMarkingsAtOnceSettingState = false;
 
   @override
   void initState() {
@@ -121,8 +126,31 @@ class MainGameViewState extends State<MainGameView> {
     undoStack = OperationStack<String>([]);
     redoStack = OperationStack<String>([]);
 
+    primaryColorSettingState = widget.gameSettings.primaryColorSetting;
+    selectMultipleMarkingsAtOnceSettingState = widget.gameSettings.selectMultipleMarkingsAtOnceSetting;
+
     initTutorial();
     _setupGameStateInitially();
+  }
+
+  _tapAnywhereToContinue() {
+    return const Align(
+      alignment: Alignment.center,
+      child: Padding(
+        padding: EdgeInsets.all(10),
+        child: Center(
+          child: Text(
+            "Tap anywhere to continue",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   initTutorial() {
@@ -133,7 +161,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "gameNameTextKey",
         keyTarget: gameNameTextKey,
         alignSkip: Alignment.topRight,
-        color: widget.primaryAppColorFromSetting,
+        color: primaryColorSettingState,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -142,83 +170,92 @@ class MainGameViewState extends State<MainGameView> {
           TargetContent(
             align: ContentAlign.bottom,
             builder: (context, controller) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: WidgetUtils.skipNulls([
-                  WidgetUtils.spacer(25),
-                  const Align(
-                    child: Text(
-                      "Note observations and infer conclusions",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(25),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "When another player shows a card, it can typically be one of three options",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
+              return SizedBox(
+                height: ScreenUtils.getScreenHeight(context),
+                child: Stack(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: WidgetUtils.skipNulls([
+                        WidgetUtils.spacer(25),
+                        const Align(
+                          child: Text(
+                            "Note observations and infer conclusions",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(10),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "In this case, add a distinct new marking corresponding to the current round",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
+                        WidgetUtils.spacer(25),
+                        const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Center(
+                            child: Text(
+                              "When another player shows a card, it can typically be one of three options",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(10),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "For instance, add the marker \"1\" next to \"Mustard\", \"Kitchen\" and \"Dagger\"",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
+                        WidgetUtils.spacer(10),
+                        const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Center(
+                            child: Text(
+                              "In this case, add a distinct new marking corresponding to the current round",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  WidgetUtils.spacer(10),
-                  const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Center(
-                      child: Text(
-                        "If there are multiple distinct markings over different rounds on the same card, that means the respective player could possess it.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15,
+                        WidgetUtils.spacer(10),
+                        const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Center(
+                            child: Text(
+                              "For instance, add the marker \"1\" next to \"Mustard\", \"Kitchen\" and \"Dagger\"",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        WidgetUtils.spacer(10),
+                        const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Center(
+                            child: Text(
+                              "If there are multiple distinct markings over different rounds on the same card, that means the respective player could possess it.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                        WidgetUtils.spacer(25),
+                        _tapAnywhereToContinue()
+                      ]),
                     ),
-                  ),
-                ]),
+                  ],
+                ),
               );
             },
           ),
@@ -231,7 +268,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "cell1Key",
         keyTarget: cell1Key,
         alignSkip: Alignment.topRight,
-        color: widget.primaryAppColorFromSetting,
+        color: primaryColorSettingState,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -300,6 +337,8 @@ class MainGameViewState extends State<MainGameView> {
                       ),
                     ),
                   ),
+                  WidgetUtils.spacer(25),
+                  _tapAnywhereToContinue()
                 ]),
               );
             },
@@ -314,7 +353,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "cell2Key",
         keyTarget: cell2Key,
         alignSkip: Alignment.topRight,
-        color: widget.primaryAppColorFromSetting,
+        color: primaryColorSettingState,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -368,6 +407,8 @@ class MainGameViewState extends State<MainGameView> {
                       ),
                     ),
                   ),
+                  WidgetUtils.spacer(25),
+                  _tapAnywhereToContinue()
                 ]),
               );
             },
@@ -382,7 +423,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "undoKey",
         keyTarget: undoKey,
         alignSkip: Alignment.centerRight,
-        color: widget.primaryAppColorFromSetting,
+        color: primaryColorSettingState,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -407,6 +448,8 @@ class MainGameViewState extends State<MainGameView> {
                       ),
                     ),
                   ),
+                  WidgetUtils.spacer(25),
+                  _tapAnywhereToContinue()
                 ]),
               );
             },
@@ -422,7 +465,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "redoKey",
         keyTarget: redoKey,
         alignSkip: Alignment.centerRight,
-        color: widget.primaryAppColorFromSetting,
+        color: primaryColorSettingState,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -447,6 +490,8 @@ class MainGameViewState extends State<MainGameView> {
                       ),
                     ),
                   ),
+                  WidgetUtils.spacer(25),
+                  _tapAnywhereToContinue()
                 ]),
               );
             },
@@ -460,7 +505,7 @@ class MainGameViewState extends State<MainGameView> {
 
     basicTutorialCoachMark = TutorialCoachMark(
       targets: basicTargets,
-      colorShadow: widget.primaryAppColorFromSetting,
+      colorShadow: primaryColorSettingState,
       hideSkip: false,
       showSkipInLastTarget: true,
       alignSkip: Alignment.topRight,
@@ -498,6 +543,20 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
+  _goToSettingsPage() {
+    Navigator.push(
+        context,
+        SettingsView.route(primaryColorSettingState)
+    ).then((value) {
+      if (value != null) {
+        setState(() {
+          primaryColorSettingState = value.primaryColorSetting;
+          selectMultipleMarkingsAtOnceSettingState = value.selectMultipleMarkingsAtOnceSetting;
+        });
+      }
+    });
+  }
+
   _performTutorial() {
     basicTutorialCoachMark?.show(context: context);
   }
@@ -532,25 +591,32 @@ class MainGameViewState extends State<MainGameView> {
           child: Text(
             gameDefinitionState.gameName,
             key: gameNameTextKey,
-            style: TextStyle(color: widget.primaryAppColorFromSetting),
+            style: TextStyle(color: primaryColorSettingState),
           )
         ),
         iconTheme: IconThemeData(
-          color: widget.primaryAppColorFromSetting,
+          color: primaryColorSettingState,
         ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.help,
-              color: widget.primaryAppColorFromSetting,
+              color: primaryColorSettingState,
             ),
             onPressed: _performTutorial,
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.settings,
+              color: primaryColorSettingState,
+            ),
+            onPressed: _goToSettingsPage,
           ),
           IconButton(
             key: undoKey,
             icon: Icon(
               Icons.undo,
-              color: _canUndo() ? widget.primaryAppColorFromSetting : Colors.grey,
+              color: _canUndo() ? primaryColorSettingState : Colors.grey,
             ),
             onPressed: _performUndo,
           ),
@@ -558,7 +624,7 @@ class MainGameViewState extends State<MainGameView> {
             key: redoKey,
             icon: Icon(
               Icons.redo,
-              color: _canRedo() ? widget.primaryAppColorFromSetting : Colors.grey,
+              color: _canRedo() ? primaryColorSettingState : Colors.grey,
             ),
             onPressed: _performRedo,
           ),
@@ -729,61 +795,68 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _mainBody() {
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.all(0),
-          sliver: SliverAppBar(
-            leadingWidth: 0,
-            automaticallyImplyLeading: false,
-            pinned: true,
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(0),
-              child: Column(
-                children: [
-                  Divider(
-                    height: 3,
-                    thickness: 3,
-                    endIndent: 0,
-                    color: widget.primaryAppColorFromSetting,
+    return ScrollConfiguration(
+      behavior: const ScrollBehavior(),
+      child: GlowingOverscrollIndicator(
+        axisDirection: AxisDirection.down,
+        color: primaryColorSettingState,
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.all(0),
+              sliver: SliverAppBar(
+                leadingWidth: 0,
+                automaticallyImplyLeading: false,
+                pinned: true,
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(0),
+                  child: Column(
+                    children: [
+                      Divider(
+                        height: 3,
+                        thickness: 3,
+                        endIndent: 0,
+                        color: primaryColorSettingState,
+                      ),
+                      _playerNamesHeaderPinned(),
+                      Divider(
+                        height: 3,
+                        thickness: 3,
+                        endIndent: 0,
+                        color: primaryColorSettingState,
+                      )
+                    ],
                   ),
-                  _playerNamesHeaderPinned(),
-                  Divider(
-                    height: 3,
-                    thickness: 3,
-                    endIndent: 0,
-                    color: widget.primaryAppColorFromSetting,
-                  )
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-        SliverList.list(
-          children: [
-            Row(
+            SliverList.list(
               children: [
-                _generateEntityNamesList(),
-                SizedBox(
-                  height: ((ConstantUtils.CELL_SIZE_DEFAULT * ConstantUtils.allEntitites.length ) +
-                      (10 * ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT)).toDouble(),
-                  child: _verticalDivider(),
-                ),
-                Expanded(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2/3,
-                      maxWidth: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2) + (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3),
+                Row(
+                  children: [
+                    _generateEntityNamesList(),
+                    SizedBox(
+                      height: ((ConstantUtils.CELL_SIZE_DEFAULT * ConstantUtils.allEntitites.length ) +
+                          (10 * ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT)).toDouble(),
+                      child: _verticalDivider(),
                     ),
-                    child: _generateEntityMarkings(),
-                  ),
-                ),
+                    Expanded(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2/3,
+                          maxWidth: (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) * 2) + (min(ScreenUtils.getScreenWidth(context), ScreenUtils.getMinimumScreenWidth()) / 3),
+                        ),
+                        child: _generateEntityMarkings(),
+                      ),
+                    ),
+                  ],
+                )
               ],
-            )
-          ],
 
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -838,7 +911,7 @@ class MainGameViewState extends State<MainGameView> {
                               fontWeight: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? FontWeight.bold : FontWeight.normal,
                               color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null,
                               decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Character, currentEntity) ? TextDecoration.lineThrough : null,
-                              decorationColor: widget.primaryAppColorFromSetting,
+                              decorationColor: primaryColorSettingState,
                               decorationThickness: 3,
                           ),
                       ),
@@ -878,7 +951,7 @@ class MainGameViewState extends State<MainGameView> {
                           fontSize: 15,
                             color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null,
                             decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Weapon, currentEntity) ? TextDecoration.lineThrough : null,
-                            decorationColor: widget.primaryAppColorFromSetting,
+                            decorationColor: primaryColorSettingState,
                             decorationThickness: 3,
                         ),
                       ),
@@ -918,7 +991,7 @@ class MainGameViewState extends State<MainGameView> {
                           fontSize: 15,
                           color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null,
                           decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Room, currentEntity) ? TextDecoration.lineThrough : null,
-                          decorationColor: widget.primaryAppColorFromSetting,
+                          decorationColor: primaryColorSettingState,
                           decorationThickness: 3,
                         ),
                       ),
@@ -1015,7 +1088,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
+            backgroundColor: MaterialStateProperty.all<Color>(primaryColorSettingState),
           ),
           onPressed: () async {
             Navigator.pop(context);
@@ -1039,7 +1112,7 @@ class MainGameViewState extends State<MainGameView> {
                 ),
                 appBar: AppBar(
                   automaticallyImplyLeading: false,
-                  title: Text("Edit game name", style: TextStyle(color: widget.primaryAppColorFromSetting),),
+                  title: Text("Edit game name", style: TextStyle(color: primaryColorSettingState),),
                 ),
                 body: Center(
                   child: Padding(
@@ -1056,7 +1129,7 @@ class MainGameViewState extends State<MainGameView> {
                         // hintStyle: const TextStyle(color: Colors.grey),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
-                            color: widget.primaryAppColorFromSetting,
+                            color: primaryColorSettingState,
                           ),
                         ),
                       ),
@@ -1079,7 +1152,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
+            backgroundColor: MaterialStateProperty.all<Color>(primaryColorSettingState),
           ),
           onPressed: () async {
             Navigator.pop(context);
@@ -1104,7 +1177,7 @@ class MainGameViewState extends State<MainGameView> {
                 ),
                 appBar: AppBar(
                   automaticallyImplyLeading: false,
-                  title: Text("Edit player name", style: TextStyle(color: widget.primaryAppColorFromSetting),),
+                  title: Text("Edit player name", style: TextStyle(color: primaryColorSettingState),),
                 ),
                 body: Center(
                   child: Padding(
@@ -1124,7 +1197,7 @@ class MainGameViewState extends State<MainGameView> {
                         // hintStyle: const TextStyle(color: Colors.grey),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
-                            color: widget.primaryAppColorFromSetting,
+                            color: primaryColorSettingState,
                           ),
                         ),
                       ),
@@ -1176,18 +1249,34 @@ class MainGameViewState extends State<MainGameView> {
         currentMarkingMap[newPlayerNamePlusId] = charactersGameState[currentCharacter]![originalPlayerNamePlusId]!;
         currentMarkingMap.remove(originalPlayerNamePlusId);
         charactersGameState[currentCharacter] = currentMarkingMap;
+
+
+        final currentCellBackgroundMap = cellBackgroundColourState[currentCharacter]!;
+        currentCellBackgroundMap[newPlayerNamePlusId] = cellBackgroundColourState[currentCharacter]![originalPlayerNamePlusId]!;
+        currentCellBackgroundMap.remove(originalPlayerNamePlusId);
+        cellBackgroundColourState[currentCharacter] = currentCellBackgroundMap;
       });
       ConstantUtils.weaponList.forEach((currentWeapon) {
         final currentMarkingMap = weaponsGameState[currentWeapon]!;
         currentMarkingMap[newPlayerNamePlusId] = weaponsGameState[currentWeapon]![originalPlayerNamePlusId]!;
         currentMarkingMap.remove(originalPlayerNamePlusId);
         weaponsGameState[currentWeapon] = currentMarkingMap;
+
+        final currentCellBackgroundMap = cellBackgroundColourState[currentWeapon]!;
+        currentCellBackgroundMap[newPlayerNamePlusId] = cellBackgroundColourState[currentWeapon]![originalPlayerNamePlusId]!;
+        currentCellBackgroundMap.remove(originalPlayerNamePlusId);
+        cellBackgroundColourState[currentWeapon] = currentCellBackgroundMap;
       });
       ConstantUtils.roomList.forEach((currentRoom) {
         final currentMarkingMap = roomsGameState[currentRoom]!;
         currentMarkingMap[newPlayerNamePlusId] = roomsGameState[currentRoom]![originalPlayerNamePlusId]!;
         currentMarkingMap.remove(originalPlayerNamePlusId);
         roomsGameState[currentRoom] = currentMarkingMap;
+
+        final currentCellBackgroundMap = cellBackgroundColourState[currentRoom]!;
+        currentCellBackgroundMap[newPlayerNamePlusId] = cellBackgroundColourState[currentRoom]![originalPlayerNamePlusId]!;
+        currentCellBackgroundMap.remove(originalPlayerNamePlusId);
+        cellBackgroundColourState[currentRoom] = currentCellBackgroundMap;
       });
 
       final indexOfUpdatedPlayerName =
@@ -1249,7 +1338,7 @@ class MainGameViewState extends State<MainGameView> {
                         _showBackgroundColourSelectDialog(EntityType.Room, currentEntity, currentPlayerName, currentSelectedColor);
                       },
                       onTap: () {
-                        final currentMarkings = roomsGameState[currentEntity]![currentPlayerName]!;
+                        final List<String> currentMarkings = List.from(roomsGameState[currentEntity]![currentPlayerName]!);
                         // Only show dialog select if not an initial card from GameDefinition
                         if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
                             !roomsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick) &&
@@ -1456,7 +1545,7 @@ class MainGameViewState extends State<MainGameView> {
                         _showBackgroundColourSelectDialog(EntityType.Weapon, currentEntity, currentPlayerName, currentSelectedColor);
                       },
                       onTap: () {
-                        final currentMarkings = weaponsGameState[currentEntity]![currentPlayerName]!;
+                        final List<String> currentMarkings = List.from(weaponsGameState[currentEntity]![currentPlayerName]!);
                         if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
                             !weaponsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick) &&
                             !weaponsGameState[currentEntity]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.noOneHasThis)
@@ -1510,7 +1599,7 @@ class MainGameViewState extends State<MainGameView> {
                             _showBackgroundColourSelectDialog(EntityType.Weapon, currentCharacter, currentPlayerName, currentSelectedColor);
                           },
                           onTap: () {
-                            final currentMarkings = charactersGameState[currentCharacter]![currentPlayerName]!;
+                            final List<String> currentMarkings = List.from(charactersGameState[currentCharacter]![currentPlayerName]!);
                             // Check if we are not changing anything from initiral state
                             if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
                                 !charactersGameState[currentCharacter]![gameDefinitionState.playerNames[0]!]!.contains(ConstantUtils.tick) &&
@@ -1698,7 +1787,7 @@ class MainGameViewState extends State<MainGameView> {
       thickness: 5,
       // indent: 20,
       // endIndent: 0,
-      color: widget.primaryAppColorFromSetting,
+      color: primaryColorSettingState,
     );
   }
 
@@ -1708,7 +1797,7 @@ class MainGameViewState extends State<MainGameView> {
       thickness: 2.5,
       // indent: 20,
       // endIndent: 0,
-      color: widget.primaryAppColorFromSetting,
+      color: primaryColorSettingState,
     );
   }
 
@@ -1717,7 +1806,7 @@ class MainGameViewState extends State<MainGameView> {
       height: ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT.toDouble(),
       thickness: 5,
       endIndent: 0,
-      color: widget.primaryAppColorFromSetting,
+      color: primaryColorSettingState,
     );
   }
 
@@ -1727,7 +1816,7 @@ class MainGameViewState extends State<MainGameView> {
       height: ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT.toDouble(),
       thickness: 2.5,
       endIndent: 0,
-      color: widget.primaryAppColorFromSetting,
+      color: primaryColorSettingState,
     );
   }
 
@@ -1745,7 +1834,7 @@ class MainGameViewState extends State<MainGameView> {
       child: Text(
         text,
         style: TextStyle(
-            color: widget.primaryAppColorFromSetting,
+            color: primaryColorSettingState,
             fontWeight: FontWeight.bold,
             fontSize: 16
         ),
@@ -1797,7 +1886,7 @@ class MainGameViewState extends State<MainGameView> {
     );
     setState(() {
       isMarkingDialogOpen = false;
-      selectedMarkingFromDialog = null;
+      selectedMarkingsFromDialog = [];
     });
   }
 
@@ -1956,14 +2045,14 @@ class MainGameViewState extends State<MainGameView> {
         text: TextSpan(
             text: "Since you have confirmed that ",
             style: TextStyle(
-                color: widget.primaryAppColorFromSetting,
+                color: primaryColorSettingState,
                 fontSize: 16
             ),
             children: [
               TextSpan(
                   text: _refinedPlayerName(currentPlayerName),
                   style: TextStyle(
-                      color: widget.primaryAppColorFromSetting,
+                      color: primaryColorSettingState,
                       fontSize: 16,
                       fontWeight: FontWeight.bold
                   )
@@ -1971,7 +2060,7 @@ class MainGameViewState extends State<MainGameView> {
               TextSpan(
                   text: " has the ",
                   style: TextStyle(
-                    color: widget.primaryAppColorFromSetting,
+                    color: primaryColorSettingState,
                     fontSize: 16,
                     // fontWeight: FontWeight.bold
                   )
@@ -1979,7 +2068,7 @@ class MainGameViewState extends State<MainGameView> {
               TextSpan(
                   text: ConstantUtils.entityNameToDisplayNameMap[currentEntity],
                   style: TextStyle(
-                      color: widget.primaryAppColorFromSetting,
+                      color: primaryColorSettingState,
                       fontSize: 16,
                       fontWeight: FontWeight.bold
                   )
@@ -1987,26 +2076,12 @@ class MainGameViewState extends State<MainGameView> {
               TextSpan(
                   text: " card, we infer that no other player has it!\n\nHit confirm if you'd like to mark all other players as not having this card.",
                   style: TextStyle(
-                    color: widget.primaryAppColorFromSetting,
+                    color: primaryColorSettingState,
                     fontSize: 16,
                     // fontWeight: FontWeight.bold
                   )
               ),
             ]
-        )
-    );
-  }
-
-  _updateBlocState() {
-    _mainGameBloc.add(
-        MainGameStateChanged(
-          initialGame: gameDefinitionState,
-          charactersGameState: charactersGameState,
-          weaponsGameState: weaponsGameState,
-          roomsGameState: roomsGameState,
-          gameBackgroundColorState: cellBackgroundColourState,
-          undoStack: undoStack,
-          redoStack: redoStack,
         )
     );
   }
@@ -2017,14 +2092,14 @@ class MainGameViewState extends State<MainGameView> {
         text: TextSpan(
             text: "Since you have confirmed that ",
             style: TextStyle(
-                color: widget.primaryAppColorFromSetting,
+                color: primaryColorSettingState,
                 fontSize: 16
             ),
             children: [
               TextSpan(
                   text: _refinedPlayerName(currentPlayerName),
                   style: TextStyle(
-                      color: widget.primaryAppColorFromSetting,
+                      color: primaryColorSettingState,
                       fontSize: 16,
                       fontWeight: FontWeight.bold
                   )
@@ -2032,7 +2107,7 @@ class MainGameViewState extends State<MainGameView> {
               TextSpan(
                   text: " has the ",
                   style: TextStyle(
-                    color: widget.primaryAppColorFromSetting,
+                    color: primaryColorSettingState,
                     fontSize: 16,
                     // fontWeight: FontWeight.bold
                   )
@@ -2040,7 +2115,7 @@ class MainGameViewState extends State<MainGameView> {
               TextSpan(
                   text: ConstantUtils.entityNameToDisplayNameMap[currentEntity],
                   style: TextStyle(
-                      color: widget.primaryAppColorFromSetting,
+                      color: primaryColorSettingState,
                       fontSize: 16,
                       fontWeight: FontWeight.bold
                   )
@@ -2048,7 +2123,7 @@ class MainGameViewState extends State<MainGameView> {
               TextSpan(
                   text: " card, we now know all the cards they posses!\n\nHit confirm if you'd like to mark all other cards for this player as missing.",
                   style: TextStyle(
-                    color: widget.primaryAppColorFromSetting,
+                    color: primaryColorSettingState,
                     fontSize: 16,
                     // fontWeight: FontWeight.bold
                   )
@@ -2059,41 +2134,42 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _markDialogAsClosedAndSaveMarking(EntityType entityType, String currentEntity, String currentPlayerName) {
-    if (selectedMarkingFromDialog != null) {
+    if (selectedMarkingsFromDialog.isNotEmpty) {
       KeyboardUtils.lightImpact();
 
       // Something was selected, persist it
-      if (entityType == EntityType.Character) {
-        if (selectedMarkingFromDialog == ConstantUtils.tick) {
-          if (charactersGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
-            // do nothing as we are removing
-          }
-          else {
-            // We are adding a Tick over here. Ask user for confirmation to infer
-            if (!dontAskAgainForInferenceNoOtherPlayerHasThisCard) {
-              _showInferenceConfirmationDialog(
-                  InferenceType.NoOtherPlayerHasThisCard,
-                  entityType,
-                  currentEntity,
-                  currentPlayerName,
-                  _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
-                      () {
-                    _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
-                    Future.delayed(const Duration(milliseconds: 200), () {
-                      _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
-                    });
-                  }
-              );
+      selectedMarkingsFromDialog.forEach((selectedMarkingFromDialog) {
+        if (entityType == EntityType.Character) {
+          if (selectedMarkingFromDialog == ConstantUtils.tick) {
+            if (charactersGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
+              // do nothing as we are removing
             }
             else {
-              _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
-              Future.delayed(const Duration(milliseconds: 200), () {
-                _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
-              });
+              // We are adding a Tick over here. Ask user for confirmation to infer
+              if (!dontAskAgainForInferenceNoOtherPlayerHasThisCard) {
+                _showInferenceConfirmationDialog(
+                    InferenceType.NoOtherPlayerHasThisCard,
+                    entityType,
+                    currentEntity,
+                    currentPlayerName,
+                    _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
+                        () {
+                      _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
+                      Future.delayed(const Duration(milliseconds: 200), () {
+                        _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                      });
+                    }
+                );
+              }
+              else {
+                _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
+                Future.delayed(const Duration(milliseconds: 200), () {
+                  _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                });
+              }
             }
           }
-        }
-        // else {
+          // else {
           // charactersGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.tick);
           // charactersGameState[currentEntity]?[currentPlayerName]?.remove(ConstantUtils.cross);
           if (charactersGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
@@ -2103,41 +2179,42 @@ class MainGameViewState extends State<MainGameView> {
             if ((charactersGameState[currentEntity]?[currentPlayerName]?.length ?? 0) >= ConstantUtils.MAX_MARKINGS) {
               charactersGameState[currentEntity]?[currentPlayerName]?.removeAt(0);
             }
-            charactersGameState[currentEntity]?[currentPlayerName]?.add(selectedMarkingFromDialog!);
+            charactersGameState[currentEntity]?[currentPlayerName]?.add(selectedMarkingFromDialog);
           }
-        // }
-      }
-      else if (entityType == EntityType.Weapon) {
-        if (selectedMarkingFromDialog == ConstantUtils.tick) {
-          if (weaponsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
-            // do nothing as we are removing
-          }
-          else {
-            // We are adding a Tick over here. Ask user for confirmation to infer
-            if (!dontAskAgainForInferenceNoOtherPlayerHasThisCard) {
-              _showInferenceConfirmationDialog(
-                  InferenceType.NoOtherPlayerHasThisCard,
-                  entityType,
-                  currentEntity,
-                  currentPlayerName,
-                  _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
-                      () {
-                    _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
-                    Future.delayed(const Duration(milliseconds: 200), () {
-                      _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
-                    });
-                  }
-              );
+          // }
+        }
+        else if (entityType == EntityType.Weapon) {
+          if (selectedMarkingFromDialog == ConstantUtils.tick) {
+            if (weaponsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
+              // do nothing as we are removing
             }
             else {
-              _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
-              Future.delayed(const Duration(milliseconds: 200), () {
-                _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
-              });
+              // We are adding a Tick over here. Ask user for confirmation to infer
+              if (!dontAskAgainForInferenceNoOtherPlayerHasThisCard) {
+                _showInferenceConfirmationDialog(
+                    InferenceType.NoOtherPlayerHasThisCard,
+                    entityType,
+                    currentEntity,
+                    currentPlayerName,
+                    _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
+                        () {
+                      _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
+                      Future.delayed(const Duration(milliseconds: 200), () {
+                        _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                      });
+                    }
+                );
+              }
+              else {
+                _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
+                Future.delayed(const Duration(milliseconds: 200), () {
+                  _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                });
+              }
             }
           }
-        }
-        // else {
+          // else {
+
           if (weaponsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
             weaponsGameState[currentEntity]?[currentPlayerName]?.remove(selectedMarkingFromDialog);
           }
@@ -2145,41 +2222,41 @@ class MainGameViewState extends State<MainGameView> {
             if ((weaponsGameState[currentEntity]?[currentPlayerName]?.length ?? 0) >= ConstantUtils.MAX_MARKINGS) {
               weaponsGameState[currentEntity]?[currentPlayerName]?.removeAt(0);
             }
-            weaponsGameState[currentEntity]?[currentPlayerName]?.add(selectedMarkingFromDialog!);
+            weaponsGameState[currentEntity]?[currentPlayerName]?.add(selectedMarkingFromDialog);
           }
-        // }
-      }
-      else {
-        if (selectedMarkingFromDialog == ConstantUtils.tick) {
-          if (roomsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
-            // do nothing as we are removing
-          }
-          else {
-            // We are adding a Tick over here. Ask user for confirmation to infer
-            if (!dontAskAgainForInferenceNoOtherPlayerHasThisCard) {
-              _showInferenceConfirmationDialog(
-                  InferenceType.NoOtherPlayerHasThisCard,
-                  entityType,
-                  currentEntity,
-                  currentPlayerName,
-                  _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
-                      () {
-                    _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
-                    Future.delayed(const Duration(milliseconds: 200), () {
-                      _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
-                    });
-                  }
-              );
+          // }
+        }
+        else {
+          if (selectedMarkingFromDialog == ConstantUtils.tick) {
+            if (roomsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
+              // do nothing as we are removing
             }
             else {
-              _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
-              Future.delayed(const Duration(milliseconds: 200), () {
-                _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
-              });
+              // We are adding a Tick over here. Ask user for confirmation to infer
+              if (!dontAskAgainForInferenceNoOtherPlayerHasThisCard) {
+                _showInferenceConfirmationDialog(
+                    InferenceType.NoOtherPlayerHasThisCard,
+                    entityType,
+                    currentEntity,
+                    currentPlayerName,
+                    _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
+                        () {
+                      _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
+                      Future.delayed(const Duration(milliseconds: 200), () {
+                        _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                      });
+                    }
+                );
+              }
+              else {
+                _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
+                Future.delayed(const Duration(milliseconds: 200), () {
+                  _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
+                });
+              }
             }
           }
-        }
-        // else {
+          // else {
           if (roomsGameState[currentEntity]?[currentPlayerName]?.contains(selectedMarkingFromDialog) ?? false) {
             roomsGameState[currentEntity]?[currentPlayerName]?.remove(selectedMarkingFromDialog);
           }
@@ -2187,10 +2264,11 @@ class MainGameViewState extends State<MainGameView> {
             if ((roomsGameState[currentEntity]?[currentPlayerName]?.length ?? 0) >= ConstantUtils.MAX_MARKINGS) {
               roomsGameState[currentEntity]?[currentPlayerName]?.removeAt(0);
             }
-            roomsGameState[currentEntity]?[currentPlayerName]?.add(selectedMarkingFromDialog!);
+            roomsGameState[currentEntity]?[currentPlayerName]?.add(selectedMarkingFromDialog);
           }
-        // }
-      }
+          // }
+        }
+      });
 
       _mainGameBloc.add(
           MainGameStateChanged(
@@ -2205,7 +2283,7 @@ class MainGameViewState extends State<MainGameView> {
       );
       setState(() {
         isMarkingDialogOpen = false;
-        selectedMarkingFromDialog = null;
+        selectedMarkingsFromDialog = [];
       });
     }
   }
@@ -2222,288 +2300,22 @@ class MainGameViewState extends State<MainGameView> {
       isMarkingDialogOpen = true;
     });
 
-    _resetCellButton() {
-      return Padding(
-        padding: const EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
-          ),
-          onPressed: () async {
-            _markDialogAsClosedAndResetMarking(entityType, currentEntity, currentPlayerName);
-            Navigator.pop(context, true);
-          },
-          child: const Text("Reset cell", style: TextStyle(fontSize: 15, color: Colors.white)),
-        ),
-      );
-    }
-
-    _dismissDialogButton() {
-      return Padding(
-        padding: const EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
-          ),
-          onPressed: () async {
-            _markDialogAsClosedAndSaveMarking(entityType, currentEntity, currentPlayerName);
-            Navigator.pop(context, false);
-          },
-          child: const Text("Go back", style: TextStyle(fontSize: 15, color: Colors.white)),
-        ),
-      );
-    }
-
     showDialog<bool>(context: context, builder: (context) {
       return Dialog(
-        child:  Scaffold(
-          appBar: null,
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 10),
-                  child: Center(
-                    child: Text(
-                      "Current markings",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: widget.primaryAppColorFromSetting
-                      ),
-                    ),
-                  ),
-                ),
-                WidgetUtils.spacer(2.5),
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                      side: BorderSide(
-                          color: widget.primaryAppColorFromSetting,
-                          width: 2.5
-                      )
-                  ),
-                  child: SizedBox(
-                    height: 120,
-                    child: currentMarkings.isEmpty ? Container() : CustomMarkingsLayout(
-                      isPartOfDialog: true,
-                      children: currentMarkings.map((marking) {
-                        return _maybeMarkerVanilla(marking, () {
-                          _setStateAndPop(marking, context);
-                        });
-                      }).toList(),
-                    ),
-                  ),
-                ),
-                WidgetUtils.spacer(2.5),
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Center(
-                    child: Text(
-                      "Select a marker to apply to the ${entityType.name}/Player combo",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.normal,
-                        color: widget.primaryAppColorFromSetting
-                      ),
-                    ),
-                  ),
-                ),
-                WidgetUtils.spacer(2.5),
-                _divider(),
-                Text(
-                    "Symbols",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: widget.primaryAppColorFromSetting,
-                        fontSize: 16,
-                    ),
-                ),
-                WidgetUtils.spacer(2.5),
-                Row(
-                  children: [
-                    Expanded(
-                        // Check marker
-                        child: SizedBox(
-                          width: 40,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedMarkingFromDialog = ConstantUtils.tick;
-                              });
-                              Navigator.pop(context);
-                            },
-                            child: const CircleAvatar(
-                              backgroundColor: Colors.teal,
-                              child: Icon(
-                                Icons.check,
-                                size: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        )
-                    ),
-                    Expanded(
-                      // Cross marker
-                        child: SizedBox(
-                          width: 40,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedMarkingFromDialog = ConstantUtils.questionMark;
-                              });
-                              Navigator.pop(context);
-                            },
-                            child: const CircleAvatar(
-                              backgroundColor: Colors.amber,
-                              child: Icon(Icons.warning, size: 16, color: Colors.white,),
-                            ),
-                          ),
-                        )
-                    ),
-                    Expanded(
-                      // Cross marker
-                        child: SizedBox(
-                          width: 40,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedMarkingFromDialog = ConstantUtils.cross;
-                              });
-                              Navigator.pop(context);
-                            },
-                            child: const CircleAvatar(
-                              backgroundColor: Colors.redAccent,
-                              child: Icon(Icons.close, size: 16, color: Colors.white,),
-                            ),
-                          ),
-                        )
-                    ),
-                  ],
-                ),
-                WidgetUtils.spacer(2.5),
-                _divider(),
-                Text(
-                    "Numbers",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: widget.primaryAppColorFromSetting,
-                      fontSize: 16,
-                    ),
-                ),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 6 : 12,
-                  children: [
-                    _maybeMarker("1", currentMarkings.contains("1"), () {
-                      _setStateAndPop("1", context);
-                    }),
-                    _maybeMarker("2", currentMarkings.contains("2"), () {
-                      _setStateAndPop("2", context);
-                    }),
-                    _maybeMarker("3", currentMarkings.contains("3"),  () {
-                      _setStateAndPop("3", context);
-                    }),
-                    _maybeMarker("4", currentMarkings.contains("4"), () {
-                      _setStateAndPop("4", context);
-                    }),
-                    _maybeMarker("5", currentMarkings.contains("5"),  () {
-                      _setStateAndPop("5", context);
-                    }),
-                    _maybeMarker("6", currentMarkings.contains("6"),  () {
-                      _setStateAndPop("6", context);
-                    }),
-                    _maybeMarker("7", currentMarkings.contains("7"),  () {
-                      _setStateAndPop("7", context);
-                    }),
-                    _maybeMarker("8", currentMarkings.contains("8"),  () {
-                      _setStateAndPop("8", context);
-                    }),
-                    _maybeMarker("9", currentMarkings.contains("9"),  () {
-                      _setStateAndPop("9", context);
-                    }),
-                    _maybeMarker("10", currentMarkings.contains("10"),  () {
-                      _setStateAndPop("10", context);
-                    }),
-                    _maybeMarker("11", currentMarkings.contains("11"),  () {
-                      _setStateAndPop("11", context);
-                    }),
-                    _maybeMarker("12", currentMarkings.contains("12"),  () {
-                      _setStateAndPop("12", context);
-                    }),
-                  ],
-                ),
-                WidgetUtils.spacer(2.5),
-                _divider(),
-                Text(
-                  "Letters",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: widget.primaryAppColorFromSetting,
-                    fontSize: 16,
-                  ),
-                ),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 6 : 12,
-                  children: [
-                    _maybeMarker("A", currentMarkings.contains("A"), () {
-                      _setStateAndPop("A", context);
-                    }),
-                    _maybeMarker("B", currentMarkings.contains("B"), () {
-                      _setStateAndPop("B", context);
-                    }),
-                    _maybeMarker("C", currentMarkings.contains("C"),  () {
-                      _setStateAndPop("C", context);
-                    }),
-                    _maybeMarker("D", currentMarkings.contains("D"), () {
-                      _setStateAndPop("D", context);
-                    }),
-                    _maybeMarker("E", currentMarkings.contains("E"),  () {
-                      _setStateAndPop("E", context);
-                    }),
-                    _maybeMarker("F", currentMarkings.contains("F"),  () {
-                      _setStateAndPop("F", context);
-                    }),
-                    _maybeMarker("G", currentMarkings.contains("G"),  () {
-                      _setStateAndPop("G", context);
-                    }),
-                    _maybeMarker("H", currentMarkings.contains("H"),  () {
-                      _setStateAndPop("H", context);
-                    }),
-                    _maybeMarker("I", currentMarkings.contains("I"),  () {
-                      _setStateAndPop("I", context);
-                    }),
-                    _maybeMarker("J", currentMarkings.contains("J"),  () {
-                      _setStateAndPop("J", context);
-                    }),
-                    _maybeMarker("K", currentMarkings.contains("K"),  () {
-                      _setStateAndPop("K", context);
-                    }),
-                    _maybeMarker("L", currentMarkings.contains("L"),  () {
-                      _setStateAndPop("L", context);
-                    }),
-                  ],
-                ),
-                WidgetUtils.spacer(2.5),
-                _divider(),
-              ],
-            ),
-          ),
-          bottomNavigationBar: Row(
-            children: [
-              Expanded(
-                child: _dismissDialogButton(),
-              ),
-              Expanded(
-                child: _resetCellButton(),
-              ),
-            ],
-          ),
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return MarkingsView(
+                primaryColorSetting: widget.gameSettings.primaryColorSetting,
+                selectMultipleMarkingsAtOnceSetting: widget.gameSettings.selectMultipleMarkingsAtOnceSetting,
+                currentMarkings: currentMarkings,
+                entityType: entityType,
+                currentEntity: currentEntity,
+                currentPlayerName: currentPlayerName,
+                // closeDialogCallback: _markDialogAsClosedAndSaveMarking,
+                setStateAndPopIfNeededCallback: _setStateAndPopIfNeeded,
+                closeDialogAndResetCellCallback: _markDialogAsClosedAndResetMarking,
+            );
+          },
         ),
       );
     }).then((value) => _markDialogAsClosedAndSaveMarking(entityType, currentEntity, currentPlayerName));
@@ -2527,7 +2339,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
+            backgroundColor: MaterialStateProperty.all<Color>(primaryColorSettingState),
           ),
           onPressed: () async {
             _markCellBackgroundColourDialogAsClosedAndResetBackground(entityType, currentEntity, currentPlayerName);
@@ -2543,7 +2355,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
+            backgroundColor: MaterialStateProperty.all<Color>(primaryColorSettingState),
           ),
           onPressed: () async {
             _markCellBackgroundColourDialogDialogAsClosedAndSaveBackgoundColour(entityType, currentEntity, currentPlayerName);
@@ -2565,14 +2377,14 @@ class MainGameViewState extends State<MainGameView> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding: EdgeInsets.all(5.0),
+                      padding: const EdgeInsets.all(5.0),
                       child: Center(
                         child: Text(
                           "Select the colour you want to change the cell background to",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontWeight: FontWeight.normal,
-                              color: widget.primaryAppColorFromSetting
+                              color: primaryColorSettingState
                           ),
                         ),
                       ),
@@ -2621,7 +2433,7 @@ class MainGameViewState extends State<MainGameView> {
                                     "Current selection",
                                     style: TextStyle(
                                         fontSize: 12,
-                                        color: widget.primaryAppColorFromSetting,
+                                        color: primaryColorSettingState,
                                         fontWeight: FontWeight.w500
                                     ),
                                   )
@@ -2678,7 +2490,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
+            backgroundColor: MaterialStateProperty.all<Color>(primaryColorSettingState),
           ),
           onPressed: () async {
             Navigator.pop(context, true);
@@ -2693,7 +2505,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
+            backgroundColor: MaterialStateProperty.all<Color>(primaryColorSettingState),
           ),
           onPressed: () async {
             Navigator.pop(context, false);
@@ -2711,9 +2523,9 @@ class MainGameViewState extends State<MainGameView> {
             child: Scaffold(
               appBar: AppBar(
                 automaticallyImplyLeading: false,
-                title: Center(child: Text("Confirm Inference", style: TextStyle(color: widget.primaryAppColorFromSetting),)),
+                title: Center(child: Text("Confirm Inference", style: TextStyle(color: primaryColorSettingState),)),
                 iconTheme: IconThemeData(
-                  color: widget.primaryAppColorFromSetting,
+                  color: primaryColorSettingState,
                 ),
               ),
               body: Center(
@@ -2760,7 +2572,7 @@ class MainGameViewState extends State<MainGameView> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: widget.primaryAppColorFromSetting
+                              color: primaryColorSettingState
                             ),
                           )
                         ],
@@ -2792,14 +2604,24 @@ class MainGameViewState extends State<MainGameView> {
     });
   }
 
-  _setStateAndPop(String text, BuildContext context) {
+  _setStateAndPopIfNeeded(
+      String text,
+      EntityType entityType,
+      String currentEntity,
+      String currentPlayerName,
+  ) {
     setState(() {
-      selectedMarkingFromDialog = text;
+      selectedMarkingsFromDialog.add(text);
+
       roomsGameState = roomsGameState;
       charactersGameState = charactersGameState;
       weaponsGameState = weaponsGameState;
+
     });
-    Navigator.pop(context);
+
+    if (!selectMultipleMarkingsAtOnceSettingState) {
+      Navigator.pop(context);
+    }
   }
 
   _setBackgroundColourStateAndPop(Color selectedColor, BuildContext context) {
@@ -2809,28 +2631,6 @@ class MainGameViewState extends State<MainGameView> {
     Navigator.pop(context);
   }
 
-  Widget _maybeMarker(String text, bool isSelectedAlready, VoidCallback onTap) {
-    return SizedBox(
-      width: 30,
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: GestureDetector(
-          onTap: onTap,
-          child: CircleAvatar(
-            backgroundColor: isSelectedAlready ? Colors.redAccent : widget.primaryAppColorFromSetting,
-            child: Text(
-                text,
-                style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold
-                )
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _colorMarker(Color color, bool isSelectedAlready, VoidCallback onTap) {
     return SizedBox(
@@ -2843,7 +2643,7 @@ class MainGameViewState extends State<MainGameView> {
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all( Radius.circular(50.0)),
               border: Border.all(
-                color: isSelectedAlready ? widget.primaryAppColorFromSetting : Colors.transparent,
+                color: isSelectedAlready ? primaryColorSettingState : Colors.transparent,
                 width: 4.0,
               ),
             ),
@@ -2854,78 +2654,6 @@ class MainGameViewState extends State<MainGameView> {
         ),
       ),
     );
-  }
-
-  Widget _maybeMarkerVanilla(String text, VoidCallback onTap) {
-    if (text == ConstantUtils.tick) {
-      return SizedBox(
-        width: 50,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: GestureDetector(
-            onTap: onTap,
-              child: const CircleAvatar(
-                backgroundColor: Colors.teal,
-                child: Icon(Icons.check, color: Colors.white, size: ConstantUtils.MARKING_ICON_DIAMETER_2,),
-              )
-          ),
-        ),
-      );
-
-    }
-    else if (text == ConstantUtils.cross) {
-      return SizedBox(
-        width: 50,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-            child: GestureDetector(
-              onTap: onTap,
-              child: const CircleAvatar(
-                backgroundColor: Colors.redAccent,
-                child: Icon(Icons.close, size: ConstantUtils.MARKING_ICON_DIAMETER_2, color: Colors.white,),
-              ),
-            )
-        ),
-      );
-
-    }
-    else if (text == ConstantUtils.questionMark) {
-      return SizedBox(
-        width: 50,
-        child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: GestureDetector(
-              onTap: onTap,
-              child: const CircleAvatar(
-                backgroundColor: Colors.amber,
-                child: Icon(Icons.warning, size: ConstantUtils.MARKING_ICON_DIAMETER_2, color: Colors.white,),
-              ),
-            )
-        ),
-      );
-    }
-    else {
-      return SizedBox(
-        width: 50,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: GestureDetector(
-            onTap: onTap,
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              child: Text(
-                  text,
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: widget.primaryAppColorFromSetting
-                  )
-              ),
-            ),
-          ),
-        ),
-      );
-    }
   }
 
   Widget _maybeMarker2(String text, VoidCallback onTap) {
@@ -2941,7 +2669,7 @@ class MainGameViewState extends State<MainGameView> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w900,
-              color: widget.primaryAppColorFromSetting
+              color: primaryColorSettingState
             ),
           ),
         ),
@@ -2987,9 +2715,10 @@ class MainGameViewState extends State<MainGameView> {
         width: ConstantUtils.MARKING_DIAMETER,
         height: ConstantUtils.MARKING_DIAMETER,
         child: CircleAvatar(
-          backgroundColor: widget.primaryAppColorFromSetting,
-          child: Center(child: Icon(Icons.not_interested, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,)),
+          backgroundColor: primaryColorSettingState,
+          child: const Center(child: Icon(Icons.not_interested, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,)),
         )
     );
   }
+
 }

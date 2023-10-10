@@ -1,3 +1,4 @@
+import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class HomePageState extends Equatable {
@@ -16,14 +17,17 @@ class HomePageSettingsLoading extends HomePageState {
 }
 
 class HomePageSettingsFetched extends HomePageState {
-  final int primaryColor;
+  final GameSettings gameSettings;
+  final int numberOfPreviouslySavedGames;
 
   const HomePageSettingsFetched({
-    required this.primaryColor,
+    required this.gameSettings,
+    required this.numberOfPreviouslySavedGames,
   });
 
   @override
   List<Object> get props => [
-    primaryColor,
+    gameSettings,
+    numberOfPreviouslySavedGames,
   ];
 }

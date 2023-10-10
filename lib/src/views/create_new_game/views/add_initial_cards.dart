@@ -170,6 +170,8 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                         ),
                       ),
                     ),
+                    WidgetUtils.spacer(25),
+                    _tapAnywhereToContinue()
                   ]),
                 );
               },
@@ -198,9 +200,29 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
 
   }
 
+  _tapAnywhereToContinue() {
+    return const Align(
+      alignment: Alignment.center,
+      child: Padding(
+        padding: EdgeInsets.all(10),
+        child: Center(
+          child: Text(
+            "Tap anywhere to continue",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    KeyboardUtils.hideKeyboard(context);
     return BlocListener<CreateNewGameBloc, CreateNewGameState>(
       listener: (context, state) {
         if (state is NewGameDetailsModified) {
@@ -213,32 +235,52 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: BlocBuilder<CreateNewGameBloc, CreateNewGameState>(
           builder: (context, state) {
             if (state is NewGameDetailsModified) {
-              return SingleChildScrollView(
-                physics: const ScrollPhysics(),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: WidgetUtils.skipNulls([
-                      Divider(color: Theme.of(context).primaryColor),
-                      WidgetUtils.spacer(2.5),
-                      _renderGameNameView(state),
-                      WidgetUtils.spacer(2.5),
-                      _renderTotalPlayers(state),
-                      WidgetUtils.spacer(2.5),
-                      _renderSelectNumberOfCardsHintText(),
-                      WidgetUtils.spacer(2.5),
-                      _renderAllPersonCards(),
-                      WidgetUtils.spacer(2.5),
-                      _renderAllWeaponsCards(),
-                      WidgetUtils.spacer(2.5),
-                      _renderAllRoomsCards(),
-                    ]),
+              final cardNames = state.initialCards.map((e) => e.cardName()).toList();
+              cardNames.forEach((element) {
+                if (ConstantUtils.characterList.contains(element)) {
+                  characterNameToBoolMap[element] = true;
+                }
+                else if (ConstantUtils.weaponList.contains(element)) {
+                  weaponNameToBoolMap[element] = true;
+                }
+                else  {
+                  roomNameToBoolMap[element] = true;
+                }
+              });
+
+              return ScrollConfiguration(
+                behavior: const ScrollBehavior(),
+                child: GlowingOverscrollIndicator(
+                  axisDirection: AxisDirection.down,
+                  color: widget.primaryAppColorFromSetting,
+                  child: SingleChildScrollView(
+                    physics: const ScrollPhysics(),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: WidgetUtils.skipNulls([
+                          Divider(color: Theme.of(context).primaryColor),
+                          WidgetUtils.spacer(2.5),
+                          _renderGameNameView(state),
+                          WidgetUtils.spacer(2.5),
+                          _renderTotalPlayers(state),
+                          WidgetUtils.spacer(2.5),
+                          _renderSelectNumberOfCardsHintText(),
+                          WidgetUtils.spacer(2.5),
+                          _renderAllPersonCards(),
+                          WidgetUtils.spacer(2.5),
+                          _renderAllWeaponsCards(),
+                          WidgetUtils.spacer(2.5),
+                          _renderAllRoomsCards(),
+                        ]),
+                      ),
+                    ),
                   ),
                 ),
               );
             }
             else {
-              return WidgetUtils.progressIndicator();
+              return WidgetUtils.progressIndicator(widget.primaryAppColorFromSetting);
             }
           }),
     );
@@ -387,6 +429,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Character,
                 ConstantUtils.characterList[index],
+                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.characterList[index]]!,
                 _checkBoxPersons(ConstantUtils.characterList[index])
             );
           }
@@ -405,6 +448,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Weapon,
                 ConstantUtils.weaponList[index],
+                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.weaponList[index]]!,
                 _checkBoxWeapons(ConstantUtils.weaponList[index])
             );
           }
@@ -423,6 +467,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Room,
                 ConstantUtils.roomList[index],
+                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.roomList[index]]!,
                 _checkBoxRooms(ConstantUtils.roomList[index])
             );
           }
@@ -430,7 +475,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
     );
   }
 
-  _renderInitialCardSelectViewForEntity(EntityType entityType, String entityName, Widget child) {
+  _renderInitialCardSelectViewForEntity(EntityType entityType, String entityName, String entityDisplayName, Widget child) {
     return Row(
       children: [
         Expanded(
@@ -461,7 +506,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                 }
               },
               child: Text(
-                entityName,
+                entityDisplayName,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

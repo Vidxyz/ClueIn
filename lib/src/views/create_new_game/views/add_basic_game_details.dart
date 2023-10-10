@@ -13,9 +13,11 @@ import 'package:numberpicker/numberpicker.dart';
 
 class AddBasicGameDetailsView extends StatefulWidget {
   final Color primaryAppColorFromSetting;
+  final int numberOfPreviouslySavedGames;
   
   const AddBasicGameDetailsView({super.key,
     required this.primaryAppColorFromSetting,
+    required this.numberOfPreviouslySavedGames,
   });
 
 
@@ -25,71 +27,130 @@ class AddBasicGameDetailsView extends StatefulWidget {
   }
 }
 
-class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with AutomaticKeepAliveClientMixin {
+class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with AutomaticKeepAliveClientMixin, WidgetsBindingObserver  {
   @override
   bool get wantKeepAlive => true;
 
-  final List<String> playerNamesHint = ["P1", "P2", "P3", "P4", "P5", "P6"];
+  final List<String> playerNamesHint = ["Me", "P2", "P3", "P4", "P5", "P6"];
 
-  final TextEditingController _totalPlayersController = TextEditingController();
   int totalPlayerCountState = 6;
 
   late CreateNewGameBloc _createNewGameBloc;
+
+  TextEditingController gameNameController = TextEditingController();
+
+  List<TextEditingController> playerNameControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+  ];
+  bool shouldGameNameBeReset = true;
+  bool shouldPlayerNamesBeReset = true;
 
   @override
   void initState() {
     super.initState();
 
     _createNewGameBloc = BlocProvider.of<CreateNewGameBloc>(context);
+
+    if (shouldGameNameBeReset) {
+      gameNameController.text = "Game ${widget.numberOfPreviouslySavedGames + 1}";
+      shouldGameNameBeReset = false;
+    }
+
+    if (shouldPlayerNamesBeReset) {
+      playerNameControllers.asMap().entries.forEach((element) {
+        playerNameControllers[element.key].text = playerNamesHint[element.key];
+      });
+      shouldPlayerNamesBeReset = false;
+    }
+
+    final currentState = _createNewGameBloc.state;
+    if (currentState is NewGameDetailsModified) {
+      _createNewGameBloc.add(
+          NewGameDetailedChanged(
+              gameName: gameNameController.text,
+              totalPlayers: currentState.totalPlayers,
+              playerNames: {
+                0: playerNameControllers[0].text,
+                1: playerNameControllers[1].text,
+                2: playerNameControllers[2].text,
+                3: playerNameControllers[3].text,
+                4: playerNameControllers[4].text,
+                5: playerNameControllers[5].text,
+              },
+              initialCards: currentState.initialCards
+          )
+      );
+    }
+
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    gameNameController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return  BlocListener<CreateNewGameBloc, CreateNewGameState>(
       listener: (context, state) {
+        if (state is NewGameDetailsModified) {
 
+        }
       },
       child: BlocBuilder<CreateNewGameBloc, CreateNewGameState>(
         builder: (context, state) {
           if (state is NewGameDetailsModified) {
-            return SingleChildScrollView(
-              child: Center(
-                child: GestureDetector(
-                  onTap: () {
-                    KeyboardUtils.hideKeyboard(context);
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: WidgetUtils.skipNulls([
-                      Divider(color: Theme.of(context).primaryColor),
-                      WidgetUtils.spacer(2.5),
-                      _renderGameNameView(),
-                      WidgetUtils.spacer(2.5),
-                      _renderTotalPlayers(),
-                      Padding(
-                        padding: const EdgeInsets.all(5),
-                        child: Text(
-                          "You are P1",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: widget.primaryAppColorFromSetting,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold
+            return ScrollConfiguration(
+              behavior: const ScrollBehavior(),
+              child: GlowingOverscrollIndicator(
+                axisDirection: AxisDirection.down,
+                color: widget.primaryAppColorFromSetting,
+                child: SingleChildScrollView(
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        KeyboardUtils.hideKeyboard(context);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: WidgetUtils.skipNulls([
+                          Divider(color: Theme.of(context).primaryColor),
+                          WidgetUtils.spacer(2.5),
+                          _renderGameNameView(),
+                          WidgetUtils.spacer(2.5),
+                          _renderTotalPlayers(),
+                          Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: Text(
+                              "You are P1",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: widget.primaryAppColorFromSetting,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
                           ),
-                        ),
+                          WidgetUtils.spacer(2.5),
+                          _renderParticipantsList(state),
+                          // Move this to its own widget
+                          // _renderAvailabilitiesView(state),
+                        ]),
                       ),
-                      WidgetUtils.spacer(2.5),
-                      _renderParticipantsList(state),
-                      // Move this to its own widget
-                      // _renderAvailabilitiesView(state),
-                    ]),
+                    ),
                   ),
                 ),
               ),
             );
           }
           else {
-            return WidgetUtils.progressIndicator();
+            return WidgetUtils.progressIndicator(widget.primaryAppColorFromSetting);
           }
         }),
       );
@@ -124,6 +185,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                     child: Column(
                       children: WidgetUtils.skipNulls([
                         TextFormField(
+                          controller: playerNameControllers[index],
                           textCapitalization: TextCapitalization.words,
                             inputFormatters: [
                               LengthLimitingTextInputFormatter(ConstantUtils.maxPlayerNameCharacters),
@@ -156,6 +218,35 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                             border: OutlineInputBorder(
                               borderSide: BorderSide(
                                 color: widget.primaryAppColorFromSetting,
+                              ),
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                playerNameControllers[index].clear();
+                                final currentState = _createNewGameBloc.state;
+                                if (currentState is NewGameDetailsModified) {
+                                  Map<int, String> newList = Map.from(currentState.playerNames);
+                                  newList[index] = "";
+                                  print("playername list is changing to - $newList");
+                                  _createNewGameBloc.add(
+                                      NewGameDetailedChanged(
+                                          gameName: currentState.gameName,
+                                          totalPlayers: currentState.totalPlayers,
+                                          playerNames: newList,
+                                          initialCards: currentState.initialCards
+                                      )
+                                  );
+                                }
+                              },
+                              icon: const SizedBox(
+                                height: 25,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.redAccent,
+                                  child: Icon(
+                                    Icons.clear,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -232,7 +323,11 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
             textCapitalization: TextCapitalization.words,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
+            controller: gameNameController,
             onChanged: (text) {
+              if (text.trim().isEmpty) {
+                gameNameController.clear();
+              }
               final currentState = _createNewGameBloc.state;
               if (currentState is NewGameDetailsModified) {
                 _createNewGameBloc.add(
@@ -255,6 +350,32 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
               border: const OutlineInputBorder(),
               hintText: 'Enter game name',
               hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.normal),
+              suffixIcon: IconButton(
+                onPressed: () {
+                  gameNameController.clear();
+                  final currentState = _createNewGameBloc.state;
+                  if (currentState is NewGameDetailsModified) {
+                    _createNewGameBloc.add(
+                        NewGameDetailedChanged(
+                            gameName: "",
+                            totalPlayers: currentState.totalPlayers,
+                            playerNames: currentState.playerNames,
+                            initialCards: currentState.initialCards
+                        )
+                    );
+                  }
+                },
+                icon: const SizedBox(
+                  height: 25,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.redAccent,
+                    child: Icon(
+                        Icons.clear,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         )

@@ -1,4 +1,5 @@
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
+import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/settings/bloc/settings_bloc.dart';
@@ -17,7 +18,7 @@ class SettingsView extends StatefulWidget {
     required this.primaryAppColorSettingsValue,
   });
 
-  static Route<bool> route(Color primaryAppColorSettingsValue) => MaterialPageRoute(
+  static Route<GameSettings> route(Color primaryAppColorSettingsValue) => MaterialPageRoute(
     settings: const RouteSettings(
         name: routeName
     ),
@@ -66,23 +67,35 @@ class SettingsViewState extends State<SettingsView> {
           color: widget.primaryAppColorSettingsValue,
         ),
       ),
-      body: BlocListener<SettingsBloc, SettingsState>(
-        listener: (context, state) {
-          if (state is SettingsFetched) {
-            primaryAppColorSettingsValue = state.primaryColor;
-            // clueVersionSettingsValue = state.clueVersion;
-            selectMultipleMarkingsAtOnceSettingsValue = state.selectMultipleMarkingsAtOnce;
-          }
+      body: WillPopScope(
+        onWillPop: () {
+          Navigator.pop(
+            context,
+            GameSettings(
+                primaryColorSetting: Color(primaryAppColorSettingsValue),
+                selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSettingsValue
+            )
+          );
+          return Future.value(false);
         },
-        child: BlocBuilder<SettingsBloc, SettingsState> (
-          builder: (context, state) {
+        child: BlocListener<SettingsBloc, SettingsState>(
+          listener: (context, state) {
             if (state is SettingsFetched) {
-              return _showSettingsList(state);
-            }
-            else {
-              return WidgetUtils.progressIndicator();
+              primaryAppColorSettingsValue = state.primaryColor;
+              // clueVersionSettingsValue = state.clueVersion;
+              selectMultipleMarkingsAtOnceSettingsValue = state.selectMultipleMarkingsAtOnce;
             }
           },
+          child: BlocBuilder<SettingsBloc, SettingsState> (
+            builder: (context, state) {
+              if (state is SettingsFetched) {
+                return _showSettingsList(state);
+              }
+              else {
+                return WidgetUtils.progressIndicator(widget.primaryAppColorSettingsValue);
+              }
+            },
+          ),
         ),
       ),
     );

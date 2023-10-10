@@ -1,4 +1,5 @@
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
+import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/snackbar_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
@@ -17,13 +18,16 @@ GlobalKey userPromptTextKey = GlobalKey();
 class CreateNewGameView extends StatefulWidget {
   static const String routeName = 'new-game';
   
-  final Color primaryAppColorFromSetting;
+  final GameSettings gameSettings;
+  final int numberOfPreviouslySavedGames;
 
-  const CreateNewGameView({super.key,
-    required this.primaryAppColorFromSetting
+  const CreateNewGameView({
+    super.key,
+    required this.gameSettings,
+    required this.numberOfPreviouslySavedGames,
   });
 
-  static Route route(Color primaryAppColorFromSetting) {
+  static Route route(GameSettings gameSettings, int numberOfPreviouslySavedGames) {
     return MaterialPageRoute<void>(
         settings: const RouteSettings(
             name: routeName
@@ -37,7 +41,10 @@ class CreateNewGameView extends StatefulWidget {
                     )
                 ),
               ],
-              child: CreateNewGameView(primaryAppColorFromSetting: primaryAppColorFromSetting),
+              child: CreateNewGameView(
+                gameSettings: gameSettings,
+                numberOfPreviouslySavedGames: numberOfPreviouslySavedGames,
+              ),
             ));
   }
 
@@ -82,10 +89,10 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
         title: Text(
           'New Game',
           key: userPromptTextKey,
-          style: TextStyle(color: widget.primaryAppColorFromSetting),
+          style: TextStyle(color: widget.gameSettings.primaryColorSetting),
         ),
         iconTheme: IconThemeData(
-          color: widget.primaryAppColorFromSetting,
+          color: widget.gameSettings.primaryColorSetting,
         ),
       ),
       body: BlocListener<CreateNewGameBloc, CreateNewGameState>(
@@ -98,7 +105,7 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
                 context,
                 MainGameView.route(
                     gameDefinition: state.gameDefinition,
-                    primaryAppColorFromSetting: widget.primaryAppColorFromSetting,
+                    gameSettings: widget.gameSettings,
                 )
             );
           }
@@ -125,10 +132,15 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
       final currentState = _createNewGameBloc.state;
       if (currentState is NewGameDetailsModified) {
         final maxCards = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / currentState.totalPlayers).floor();
-        final publicInfoCardCount = ConstantUtils.MAX_GAME_CARDS - (maxCards * currentState.totalPlayers) - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL;
-        if (publicInfoCardCount == 0) {
+        final expectedPublicInfoCardCount = ConstantUtils.MAX_GAME_CARDS - (maxCards * currentState.totalPlayers) - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL;
+        if (expectedPublicInfoCardCount == 0) {
           setState(() {
             floatingActionButtonIcon = const Icon(Icons.check, color: Colors.white);
+          });
+        }
+        else {
+          setState(() {
+            floatingActionButtonIcon = const Icon(Icons.navigate_next, color: Colors.white);
           });
         }
       }
@@ -170,20 +182,21 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
               },
               physics: const NeverScrollableScrollPhysics(),
               children: WidgetUtils.skipNulls( [
-                AddBasicGameDetailsView(primaryAppColorFromSetting: widget.primaryAppColorFromSetting),
-                AddInitialCardsView(primaryAppColorFromSetting: widget.primaryAppColorFromSetting),
+                AddBasicGameDetailsView(
+                    primaryAppColorFromSetting: widget.gameSettings.primaryColorSetting,
+                    numberOfPreviouslySavedGames: widget.numberOfPreviouslySavedGames,
+                ),
+                AddInitialCardsView(primaryAppColorFromSetting: widget.gameSettings.primaryColorSetting),
                 !isPublicInfoCardCountZero(state) ?
                   AddPublicInfoCardsView(
                       maxCardsPublicInfo: getPublicInfoCardCount(state),
-                      primaryAppColorFromSetting: widget.primaryAppColorFromSetting
+                      primaryAppColorFromSetting: widget.gameSettings.primaryColorSetting
                   ) : null,
               ]),
             );
           }
           else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return WidgetUtils.progressIndicator(widget.gameSettings.primaryColorSetting);
           }
         });
   }
@@ -192,7 +205,7 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
     return FloatingActionButton(
         heroTag: "CreateNewMeetupViewbutton0",
         onPressed: _onActionButtonPress,
-        backgroundColor: widget.primaryAppColorFromSetting,
+        backgroundColor: widget.gameSettings.primaryColorSetting,
         child: floatingActionButtonIcon
     );
   }
@@ -208,14 +221,14 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
             child: FloatingActionButton(
                 heroTag: "CreateNewMeetupViewbutton1",
                 onPressed: _onBackFloatingActionButtonPress,
-                backgroundColor: widget.primaryAppColorFromSetting,
+                backgroundColor: widget.gameSettings.primaryColorSetting,
                 child: const Icon(Icons.navigate_before, color: Colors.white)
             ),
           ),
           FloatingActionButton(
               heroTag: "CreateNewMeetupViewbutton2",
               onPressed: _onActionButtonPress,
-              backgroundColor: widget.primaryAppColorFromSetting,
+              backgroundColor: widget.gameSettings.primaryColorSetting,
               child: floatingActionButtonIcon
           )
         ],
@@ -279,9 +292,12 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
 
   bool _isPageDataValid(int pageNumber, NewGameDetailsModified state) {
     gameHasValidName() => state.gameName.isNotEmpty;
+    allPlayersHaveNonEmptyNames() => state.playerNames.entries.map((e) => e.value).map((e) => e.isNotEmpty).reduce((value, element) => value && element);
     playerNamesEqualPlayerCount() => state.playerNames.length >= state.totalPlayers && state.totalPlayers != 0;
-    initialCardCountEqualsExpected() => state.initialCards.length ==
-        ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / state.totalPlayers).floor();
+    initialCardCountEqualsExpected() {
+      return state.initialCards.length ==
+          ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / state.totalPlayers).floor();
+    }
 
     publicInfoCardCountEqualsExpected() {
       final maxCardsPerPlayer = ((ConstantUtils.MAX_GAME_CARDS - ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL) / state.totalPlayers).floor();
@@ -293,12 +309,12 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
     switch (pageNumber) {
       case 0:
       // Validate that everyone has a name, game has a name
-        return playerNamesEqualPlayerCount() && gameHasValidName();
+        return playerNamesEqualPlayerCount() && allPlayersHaveNonEmptyNames() && gameHasValidName();
       case 1:
       // Validate rest of the meetup data
-        return playerNamesEqualPlayerCount() && gameHasValidName() && initialCardCountEqualsExpected();
+        return playerNamesEqualPlayerCount()  && allPlayersHaveNonEmptyNames() && gameHasValidName() && initialCardCountEqualsExpected();
       case 2:
-        return playerNamesEqualPlayerCount() && gameHasValidName() && initialCardCountEqualsExpected() && publicInfoCardCountEqualsExpected();
+        return playerNamesEqualPlayerCount()  && allPlayersHaveNonEmptyNames() && gameHasValidName() && initialCardCountEqualsExpected() && publicInfoCardCountEqualsExpected();
       default:
         return false;
     }

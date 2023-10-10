@@ -1,4 +1,6 @@
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
+import 'package:cluein_app/src/models/settings/game_settings.dart';
+import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/about/about_page.dart';
 import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
@@ -38,7 +40,8 @@ class HomePageView extends StatefulWidget {
 
 class HomePageViewState extends State<HomePageView> {
 
-  late Color primaryAppColorFromSetting;
+  GameSettings? gameSettings;
+  int numberOfPreviouslySavedGamesState = 0;
 
   late HomePageBloc homePageBloc;
 
@@ -59,13 +62,13 @@ class HomePageViewState extends State<HomePageView> {
     return Scaffold(
       body: BlocListener<HomePageBloc, HomePageState>(
         listener: (context, state) {
-          if (state is HomePageSettingsFetched) {
-            primaryAppColorFromSetting = Color(state.primaryColor);
-          }
+
         },
         child: BlocBuilder<HomePageBloc, HomePageState> (
           builder: (context, state) {
             if (state is HomePageSettingsFetched) {
+              gameSettings = state.gameSettings;
+              numberOfPreviouslySavedGamesState = state.numberOfPreviouslySavedGames;
               return Scaffold(
                 body: Center(
                   child: SingleChildScrollView(
@@ -81,6 +84,8 @@ class HomePageViewState extends State<HomePageView> {
                         WidgetUtils.spacer(5),
                         _actionButton("About"),
                         WidgetUtils.spacer(5),
+                        _actionButton("How To Play"),
+                        WidgetUtils.spacer(5),
                       ],
                     ),
                   ),
@@ -88,7 +93,7 @@ class HomePageViewState extends State<HomePageView> {
               );
             }
             else {
-              return WidgetUtils.progressIndicator();
+              return WidgetUtils.progressIndicator(gameSettings?.primaryColorSetting ?? ConstantUtils.primaryAppColor);
             }
           },
         ),
@@ -113,12 +118,15 @@ class HomePageViewState extends State<HomePageView> {
               case "Settings":
                 _goToSettingsPage();
                 break;
+              case "How To Play":
+                _goToSettingsPage();
+                break;
               default:
                 break;
             }
           },
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(primaryAppColorFromSetting),
+            backgroundColor: MaterialStateProperty.all<Color>(gameSettings?.primaryColorSetting ?? ConstantUtils.primaryAppColor),
           ),
           child: Text(title),
       ),
@@ -148,28 +156,28 @@ class HomePageViewState extends State<HomePageView> {
   _goToCreateNewGamePage() {
     Navigator.push(
         context,
-        CreateNewGameView.route(primaryAppColorFromSetting)
+        CreateNewGameView.route(gameSettings!, numberOfPreviouslySavedGamesState)
     ).then((value) => _fetchHomePageSettings());
   }
 
   _goToSettingsPage() {
     Navigator.push(
         context,
-        SettingsView.route(primaryAppColorFromSetting)
+        SettingsView.route(gameSettings!.primaryColorSetting)
     ).then((value) => _fetchHomePageSettings());
   }
 
   _goToLoadGamePage() {
     Navigator.push(
         context,
-        LoadGameView.route(primaryAppColorFromSetting)
+        LoadGameView.route(gameSettings!)
     ).then((value) => _fetchHomePageSettings());
   }
 
   _goToAboutPage() {
     Navigator.push(
         context,
-        AboutPage.route(primaryAppColorFromSetting)
+        AboutPage.route(gameSettings!.primaryColorSetting)
     ).then((value) => _fetchHomePageSettings());
   }
 

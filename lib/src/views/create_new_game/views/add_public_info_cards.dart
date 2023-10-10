@@ -63,6 +63,20 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
       }
     });
 
+    if (currentState is NewGameDetailsModified) {
+      characterNameToBoolMap = {};
+      weaponNameToBoolMap = {};
+      roomNameToBoolMap = {};
+      _createNewGameBloc.add(
+          NewGameDetailedChanged(
+              gameName: currentState.gameName,
+              totalPlayers: currentState.totalPlayers,
+              playerNames: currentState.playerNames,
+              initialCards: currentState.initialCards,
+              publicInfoCards: []
+          )
+      );
+    }
 
   }
 
@@ -81,32 +95,52 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
       child: BlocBuilder<CreateNewGameBloc, CreateNewGameState>(
           builder: (context, state) {
             if (state is NewGameDetailsModified) {
-              return SingleChildScrollView(
-                physics: const ScrollPhysics(),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: WidgetUtils.skipNulls([
-                      Divider(color: Theme.of(context).primaryColor),
-                      WidgetUtils.spacer(2.5),
-                      _renderGameNameView(state),
-                      WidgetUtils.spacer(2.5),
-                      _renderTotalPlayers(state),
-                      WidgetUtils.spacer(2.5),
-                      _renderSelectNumberOfCardsHintText(),
-                      WidgetUtils.spacer(2.5),
-                      _renderAllPersonCards(state),
-                      WidgetUtils.spacer(2.5),
-                      _renderAllWeaponsCards(state),
-                      WidgetUtils.spacer(2.5),
-                      _renderAllRoomsCards(state),
-                    ]),
+              final cardNames = state.publicInfoCards.map((e) => e.cardName()).toList();
+              cardNames.forEach((element) {
+                if (ConstantUtils.characterList.contains(element)) {
+                  characterNameToBoolMap[element] = true;
+                }
+                else if (ConstantUtils.weaponList.contains(element)) {
+                  weaponNameToBoolMap[element] = true;
+                }
+                else  {
+                  roomNameToBoolMap[element] = true;
+                }
+              });
+
+              return ScrollConfiguration(
+                behavior: const ScrollBehavior(),
+                child: GlowingOverscrollIndicator(
+                  axisDirection: AxisDirection.down,
+                  color: widget.primaryAppColorFromSetting,
+                  child: SingleChildScrollView(
+                    physics: const ScrollPhysics(),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: WidgetUtils.skipNulls([
+                          Divider(color: Theme.of(context).primaryColor),
+                          WidgetUtils.spacer(2.5),
+                          _renderGameNameView(state),
+                          WidgetUtils.spacer(2.5),
+                          _renderTotalPlayers(state),
+                          WidgetUtils.spacer(2.5),
+                          _renderSelectNumberOfCardsHintText(),
+                          WidgetUtils.spacer(2.5),
+                          _renderAllPersonCards(state),
+                          WidgetUtils.spacer(2.5),
+                          _renderAllWeaponsCards(state),
+                          WidgetUtils.spacer(2.5),
+                          _renderAllRoomsCards(state),
+                        ]),
+                      ),
+                    ),
                   ),
                 ),
               );
             }
             else {
-              return WidgetUtils.progressIndicator();
+              return WidgetUtils.progressIndicator(widget.primaryAppColorFromSetting);
             }
           }),
     );
@@ -252,6 +286,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Character,
                 ConstantUtils.characterList[index],
+                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.characterList[index]]!,
                 _checkBoxPersons(ConstantUtils.characterList[index], isDisabled: isDisabled),
                 isDisabled: isDisabled
             );
@@ -272,6 +307,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Weapon,
                 ConstantUtils.weaponList[index],
+                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.weaponList[index]]!,
                 _checkBoxWeapons(ConstantUtils.weaponList[index], isDisabled: isDisabled),
                 isDisabled: isDisabled
             );
@@ -292,6 +328,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Room,
                 ConstantUtils.roomList[index],
+                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.roomList[index]]!,
                 _checkBoxRooms(ConstantUtils.roomList[index], isDisabled: isDisabled),
                 isDisabled: isDisabled
             );
@@ -303,6 +340,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
   _renderInitialCardSelectViewForEntity(
       EntityType entityType,
       String entityName,
+      String entityDisplayName,
       Widget child,
       {bool isDisabled = false}
       ) {
@@ -338,7 +376,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
                 }
               },
               child: Text(
-                entityName,
+                entityDisplayName,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
