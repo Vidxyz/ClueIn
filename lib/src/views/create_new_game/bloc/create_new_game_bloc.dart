@@ -37,7 +37,10 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
   void _beginNewClueGame(BeginNewClueGame event, Emitter<CreateNewGameState> emit) async {
     emit(const NewGameBeingSaved());
     final newGameId = uuid.v4();
-    final newNames = Map.fromEntries(event.playerNames.entries.map((e) => MapEntry(e.key, "${e.value}${ConstantUtils.UNIQUE_NAME_DELIMITER}${uuid.v4()}")));
+    final newNames = Map.fromEntries(
+        event.playerNames.entries.take(event.totalPlayers)
+            .map((e) => MapEntry(e.key, "${e.value}${ConstantUtils.UNIQUE_NAME_DELIMITER}${uuid.v4()}"))
+    );
     final gameToSave = GameDefinition(
         gameId: newGameId,
         gameName: event.gameName,

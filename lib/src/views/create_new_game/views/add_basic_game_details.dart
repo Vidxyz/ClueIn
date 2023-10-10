@@ -100,7 +100,10 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
     return  BlocListener<CreateNewGameBloc, CreateNewGameState>(
       listener: (context, state) {
         if (state is NewGameDetailsModified) {
-
+          state.playerNames.entries.forEach((element) {
+            playerNameControllers[element.key].text = element.value;
+            playerNameControllers[element.key].selection = TextSelection.fromPosition(TextPosition(offset: element.value.length));
+          });
         }
       },
       child: BlocBuilder<CreateNewGameBloc, CreateNewGameState>(
@@ -185,7 +188,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                     child: Column(
                       children: WidgetUtils.skipNulls([
                         TextFormField(
-                          controller: playerNameControllers[index],
+                         controller: playerNameControllers[index],
                           textCapitalization: TextCapitalization.words,
                             inputFormatters: [
                               LengthLimitingTextInputFormatter(ConstantUtils.maxPlayerNameCharacters),
@@ -194,7 +197,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                             final currentState = _createNewGameBloc.state;
                             if (currentState is NewGameDetailsModified) {
                               Map<int, String> newList = Map.from(currentState.playerNames);
-                              newList[index] = text.trim();
+                              newList[index] = text.trim().capitalize();
                               _createNewGameBloc.add(
                                   NewGameDetailedChanged(
                                       gameName: currentState.gameName,

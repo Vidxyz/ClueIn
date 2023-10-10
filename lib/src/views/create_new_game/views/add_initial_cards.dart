@@ -294,7 +294,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
         child: Padding(
           padding: const EdgeInsets.all(5.0),
           child: Text(
-            "Please select exactly the $maxCards cards that you start the game with",
+            "Please select exactly the $maxCards cards that you start the game with. These are the card that were dealt to you randomly. Ensure that no one else knows this!",
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: widget.primaryAppColorFromSetting,

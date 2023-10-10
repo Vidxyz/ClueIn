@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
@@ -26,6 +27,7 @@ GlobalKey cell3Key = GlobalKey();
 GlobalKey undoKey = GlobalKey();
 GlobalKey redoKey = GlobalKey();
 GlobalKey gameNameTextKey = GlobalKey();
+GlobalKey playerNameTextKey = GlobalKey();
 
 enum EntityType { Character, Weapon, Room }
 enum InferenceType { NoOtherPlayerHasThisCard, ThisPlayerHasNoOtherCards }
@@ -108,6 +110,9 @@ class MainGameViewState extends State<MainGameView> {
   bool selectMultipleMarkingsAtOnceSettingState = false;
 
   int currentQuickMarkerIndex = 0;
+
+  Timer? debounce;
+  bool isSnackbarBeingShown = false;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -483,6 +488,89 @@ class MainGameViewState extends State<MainGameView> {
       ),
     );
 
+    // Game name button
+    basicTargets.add(
+      TargetFocus(
+        identify: "gameNameTextKey2",
+        keyTarget: gameNameTextKey,
+        alignSkip: Alignment.centerRight,
+        color: primaryColorSettingState,
+        shape: ShapeLightFocus.RRect,
+        enableOverlayTab: true,
+        enableTargetTab: true,
+        paddingFocus: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: WidgetUtils.skipNulls([
+                  WidgetUtils.spacer(25),
+                  const Align(
+                    child: Text(
+                      "Tap on the name of the game to change it",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(25),
+                  _tapAnywhereToContinue()
+                ]),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    // Player name button
+    basicTargets.add(
+      TargetFocus(
+        identify: "playerNameTextKey",
+        keyTarget: playerNameTextKey,
+        alignSkip: Alignment.centerRight,
+        color: primaryColorSettingState,
+        shape: ShapeLightFocus.RRect,
+        enableOverlayTab: true,
+        enableTargetTab: true,
+        paddingFocus: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: WidgetUtils.skipNulls([
+                  WidgetUtils.spacer(25),
+                  const Align(
+                    child: Text(
+                      "Tap on a player's name to change it",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(25),
+                  _tapAnywhereToContinue()
+                ]),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+
     // Undo button
     basicTargets.add(
       TargetFocus(
@@ -505,7 +593,7 @@ class MainGameViewState extends State<MainGameView> {
                   WidgetUtils.spacer(25),
                   const Align(
                     child: Text(
-                      "Press this button to undo your last move",
+                      "Tap here to undo your last move",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.white,
@@ -547,7 +635,7 @@ class MainGameViewState extends State<MainGameView> {
                   WidgetUtils.spacer(25),
                   const Align(
                     child: Text(
-                      "Press this button to redo your last move",
+                      "Tap here to redo your last move",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.white,
@@ -1454,7 +1542,17 @@ class MainGameViewState extends State<MainGameView> {
                           _showMarkerSelectDialog(EntityType.Room, currentEntity, currentPlayerName, currentMarkings);
                         }
                         else {
-                          SnackbarUtils.showSnackBarMedium(context, "Cannot modify markings here as this is initial game info! Long press to change background colour if needed.");
+                          if (!isSnackbarBeingShown) {
+                            isSnackbarBeingShown = true;
+                            SnackbarUtils.showSnackBarMedium(context, "Cannot modify markings here as this is initial game info! Long press to change background colour if needed.");
+
+                            if (debounce?.isActive ?? false) debounce?.cancel();
+                            debounce = Timer(SnackbarUtils.mediumDuration, () {
+                              isSnackbarBeingShown = false;
+                            });
+                          }
+
+
                         }
                       },
                       child: Card(
@@ -1502,16 +1600,16 @@ class MainGameViewState extends State<MainGameView> {
             child: Column(
               children: [
                 Row(
-                  children: playerNameMapEntries.map((e) => e.value).map((currentPlayerName) {
+                  children: playerNameMapEntries.map((currentPlayerNameMap) {
 
                     final knownWeapons = weaponsGameState.entries.where((entry) {
-                      return entry.value[currentPlayerName]!.contains(ConstantUtils.tick);
+                      return entry.value[currentPlayerNameMap.value]!.contains(ConstantUtils.tick);
                     });
                     final knownRooms = roomsGameState.entries.where((entry) {
-                      return entry.value[currentPlayerName]!.contains(ConstantUtils.tick);
+                      return entry.value[currentPlayerNameMap.value]!.contains(ConstantUtils.tick);
                     });
                     final knownCharacters = charactersGameState.entries.where((entry) {
-                      return entry.value[currentPlayerName]!.contains(ConstantUtils.tick);
+                      return entry.value[currentPlayerNameMap.value]!.contains(ConstantUtils.tick);
                     });
                     final knownCards = knownCharacters.length + knownRooms.length + knownWeapons.length;
 
@@ -1519,8 +1617,9 @@ class MainGameViewState extends State<MainGameView> {
                       Expanded(
                         flex:  3,
                         child: InkWell(
+                          key: currentPlayerNameMap.key == 0 ? playerNameTextKey : null,
                           onTap: () {
-                            _showEditPlayerNameDialog(currentPlayerName);
+                            _showEditPlayerNameDialog(currentPlayerNameMap.value);
                           },
                           child: Column(
                             children: [
@@ -1535,7 +1634,7 @@ class MainGameViewState extends State<MainGameView> {
                                   child: FittedBox(
                                     fit: BoxFit.scaleDown,
                                     child: Text(
-                                      currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
+                                      currentPlayerNameMap.value.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14
