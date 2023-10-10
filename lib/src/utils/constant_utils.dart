@@ -27,6 +27,8 @@ class ConstantUtils {
   static const String questionMark = "?";
   static const String noOneHasThis = "*";
 
+  static const List<String> quickMarkers = [tick, cross, questionMark];
+
   static const List<String> allEntitites = [...characterList, ...weaponList, ...roomList];
 
   static const Map<String, String> entityNameToDisplayNameMap = {

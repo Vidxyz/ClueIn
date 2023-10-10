@@ -227,7 +227,6 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                                 if (currentState is NewGameDetailsModified) {
                                   Map<int, String> newList = Map.from(currentState.playerNames);
                                   newList[index] = "";
-                                  print("playername list is changing to - $newList");
                                   _createNewGameBloc.add(
                                       NewGameDetailedChanged(
                                           gameName: currentState.gameName,

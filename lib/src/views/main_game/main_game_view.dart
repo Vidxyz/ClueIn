@@ -22,6 +22,7 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 GlobalKey cell1Key = GlobalKey();
 GlobalKey cell2Key = GlobalKey();
+GlobalKey cell3Key = GlobalKey();
 GlobalKey undoKey = GlobalKey();
 GlobalKey redoKey = GlobalKey();
 GlobalKey gameNameTextKey = GlobalKey();
@@ -105,6 +106,8 @@ class MainGameViewState extends State<MainGameView> {
 
   Color primaryColorSettingState = ConstantUtils.primaryAppColor;
   bool selectMultipleMarkingsAtOnceSettingState = false;
+
+  int currentQuickMarkerIndex = 0;
 
   @override
   void initState() {
@@ -398,6 +401,61 @@ class MainGameViewState extends State<MainGameView> {
                     child: Center(
                       child: Text(
                         "Ensure you only disclose as little information as required!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(25),
+                  _tapAnywhereToContinue()
+                ]),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    // Double tap
+    basicTargets.add(
+      TargetFocus(
+        identify: "cell3Key",
+        keyTarget: cell3Key,
+        alignSkip: Alignment.topRight,
+        color: primaryColorSettingState,
+        shape: ShapeLightFocus.RRect,
+        enableOverlayTab: true,
+        enableTargetTab: true,
+        paddingFocus: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: WidgetUtils.skipNulls([
+                  const Align(
+                    child: Text(
+                      "Double tap on a cell to toggle between basic markers",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                  WidgetUtils.spacer(25),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Center(
+                      child: Text(
+                        "This cycles through the 3 symbols available for selection in the dialog that pops up when a cell is tapped.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -1312,6 +1370,39 @@ class MainGameViewState extends State<MainGameView> {
 
   }
 
+  _addNextQuickMarker(EntityType entityType, String currentEntity, String currentPlayerName) {
+    if (currentQuickMarkerIndex < ConstantUtils.quickMarkers.length - 1) {
+      currentQuickMarkerIndex = currentQuickMarkerIndex + 1;
+    }
+    else {
+      currentQuickMarkerIndex = 0;
+    }
+    final nextMarker = ConstantUtils.quickMarkers[currentQuickMarkerIndex];
+
+    final markersToRemove = ConstantUtils.quickMarkers.where((element) => element != nextMarker);
+    setState(() {
+      if (entityType == EntityType.Character) {
+        charactersGameState[currentEntity]?[currentPlayerName]?.remove(nextMarker);
+        markersToRemove.forEach((element) {
+          charactersGameState[currentEntity]?[currentPlayerName]?.remove(element);
+        });
+      }
+      else if (entityType == EntityType.Weapon) {
+        weaponsGameState[currentEntity]?[currentPlayerName]?.remove(nextMarker);
+        markersToRemove.forEach((element) {
+          weaponsGameState[currentEntity]?[currentPlayerName]?.remove(element);
+        });
+      }
+      else {
+        roomsGameState[currentEntity]?[currentPlayerName]?.remove(nextMarker);
+        markersToRemove.forEach((element) {
+          roomsGameState[currentEntity]?[currentPlayerName]?.remove(element);
+        });
+      }
+      selectedMarkingsFromDialog.add(nextMarker);
+    });
+  }
+
   _generateRoomsListMarkings() {
     return ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
@@ -1336,6 +1427,12 @@ class MainGameViewState extends State<MainGameView> {
                     child: GestureDetector(
                       onLongPress: () {
                         _showBackgroundColourSelectDialog(EntityType.Room, currentEntity, currentPlayerName, currentSelectedColor);
+                      },
+                      onDoubleTap: () {
+                        setState(() {
+                          _addNextQuickMarker(EntityType.Room, currentEntity, currentPlayerName);
+                        });
+                        _markDialogAsClosedAndSaveMarking(EntityType.Room, currentEntity, currentPlayerName);
                       },
                       onTap: () {
                         final List<String> currentMarkings = List.from(roomsGameState[currentEntity]![currentPlayerName]!);
@@ -1544,6 +1641,12 @@ class MainGameViewState extends State<MainGameView> {
                       onLongPress: () {
                         _showBackgroundColourSelectDialog(EntityType.Weapon, currentEntity, currentPlayerName, currentSelectedColor);
                       },
+                      onDoubleTap: () {
+                        setState(() {
+                          _addNextQuickMarker(EntityType.Weapon, currentEntity, currentPlayerName);
+                        });
+                        _markDialogAsClosedAndSaveMarking(EntityType.Weapon, currentEntity, currentPlayerName);
+                      },
                       onTap: () {
                         final List<String> currentMarkings = List.from(weaponsGameState[currentEntity]![currentPlayerName]!);
                         if (!(currentPlayerName == gameDefinitionState.playerNames[0]!) &&
@@ -1596,7 +1699,13 @@ class MainGameViewState extends State<MainGameView> {
                         flex: 3,
                         child: GestureDetector(
                           onLongPress: () {
-                            _showBackgroundColourSelectDialog(EntityType.Weapon, currentCharacter, currentPlayerName, currentSelectedColor);
+                            _showBackgroundColourSelectDialog(EntityType.Character, currentCharacter, currentPlayerName, currentSelectedColor);
+                          },
+                          onDoubleTap: () {
+                            setState(() {
+                              _addNextQuickMarker(EntityType.Character, currentCharacter, currentPlayerName);
+                            });
+                            _markDialogAsClosedAndSaveMarking(EntityType.Character, currentCharacter, currentPlayerName);
                           },
                           onTap: () {
                             final List<String> currentMarkings = List.from(charactersGameState[currentCharacter]![currentPlayerName]!);
@@ -1613,7 +1722,8 @@ class MainGameViewState extends State<MainGameView> {
                           },
                           child: Card(
                             key: index == 1 && currentCharacter == ConstantUtils.characterList[0] ? cell1Key :
-                                (index == 1 && currentCharacter == ConstantUtils.characterList[1] ? cell2Key : null),
+                                (index == 1 && currentCharacter == ConstantUtils.characterList[1] ? cell2Key :
+                                (index == 1 && currentCharacter == ConstantUtils.characterList[2] ? cell3Key : null)),
                             color: Color(cellBackgroundColourState[currentCharacter]![currentPlayerName]!),
                             child: _fillInCharacterCellContentsBasedOnState(currentCharacter, currentPlayerName),
                           ),
