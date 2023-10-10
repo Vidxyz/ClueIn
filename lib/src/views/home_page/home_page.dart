@@ -121,7 +121,7 @@ class HomePageViewState extends State<HomePageView> {
                 break;
               case "How To Play":
                 // _goToSettingsPage();
-               SnackbarUtils.showSnackBarMedium(context, r"Soon to come... hang tight!");
+               SnackbarUtils.showSnackBarMedium(context, "Soon to come... hang tight!");
                 break;
               default:
                 break;
@@ -173,7 +173,9 @@ class HomePageViewState extends State<HomePageView> {
     Navigator.push(
         context,
         LoadGameView.route(gameSettings!)
-    ).then((value) => _fetchHomePageSettings());
+    ).then((value) {
+      _fetchHomePageSettings();
+    });
   }
 
   _goToAboutPage() {

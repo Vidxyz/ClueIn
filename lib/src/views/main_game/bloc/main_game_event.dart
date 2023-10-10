@@ -140,3 +140,10 @@ class RedoLastMove extends MainGameEvent {
   ];
 }
 
+class GameOverEvent extends MainGameEvent {
+
+  const GameOverEvent();
+
+  @override
+  List<Object> get props => [super.props];
+}

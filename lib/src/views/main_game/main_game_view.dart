@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
+import 'package:cluein_app/src/models/game_conclusion.dart';
 import 'package:cluein_app/src/models/save/game_definition.dart';
 import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:cluein_app/src/models/stack.dart';
@@ -114,6 +115,8 @@ class MainGameViewState extends State<MainGameView> {
 
   Timer? debounce;
   bool isSnackbarBeingShown = false;
+
+  bool isGameOver = false;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -744,6 +747,11 @@ class MainGameViewState extends State<MainGameView> {
 
   @override
   Widget build(BuildContext context) {
+    final conclusion = generateConclusion();
+    if (conclusion.isGameOver() && !isGameOver) {
+      isGameOver = true;
+      _mainGameBloc.add(const GameOverEvent());
+    }
     return Scaffold(
       appBar: AppBar(
         title: InkWell(
@@ -838,10 +846,41 @@ class MainGameViewState extends State<MainGameView> {
               redoStack = state.redoStack;
             });
           }
+
+          if (state is GameOverState) {
+            _showGameOverDialog(conclusion);
+          }
         },
         child: _mainBody(),
       ),
     );
+  }
+
+  /// Returns true iff there are exactly 3 cards completely unnaccounted for ---> Weapon/Room/Character combo
+  GameConclusion generateConclusion() {
+    final Map<CharacterName, bool> characterReductionMap = charactersGameState.map((key, value) =>
+        MapEntry(key, value.entries
+            .map((e) => e.value.contains(ConstantUtils.cross))
+            .reduce((value, element) => value && element))
+    );
+
+    final Map<CharacterName, bool> weaponReductionMap = weaponsGameState.map((key, value) =>
+        MapEntry(key, value.entries
+            .map((e) => e.value.contains(ConstantUtils.cross))
+            .reduce((value, element) => value && element))
+    );
+
+    final Map<CharacterName, bool> roomReductionMap = roomsGameState.map((key, value) =>
+        MapEntry(key, value.entries
+            .map((e) => e.value.contains(ConstantUtils.cross))
+            .reduce((value, element) => value && element))
+    );
+
+    final String? murderer = characterReductionMap.entries.where((element) => element.value).firstOrNull?.key;
+    final String? room = roomReductionMap.entries.where((element) => element.value).firstOrNull?.key;
+    final String? weapon = weaponReductionMap.entries.where((element) => element.value).firstOrNull?.key;
+
+    return GameConclusion(character: murderer, room: room, weapon: weapon);
   }
 
   _setupGameStateInitially() {
@@ -1144,6 +1183,7 @@ class MainGameViewState extends State<MainGameView> {
                           textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
+                            fontWeight: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? FontWeight.bold : FontWeight.normal,
                             color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null,
                             decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Weapon, currentEntity) ? TextDecoration.lineThrough : null,
                             decorationColor: primaryColorSettingState,
@@ -1184,6 +1224,7 @@ class MainGameViewState extends State<MainGameView> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
+                          fontWeight: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? FontWeight.bold : FontWeight.normal,
                           color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null,
                           decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Room, currentEntity) ? TextDecoration.lineThrough : null,
                           decorationColor: primaryColorSettingState,
@@ -2559,6 +2600,156 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
+  _showGameOverDialog(GameConclusion conclusion) {
+    _dismissDialogButton() {
+      return Padding(
+        padding: const EdgeInsets.all(10),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(primaryColorSettingState),
+          ),
+          onPressed: () async {
+            // widget.closeDialogCallback(widget.entityType, widget.currentEntity, widget.currentPlayerName);
+            Navigator.pop(context, false);
+          },
+          child: const Text("Go back", style: TextStyle(fontSize: 15, color: Colors.white)),
+        ),
+      );
+    }
+
+    showDialog(context: context, builder: (context) {
+      return Dialog(
+        child: Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Center(
+              child: Text(
+                "Game Over",
+                style: TextStyle(color: widget.gameSettings.primaryColorSetting),
+              ),
+            ),
+            iconTheme: IconThemeData(
+              color: widget.gameSettings.primaryColorSetting,
+            ),
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                _divider(),
+                WidgetUtils.spacer(25),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: Text(
+                      "Congratulations!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColorSettingState,
+                      ),
+                    ),
+                  ),
+                ),
+                WidgetUtils.spacer(25),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "With the info you have noted down, we can now infer the unknown cards!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      // fontWeight: FontWeight.bold,
+                      color: primaryColorSettingState,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                WidgetUtils.spacer(10),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                        text: "We can now deduce that ",
+                        style: TextStyle(
+                            color: primaryColorSettingState,
+                            fontSize: 18
+                        ),
+                        children: [
+                          TextSpan(
+                              text: ConstantUtils.entityNameToDisplayNameMap[conclusion.character],
+                              style: TextStyle(
+                                  color: primaryColorSettingState,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold
+                              )
+                          ),
+                          TextSpan(
+                              text: " was murdered in the ",
+                              style: TextStyle(
+                                color: primaryColorSettingState,
+                                fontSize: 18,
+                                // fontWeight: FontWeight.bold
+                              )
+                          ),
+                          TextSpan(
+                              text: ConstantUtils.entityNameToDisplayNameMap[conclusion.room],
+                              style: TextStyle(
+                                  color: primaryColorSettingState,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold
+                              )
+                          ),
+                          TextSpan(
+                              text: " using the ",
+                              style: TextStyle(
+                                color: primaryColorSettingState,
+                                fontSize: 18,
+                                // fontWeight: FontWeight.bold
+                              )
+                          ),
+                          TextSpan(
+                              text: ConstantUtils.entityNameToDisplayNameMap[conclusion.weapon],
+                              style: TextStyle(
+                                  color: primaryColorSettingState,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold
+                              )
+                          ),
+                        ]
+                    )
+                  ),
+                ),
+                WidgetUtils.spacer(10),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "On your next turn, you can guess your conclusion and win the game!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      // fontWeight: FontWeight.bold,
+                      color: primaryColorSettingState,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                WidgetUtils.spacer(25),
+                _divider(),
+              ],
+            ),
+          ),
+          bottomNavigationBar: Row(
+            children: [
+              Expanded(
+                child: _dismissDialogButton(),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
   _showMarkerSelectDialog(
       EntityType entityType,
       String currentEntity,
@@ -2576,8 +2767,8 @@ class MainGameViewState extends State<MainGameView> {
         child: StatefulBuilder(
           builder: (context, setState) {
             return MarkingsView(
-                primaryColorSetting: widget.gameSettings.primaryColorSetting,
-                selectMultipleMarkingsAtOnceSetting: widget.gameSettings.selectMultipleMarkingsAtOnceSetting,
+                primaryColorSetting: primaryColorSettingState,
+                selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSettingState,
                 currentMarkings: currentMarkings,
                 entityType: entityType,
                 currentEntity: currentEntity,
@@ -2818,8 +3009,13 @@ class MainGameViewState extends State<MainGameView> {
                           StatefulBuilder(
                           builder: (BuildContext context, StateSetter setState) {
                             return Checkbox(
-                              // checkColor: Colors.white,
-                              // value: true,
+                                fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                                  final c = primaryColorSettingState;
+                                  if (states.contains(MaterialState.disabled)) {
+                                    return c.withOpacity(.32);
+                                  }
+                                  return c;
+                                }),
                                 value: inferenceType == InferenceType.NoOtherPlayerHasThisCard ?
                                 dontAskAgainForInferenceNoOtherPlayerHasThisCard :
                                 dontAskAgainForInferenceThisPlayerHasNoOtherCards,

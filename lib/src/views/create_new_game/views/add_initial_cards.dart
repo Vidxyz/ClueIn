@@ -128,7 +128,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                       padding: EdgeInsets.all(10),
                       child: Center(
                         child: Text(
-                          "Shuffle the cards and set aside ${ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL} cards, one of each category - Character, Weapon and Room",
+                          "Shuffle the cards and set aside ${ConstantUtils.MAX_CARD_UNKNOWN_BY_ALL} cards, one of each category - Character, Weapon and Room. Ensure that no one sees these cards!",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -143,7 +143,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                       padding: const EdgeInsets.all(10),
                       child: Center(
                         child: Text(
-                          "Shuffle the cards and distribute $maxCardsPerPlayer cards to each player. These cards can be of any category",
+                          "Shuffle the REMAINING cards and distribute $maxCardsPerPlayer cards to each player. These cards can be of any category.",
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,

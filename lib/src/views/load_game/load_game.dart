@@ -177,13 +177,13 @@ class LoadGameViewState extends State<LoadGameView> {
   }
 
   _openSavedGame(GameDefinition gameDefinition) {
-    Navigator.pushReplacement(
+    Navigator.push(
         context,
         MainGameView.route(
             gameDefinition: gameDefinition,
             gameSettings: widget.gameSettings,
         )
-    );
+    ).then((value) => Navigator.pop(context));
   }
 
   _deleteCurrentGame(String gameId) {

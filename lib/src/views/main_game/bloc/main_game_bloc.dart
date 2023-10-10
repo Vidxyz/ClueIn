@@ -23,6 +23,15 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     on<MainGameStateLoadInitial>(_mainGameStateLoadInitial);
     on<UndoLastMove>(_undoLastMove);
     on<RedoLastMove>(_redoLastMove);
+    on<GameOverEvent>(_gameOverEvent);
+  }
+
+  void _gameOverEvent(GameOverEvent event, Emitter<MainGameState> emit) async {
+    final currentState = state;
+    if (currentState is MainGameStateModified) {
+      emit(const GameOverState());
+      emit(currentState);
+    }
   }
 
   void _redoLastMove(RedoLastMove event, Emitter<MainGameState> emit) async {

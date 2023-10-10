@@ -47,6 +47,13 @@ class DummyState extends MainGameState {
 
   const DummyState();
 }
+class GameOverState extends MainGameState {
+
+  @override
+  List<Object> get props => [];
+
+  const GameOverState();
+}
 class MainGameStateModified extends MainGameState {
 
   final GameState charactersGameState;
