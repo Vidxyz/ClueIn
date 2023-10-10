@@ -12,14 +12,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class LoadGameView extends StatefulWidget {
+  final Color primaryAppColorSettingsValue;
 
   static const String routeName = "load-game";
 
   const LoadGameView({
     super.key,
+    required this.primaryAppColorSettingsValue,
   });
 
-  static Route<bool> route() => MaterialPageRoute(
+  static Route<bool> route(Color primaryAppColorSettingsValue) => MaterialPageRoute(
     settings: const RouteSettings(
         name: routeName
     ),
@@ -30,7 +32,7 @@ class LoadGameView extends StatefulWidget {
                 sembast: RepositoryProvider.of<SembastRepository>(context)
             )),
       ],
-      child: const LoadGameView(),
+      child: LoadGameView(primaryAppColorSettingsValue: primaryAppColorSettingsValue),
     ),
   );
 
@@ -57,15 +59,15 @@ class LoadGameViewState extends State<LoadGameView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Load game", style: TextStyle(color: ConstantUtils.primaryAppColor),),
-        iconTheme: const IconThemeData(
-          color: ConstantUtils.primaryAppColor,
+        title: Text("Load game", style: TextStyle(color: widget.primaryAppColorSettingsValue),),
+        iconTheme: IconThemeData(
+          color: widget.primaryAppColorSettingsValue,
         ),
       ),
       floatingActionButton: FloatingActionButton(
           heroTag: "CreateNewMeetupViewbuttonLoadGameView",
           onPressed: _goToCreateNewGamePage,
-          backgroundColor: ConstantUtils.primaryAppColor,
+          backgroundColor: widget.primaryAppColorSettingsValue,
           child: const Icon(Icons.add, color: Colors.white)
       ),
       body: BlocListener<LoadGameBloc, LoadGameState>(
@@ -89,7 +91,7 @@ class LoadGameViewState extends State<LoadGameView> {
   _goToCreateNewGamePage() {
     Navigator.pushReplacement(
         context,
-        CreateNewGameView.route()
+        CreateNewGameView.route(widget.primaryAppColorSettingsValue)
     );
   }
 
@@ -106,7 +108,7 @@ class LoadGameViewState extends State<LoadGameView> {
                 // Show dialog asking confirmation
                 Widget cancelButton = TextButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+                    foregroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorSettingsValue),
                   ),
                   onPressed:  () {
                     Navigator.pop(context, false);
@@ -174,7 +176,10 @@ class LoadGameViewState extends State<LoadGameView> {
   _openSavedGame(GameDefinition gameDefinition) {
     Navigator.pushReplacement(
         context,
-        MainGameView.route(gameDefinition: gameDefinition)
+        MainGameView.route(
+            gameDefinition: gameDefinition,
+            primaryAppColorFromSetting: widget.primaryAppColorSettingsValue,
+        )
     );
   }
 

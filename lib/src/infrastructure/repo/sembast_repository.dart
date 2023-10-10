@@ -38,6 +38,10 @@ class SembastRepository {
     return (await store.record(key).get(db) as Iterable<Object?>?)?.map((e) => e.toString()).toList();
   }
 
+  Future<Key?> delete(String key) async {
+    return await store.record(key).delete(db);
+  }
+
   Future<void> writeStringList(String key, List<String> value) async {
     await store.record(key).put(db, value);
   }

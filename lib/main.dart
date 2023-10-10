@@ -2,6 +2,7 @@ import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/views/home_page/home_page.dart';
 import 'package:cluein_app/src/views/shared_components/ads/bloc/ad_bloc.dart';
+import 'package:cluein_app/src/views/splash/splash_page.dart';
 import 'package:cluein_app/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +64,13 @@ class _AppViewState extends State<AppView> {
   NavigatorState get _navigator => _navigatorKey.currentState!;
 
   @override
+  void initState() {
+    super.initState();
+
+    var hack = RepositoryProvider.of<SembastRepository>(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "ClueIn",
@@ -76,7 +84,9 @@ class _AppViewState extends State<AppView> {
       //   '/complete-profile': (context) => const CompleteProfilePage(),
       // },
       navigatorKey: _navigatorKey,
-      home: const HomePage(),
+      onGenerateRoute: (_) {
+        return SplashPage.route();
+      },
     );
   }
 }

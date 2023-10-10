@@ -59,6 +59,10 @@ class ConstantUtils {
   static const String SHARED_PREF_SAVED_IDS_KEY = "cluein_game_ids";
   static const String SHARED_PREF_SAVED_GAMES_KEY = "cluein_saved_game";
 
+  static const String SETTING_PRIMARY_COLOR = "cluein_app_primary_color";
+  static const String SETTING_CLUE_VERSION = "cluein_app_flavor";
+  static const String SETTING_MULTIPLE_MARKINGS_AT_ONCE = "cluein_app_multiple_markings_at_once";
+
   static const int MAX_UNDO_STACK_SIZE = 25;
 
   static const String UNIQUE_NAME_DELIMITER = "_@@_";
@@ -72,6 +76,7 @@ class ConstantUtils {
   static const String githubIssuesUrl = "https://github.com/Vidxyz/ClueIn/issues";
   static const String githubIconPath = "assets/github_icon.png";
 
+  static const int maxPlayerNameCharacters = 6;
 
   static const Color primaryAppColor = Color(0xff733ddf);
   // static const Color primaryAppColor = Color(0xff1aa328);

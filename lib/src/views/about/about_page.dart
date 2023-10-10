@@ -5,16 +5,19 @@ import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatefulWidget {
   static const String routeName = "about";
+  
+  final Color primaryAppColorSettingsValue;
 
   const AboutPage({
     super.key,
+    required this.primaryAppColorSettingsValue,
   });
 
-  static Route<bool> route() => MaterialPageRoute(
+  static Route<bool> route(Color primaryAppColorSettingsValue) => MaterialPageRoute(
     settings: const RouteSettings(
         name: routeName
     ),
-    builder: (_) => const AboutPage(),
+    builder: (_) => AboutPage(primaryAppColorSettingsValue: primaryAppColorSettingsValue),
   );
 
   @override
@@ -74,9 +77,9 @@ class AboutPageState extends State<AboutPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('About', style: TextStyle(color: ConstantUtils.primaryAppColor),),
-        iconTheme: const IconThemeData(
-          color: ConstantUtils.primaryAppColor,
+        title: Text('About', style: TextStyle(color: widget.primaryAppColorSettingsValue),),
+        iconTheme: IconThemeData(
+          color: widget.primaryAppColorSettingsValue,
         ),
       ),
       body: ListView(
@@ -111,27 +114,6 @@ class AboutPageState extends State<AboutPage> {
     );
   }
 
-  Widget _linkButtons(String url, String assetPath) =>
-      GestureDetector(
-        onTap: () async {
-          if (await canLaunchUrl(Uri.parse(url))) {
-            await launchUrl(Uri.parse(url));
-          }
-          else {
-            throw "Could not launch $url";
-          }
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            image: DecorationImage(
-                image: AssetImage(assetPath),
-                fit: BoxFit.fitHeight
-            ),
-          ),
-        ),
-      );
-
   Widget _addText(String text) =>
       Container(
         margin: const EdgeInsets.only(top: 15, bottom: 15),
@@ -160,8 +142,8 @@ class AboutPageState extends State<AboutPage> {
           child: Center(
             child: Text(
               displayText,
-              style: const TextStyle(
-                  color: ConstantUtils.primaryAppColor
+              style: TextStyle(
+                  color: widget.primaryAppColorSettingsValue
               ),
             ),
           ),

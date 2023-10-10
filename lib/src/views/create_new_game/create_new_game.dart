@@ -16,10 +16,14 @@ GlobalKey userPromptTextKey = GlobalKey();
 
 class CreateNewGameView extends StatefulWidget {
   static const String routeName = 'new-game';
+  
+  final Color primaryAppColorFromSetting;
 
-  const CreateNewGameView({super.key});
+  const CreateNewGameView({super.key,
+    required this.primaryAppColorFromSetting
+  });
 
-  static Route route() {
+  static Route route(Color primaryAppColorFromSetting) {
     return MaterialPageRoute<void>(
         settings: const RouteSettings(
             name: routeName
@@ -33,7 +37,7 @@ class CreateNewGameView extends StatefulWidget {
                     )
                 ),
               ],
-              child: const CreateNewGameView(),
+              child: CreateNewGameView(primaryAppColorFromSetting: primaryAppColorFromSetting),
             ));
   }
 
@@ -78,10 +82,10 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
         title: Text(
           'New Game',
           key: userPromptTextKey,
-          style: const TextStyle(color: ConstantUtils.primaryAppColor),
+          style: TextStyle(color: widget.primaryAppColorFromSetting),
         ),
-        iconTheme: const IconThemeData(
-          color: ConstantUtils.primaryAppColor,
+        iconTheme: IconThemeData(
+          color: widget.primaryAppColorFromSetting,
         ),
       ),
       body: BlocListener<CreateNewGameBloc, CreateNewGameState>(
@@ -92,7 +96,10 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
           else if (state is NewGameSavedAndReadyToStart) {
             Navigator.pushReplacement(
                 context,
-                MainGameView.route(gameDefinition: state.gameDefinition)
+                MainGameView.route(
+                    gameDefinition: state.gameDefinition,
+                    primaryAppColorFromSetting: widget.primaryAppColorFromSetting,
+                )
             );
           }
         },
@@ -163,9 +170,13 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
               },
               physics: const NeverScrollableScrollPhysics(),
               children: WidgetUtils.skipNulls( [
-                const AddBasicGameDetailsView(),
-                const AddInitialCardsView(),
-                !isPublicInfoCardCountZero(state) ? AddPublicInfoCardsView(maxCardsPublicInfo: getPublicInfoCardCount(state)) : null,
+                AddBasicGameDetailsView(primaryAppColorFromSetting: widget.primaryAppColorFromSetting),
+                AddInitialCardsView(primaryAppColorFromSetting: widget.primaryAppColorFromSetting),
+                !isPublicInfoCardCountZero(state) ?
+                  AddPublicInfoCardsView(
+                      maxCardsPublicInfo: getPublicInfoCardCount(state),
+                      primaryAppColorFromSetting: widget.primaryAppColorFromSetting
+                  ) : null,
               ]),
             );
           }
@@ -181,7 +192,7 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
     return FloatingActionButton(
         heroTag: "CreateNewMeetupViewbutton0",
         onPressed: _onActionButtonPress,
-        backgroundColor: ConstantUtils.primaryAppColor,
+        backgroundColor: widget.primaryAppColorFromSetting,
         child: floatingActionButtonIcon
     );
   }
@@ -197,14 +208,14 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
             child: FloatingActionButton(
                 heroTag: "CreateNewMeetupViewbutton1",
                 onPressed: _onBackFloatingActionButtonPress,
-                backgroundColor: ConstantUtils.primaryAppColor,
+                backgroundColor: widget.primaryAppColorFromSetting,
                 child: const Icon(Icons.navigate_before, color: Colors.white)
             ),
           ),
           FloatingActionButton(
               heroTag: "CreateNewMeetupViewbutton2",
               onPressed: _onActionButtonPress,
-              backgroundColor: ConstantUtils.primaryAppColor,
+              backgroundColor: widget.primaryAppColorFromSetting,
               child: floatingActionButtonIcon
           )
         ],

@@ -12,8 +12,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 class AddBasicGameDetailsView extends StatefulWidget {
-
-  const AddBasicGameDetailsView({super.key});
+  final Color primaryAppColorFromSetting;
+  
+  const AddBasicGameDetailsView({super.key,
+    required this.primaryAppColorFromSetting,
+  });
 
 
   @override
@@ -63,13 +66,13 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                       _renderGameNameView(),
                       WidgetUtils.spacer(2.5),
                       _renderTotalPlayers(),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.all(5),
                         child: Text(
                           "You are P1",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: ConstantUtils.primaryAppColor,
+                              color: widget.primaryAppColorFromSetting,
                               fontSize: 14,
                               fontWeight: FontWeight.bold
                           ),
@@ -111,7 +114,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: index == 0 ? ConstantUtils.primaryAppColor : null,
+                          color: index == 0 ? widget.primaryAppColorFromSetting : null,
                         ),
                       ),
                     )
@@ -123,7 +126,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                         TextFormField(
                           textCapitalization: TextCapitalization.words,
                             inputFormatters: [
-                              LengthLimitingTextInputFormatter(5),
+                              LengthLimitingTextInputFormatter(ConstantUtils.maxPlayerNameCharacters),
                             ],
                           onChanged: (text) {
                             final currentState = _createNewGameBloc.state;
@@ -144,9 +147,9 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                           decoration: InputDecoration(
                             hintText: playerNamesHint[index],
                             hintStyle: const TextStyle(color: Colors.grey),
-                            border: const OutlineInputBorder(
+                            border: OutlineInputBorder(
                               borderSide: BorderSide(
-                                color: ConstantUtils.primaryAppColor,
+                                color: widget.primaryAppColorFromSetting,
                               ),
                             ),
                           ),

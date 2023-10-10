@@ -1,7 +1,5 @@
 import 'package:cluein_app/src/models/game_card.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
-import 'package:cluein_app/src/utils/keyboard_utils.dart';
-import 'package:cluein_app/src/utils/screen_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.dart';
@@ -13,10 +11,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddPublicInfoCardsView extends StatefulWidget {
   final int maxCardsPublicInfo;
+  final Color primaryAppColorFromSetting;
 
   const AddPublicInfoCardsView({
     super.key,
     required this.maxCardsPublicInfo,
+    required this.primaryAppColorFromSetting,
   });
 
   @override
@@ -119,8 +119,8 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
         child: Text(
           "Please select the ${widget.maxCardsPublicInfo} cards that has been set aside for everyone to know.",
           textAlign: TextAlign.center,
-          style: const TextStyle(
-              color: ConstantUtils.primaryAppColor,
+          style: TextStyle(
+              color: widget.primaryAppColorFromSetting,
               fontSize: 14,
               fontWeight: FontWeight.bold
           ),
@@ -357,7 +357,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          const c = ConstantUtils.primaryAppColor;
+          final c = widget.primaryAppColorFromSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -413,7 +413,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          const c = ConstantUtils.primaryAppColor;
+          final c = widget.primaryAppColorFromSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -439,7 +439,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          const c = ConstantUtils.primaryAppColor;
+          final c = widget.primaryAppColorFromSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -479,11 +479,11 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
                 controller: personCountTextFieldController,
                 enabled: false,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintStyle: TextStyle(color: Colors.grey),
+                decoration: InputDecoration(
+                  hintStyle: const TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: ConstantUtils.primaryAppColor,
+                      color: widget.primaryAppColorFromSetting,
                     ),
                   ),
                 ),

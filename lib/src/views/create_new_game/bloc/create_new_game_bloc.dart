@@ -34,7 +34,6 @@ class CreateNewGameBloc extends Bloc<CreateNewGameEvent, CreateNewGameState> {
     );
   }
 
-  // This will save current game to SharedPrefs, and then emit event to pop and send shared prefs ID
   void _beginNewClueGame(BeginNewClueGame event, Emitter<CreateNewGameState> emit) async {
     emit(const NewGameBeingSaved());
     final newGameId = uuid.v4();

@@ -30,14 +30,17 @@ class MainGameView extends StatefulWidget {
   static const String routeName = "game";
 
   final GameDefinition gameDefinition;
+  final Color primaryAppColorFromSetting;
 
   const MainGameView({
     super.key,
-    required this.gameDefinition
+    required this.gameDefinition,
+    required this.primaryAppColorFromSetting,
   });
 
   static Route<bool> route({
     required GameDefinition gameDefinition,
+    required Color primaryAppColorFromSetting,
   }) => MaterialPageRoute(
     settings: const RouteSettings(
         name: routeName
@@ -51,6 +54,7 @@ class MainGameView extends StatefulWidget {
       ],
       child: MainGameView(
         gameDefinition: gameDefinition,
+        primaryAppColorFromSetting: primaryAppColorFromSetting,
       ),
     ),
   );
@@ -129,7 +133,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "gameNameTextKey",
         keyTarget: gameNameTextKey,
         alignSkip: Alignment.topRight,
-        color: ConstantUtils.primaryAppColor,
+        color: widget.primaryAppColorFromSetting,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -227,7 +231,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "cell1Key",
         keyTarget: cell1Key,
         alignSkip: Alignment.topRight,
-        color: ConstantUtils.primaryAppColor,
+        color: widget.primaryAppColorFromSetting,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -310,7 +314,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "cell2Key",
         keyTarget: cell2Key,
         alignSkip: Alignment.topRight,
-        color: ConstantUtils.primaryAppColor,
+        color: widget.primaryAppColorFromSetting,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -378,7 +382,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "undoKey",
         keyTarget: undoKey,
         alignSkip: Alignment.centerRight,
-        color: ConstantUtils.primaryAppColor,
+        color: widget.primaryAppColorFromSetting,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -418,7 +422,7 @@ class MainGameViewState extends State<MainGameView> {
         identify: "redoKey",
         keyTarget: redoKey,
         alignSkip: Alignment.centerRight,
-        color: ConstantUtils.primaryAppColor,
+        color: widget.primaryAppColorFromSetting,
         shape: ShapeLightFocus.RRect,
         enableOverlayTab: true,
         enableTargetTab: true,
@@ -456,7 +460,7 @@ class MainGameViewState extends State<MainGameView> {
 
     basicTutorialCoachMark = TutorialCoachMark(
       targets: basicTargets,
-      colorShadow: ConstantUtils.primaryAppColor,
+      colorShadow: widget.primaryAppColorFromSetting,
       hideSkip: false,
       showSkipInLastTarget: true,
       alignSkip: Alignment.topRight,
@@ -528,17 +532,17 @@ class MainGameViewState extends State<MainGameView> {
           child: Text(
             gameDefinitionState.gameName,
             key: gameNameTextKey,
-            style: const TextStyle(color: ConstantUtils.primaryAppColor),
+            style: TextStyle(color: widget.primaryAppColorFromSetting),
           )
         ),
-        iconTheme: const IconThemeData(
-          color: ConstantUtils.primaryAppColor,
+        iconTheme: IconThemeData(
+          color: widget.primaryAppColorFromSetting,
         ),
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.help,
-              color: ConstantUtils.primaryAppColor,
+              color: widget.primaryAppColorFromSetting,
             ),
             onPressed: _performTutorial,
           ),
@@ -546,7 +550,7 @@ class MainGameViewState extends State<MainGameView> {
             key: undoKey,
             icon: Icon(
               Icons.undo,
-              color: _canUndo() ? ConstantUtils.primaryAppColor : Colors.grey,
+              color: _canUndo() ? widget.primaryAppColorFromSetting : Colors.grey,
             ),
             onPressed: _performUndo,
           ),
@@ -554,7 +558,7 @@ class MainGameViewState extends State<MainGameView> {
             key: redoKey,
             icon: Icon(
               Icons.redo,
-              color: _canRedo() ? ConstantUtils.primaryAppColor : Colors.grey,
+              color: _canRedo() ? widget.primaryAppColorFromSetting : Colors.grey,
             ),
             onPressed: _performRedo,
           ),
@@ -737,18 +741,18 @@ class MainGameViewState extends State<MainGameView> {
               preferredSize: const Size.fromHeight(0),
               child: Column(
                 children: [
-                  const Divider(
+                  Divider(
                     height: 3,
                     thickness: 3,
                     endIndent: 0,
-                    color: ConstantUtils.primaryAppColor,
+                    color: widget.primaryAppColorFromSetting,
                   ),
                   _playerNamesHeaderPinned(),
-                  const Divider(
+                  Divider(
                     height: 3,
                     thickness: 3,
                     endIndent: 0,
-                    color: ConstantUtils.primaryAppColor,
+                    color: widget.primaryAppColorFromSetting,
                   )
                 ],
               ),
@@ -833,7 +837,7 @@ class MainGameViewState extends State<MainGameView> {
                               fontSize: 15,
                               color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null,
                               decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Character, currentEntity) ? TextDecoration.lineThrough : null,
-                              decorationColor: ConstantUtils.primaryAppColor,
+                              decorationColor: widget.primaryAppColorFromSetting,
                               decorationThickness: 3,
                           ),
                       ),
@@ -873,7 +877,7 @@ class MainGameViewState extends State<MainGameView> {
                           fontSize: 15,
                             color: noPlayersHaveThisCard(EntityType.Weapon, currentEntity) ? Colors.red : null,
                             decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Weapon, currentEntity) ? TextDecoration.lineThrough : null,
-                            decorationColor: ConstantUtils.primaryAppColor,
+                            decorationColor: widget.primaryAppColorFromSetting,
                             decorationThickness: 3,
                         ),
                       ),
@@ -913,7 +917,7 @@ class MainGameViewState extends State<MainGameView> {
                           fontSize: 15,
                           color: noPlayersHaveThisCard(EntityType.Room, currentEntity) ? Colors.red : null,
                           decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Room, currentEntity) ? TextDecoration.lineThrough : null,
-                          decorationColor: ConstantUtils.primaryAppColor,
+                          decorationColor: widget.primaryAppColorFromSetting,
                           decorationThickness: 3,
                         ),
                       ),
@@ -1010,7 +1014,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
           ),
           onPressed: () async {
             Navigator.pop(context);
@@ -1034,7 +1038,7 @@ class MainGameViewState extends State<MainGameView> {
                 ),
                 appBar: AppBar(
                   automaticallyImplyLeading: false,
-                  title: const Text("Edit game name", style: TextStyle(color: ConstantUtils.primaryAppColor),),
+                  title: Text("Edit game name", style: TextStyle(color: widget.primaryAppColorFromSetting),),
                 ),
                 body: Center(
                   child: Padding(
@@ -1046,12 +1050,12 @@ class MainGameViewState extends State<MainGameView> {
                       },
                       initialValue: gameDefinitionState.gameName,
                       keyboardType: TextInputType.name,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         // hintText: playerNamesHint[index],
                         // hintStyle: const TextStyle(color: Colors.grey),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
-                            color: ConstantUtils.primaryAppColor,
+                            color: widget.primaryAppColorFromSetting,
                           ),
                         ),
                       ),
@@ -1074,7 +1078,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
           ),
           onPressed: () async {
             Navigator.pop(context);
@@ -1099,7 +1103,7 @@ class MainGameViewState extends State<MainGameView> {
                 ),
                 appBar: AppBar(
                   automaticallyImplyLeading: false,
-                  title: const Text("Edit player name", style: TextStyle(color: ConstantUtils.primaryAppColor),),
+                  title: Text("Edit player name", style: TextStyle(color: widget.primaryAppColorFromSetting),),
                 ),
                 body: Center(
                   child: Padding(
@@ -1107,19 +1111,19 @@ class MainGameViewState extends State<MainGameView> {
                     child: TextFormField(
                       textCapitalization: TextCapitalization.words,
                       inputFormatters: [
-                        LengthLimitingTextInputFormatter(5),
+                        LengthLimitingTextInputFormatter(ConstantUtils.maxPlayerNameCharacters),
                       ],
                       onChanged: (text) {
                         editedPlayerNameValue = text.trim();
                       },
                       initialValue: currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
                       keyboardType: TextInputType.name,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         // hintText: playerNamesHint[index],
                         // hintStyle: const TextStyle(color: Colors.grey),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
-                            color: ConstantUtils.primaryAppColor,
+                            color: widget.primaryAppColorFromSetting,
                           ),
                         ),
                       ),
@@ -1688,22 +1692,22 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   Widget _verticalDivider() {
-    return const VerticalDivider(
+    return VerticalDivider(
       width: ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT / 2,
       thickness: 5,
       // indent: 20,
       // endIndent: 0,
-      color: ConstantUtils.primaryAppColor,
+      color: widget.primaryAppColorFromSetting,
     );
   }
 
   Widget _verticalDivider2() {
-    return const VerticalDivider(
+    return VerticalDivider(
       width: 2,
       thickness: 2.5,
       // indent: 20,
       // endIndent: 0,
-      color: ConstantUtils.primaryAppColor,
+      color: widget.primaryAppColorFromSetting,
     );
   }
 
@@ -1712,7 +1716,7 @@ class MainGameViewState extends State<MainGameView> {
       height: ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT.toDouble(),
       thickness: 5,
       endIndent: 0,
-      color: ConstantUtils.primaryAppColor,
+      color: widget.primaryAppColorFromSetting,
     );
   }
 
@@ -1722,7 +1726,7 @@ class MainGameViewState extends State<MainGameView> {
       height: ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT.toDouble(),
       thickness: 2.5,
       endIndent: 0,
-      color: ConstantUtils.primaryAppColor,
+      color: widget.primaryAppColorFromSetting,
     );
   }
 
@@ -1739,8 +1743,8 @@ class MainGameViewState extends State<MainGameView> {
     return Center(
       child: Text(
         text,
-        style: const TextStyle(
-            color: ConstantUtils.primaryAppColor,
+        style: TextStyle(
+            color: widget.primaryAppColorFromSetting,
             fontWeight: FontWeight.bold,
             fontSize: 16
         ),
@@ -1950,39 +1954,39 @@ class MainGameViewState extends State<MainGameView> {
         textAlign: TextAlign.center,
         text: TextSpan(
             text: "Since you have confirmed that ",
-            style: const TextStyle(
-                color: ConstantUtils.primaryAppColor,
+            style: TextStyle(
+                color: widget.primaryAppColorFromSetting,
                 fontSize: 16
             ),
             children: [
               TextSpan(
                   text: _refinedPlayerName(currentPlayerName),
-                  style: const TextStyle(
-                      color: ConstantUtils.primaryAppColor,
+                  style: TextStyle(
+                      color: widget.primaryAppColorFromSetting,
                       fontSize: 16,
                       fontWeight: FontWeight.bold
                   )
               ),
-              const TextSpan(
+              TextSpan(
                   text: " has the ",
                   style: TextStyle(
-                    color: ConstantUtils.primaryAppColor,
+                    color: widget.primaryAppColorFromSetting,
                     fontSize: 16,
                     // fontWeight: FontWeight.bold
                   )
               ),
               TextSpan(
                   text: ConstantUtils.entityNameToDisplayNameMap[currentEntity],
-                  style: const TextStyle(
-                      color: ConstantUtils.primaryAppColor,
+                  style: TextStyle(
+                      color: widget.primaryAppColorFromSetting,
                       fontSize: 16,
                       fontWeight: FontWeight.bold
                   )
               ),
-              const TextSpan(
+              TextSpan(
                   text: " card, we infer that no other player has it!\n\nHit confirm if you'd like to mark all other players as not having this card.",
                   style: TextStyle(
-                    color: ConstantUtils.primaryAppColor,
+                    color: widget.primaryAppColorFromSetting,
                     fontSize: 16,
                     // fontWeight: FontWeight.bold
                   )
@@ -2011,39 +2015,39 @@ class MainGameViewState extends State<MainGameView> {
         textAlign: TextAlign.center,
         text: TextSpan(
             text: "Since you have confirmed that ",
-            style: const TextStyle(
-                color: ConstantUtils.primaryAppColor,
+            style: TextStyle(
+                color: widget.primaryAppColorFromSetting,
                 fontSize: 16
             ),
             children: [
               TextSpan(
                   text: _refinedPlayerName(currentPlayerName),
-                  style: const TextStyle(
-                      color: ConstantUtils.primaryAppColor,
+                  style: TextStyle(
+                      color: widget.primaryAppColorFromSetting,
                       fontSize: 16,
                       fontWeight: FontWeight.bold
                   )
               ),
-              const TextSpan(
+              TextSpan(
                   text: " has the ",
                   style: TextStyle(
-                    color: ConstantUtils.primaryAppColor,
+                    color: widget.primaryAppColorFromSetting,
                     fontSize: 16,
                     // fontWeight: FontWeight.bold
                   )
               ),
               TextSpan(
                   text: ConstantUtils.entityNameToDisplayNameMap[currentEntity],
-                  style: const TextStyle(
-                      color: ConstantUtils.primaryAppColor,
+                  style: TextStyle(
+                      color: widget.primaryAppColorFromSetting,
                       fontSize: 16,
                       fontWeight: FontWeight.bold
                   )
               ),
-              const TextSpan(
+              TextSpan(
                   text: " card, we now know all the cards they posses!\n\nHit confirm if you'd like to mark all other cards for this player as missing.",
                   style: TextStyle(
-                    color: ConstantUtils.primaryAppColor,
+                    color: widget.primaryAppColorFromSetting,
                     fontSize: 16,
                     // fontWeight: FontWeight.bold
                   )
@@ -2222,7 +2226,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
           ),
           onPressed: () async {
             _markDialogAsClosedAndResetMarking(entityType, currentEntity, currentPlayerName);
@@ -2238,7 +2242,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
           ),
           onPressed: () async {
             _markDialogAsClosedAndSaveMarking(entityType, currentEntity, currentPlayerName);
@@ -2256,7 +2260,7 @@ class MainGameViewState extends State<MainGameView> {
           body: SingleChildScrollView(
             child: Column(
               children: [
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 10),
                   child: Center(
                     child: Text(
@@ -2264,7 +2268,7 @@ class MainGameViewState extends State<MainGameView> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: ConstantUtils.primaryAppColor
+                          color: widget.primaryAppColorFromSetting
                       ),
                     ),
                   ),
@@ -2274,8 +2278,8 @@ class MainGameViewState extends State<MainGameView> {
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),
-                      side: const BorderSide(
-                          color: ConstantUtils.primaryAppColor,
+                      side: BorderSide(
+                          color: widget.primaryAppColorFromSetting,
                           width: 2.5
                       )
                   ),
@@ -2298,20 +2302,20 @@ class MainGameViewState extends State<MainGameView> {
                     child: Text(
                       "Select a marker to apply to the ${entityType.name}/Player combo",
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.normal,
-                        color: ConstantUtils.primaryAppColor
+                        color: widget.primaryAppColorFromSetting
                       ),
                     ),
                   ),
                 ),
                 WidgetUtils.spacer(2.5),
                 _divider(),
-                const Text(
+                Text(
                     "Symbols",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: ConstantUtils.primaryAppColor,
+                        color: widget.primaryAppColorFromSetting,
                         fontSize: 16,
                     ),
                 ),
@@ -2380,11 +2384,11 @@ class MainGameViewState extends State<MainGameView> {
                 ),
                 WidgetUtils.spacer(2.5),
                 _divider(),
-                const Text(
+                Text(
                     "Numbers",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: ConstantUtils.primaryAppColor,
+                      color: widget.primaryAppColorFromSetting,
                       fontSize: 16,
                     ),
                 ),
@@ -2433,11 +2437,11 @@ class MainGameViewState extends State<MainGameView> {
                 ),
                 WidgetUtils.spacer(2.5),
                 _divider(),
-                const Text(
+                Text(
                   "Letters",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: ConstantUtils.primaryAppColor,
+                    color: widget.primaryAppColorFromSetting,
                     fontSize: 16,
                   ),
                 ),
@@ -2522,7 +2526,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
           ),
           onPressed: () async {
             _markCellBackgroundColourDialogAsClosedAndResetBackground(entityType, currentEntity, currentPlayerName);
@@ -2538,7 +2542,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
           ),
           onPressed: () async {
             _markCellBackgroundColourDialogDialogAsClosedAndSaveBackgoundColour(entityType, currentEntity, currentPlayerName);
@@ -2559,7 +2563,7 @@ class MainGameViewState extends State<MainGameView> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.all(5.0),
                       child: Center(
                         child: Text(
@@ -2567,7 +2571,7 @@ class MainGameViewState extends State<MainGameView> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontWeight: FontWeight.normal,
-                              color: ConstantUtils.primaryAppColor
+                              color: widget.primaryAppColorFromSetting
                           ),
                         ),
                       ),
@@ -2611,12 +2615,12 @@ class MainGameViewState extends State<MainGameView> {
                                     ),
                                   )
                               ),
-                              const Expanded(
+                              Expanded(
                                   child: Text(
                                     "Current selection",
                                     style: TextStyle(
                                         fontSize: 12,
-                                        color: ConstantUtils.primaryAppColor,
+                                        color: widget.primaryAppColorFromSetting,
                                         fontWeight: FontWeight.w500
                                     ),
                                   )
@@ -2673,7 +2677,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
           ),
           onPressed: () async {
             Navigator.pop(context, true);
@@ -2688,7 +2692,7 @@ class MainGameViewState extends State<MainGameView> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+            backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorFromSetting),
           ),
           onPressed: () async {
             Navigator.pop(context, false);
@@ -2706,9 +2710,9 @@ class MainGameViewState extends State<MainGameView> {
             child: Scaffold(
               appBar: AppBar(
                 automaticallyImplyLeading: false,
-                title: const Center(child: Text("Confirm Inference", style: TextStyle(color: ConstantUtils.primaryAppColor),)),
-                iconTheme: const IconThemeData(
-                  color: ConstantUtils.primaryAppColor,
+                title: Center(child: Text("Confirm Inference", style: TextStyle(color: widget.primaryAppColorFromSetting),)),
+                iconTheme: IconThemeData(
+                  color: widget.primaryAppColorFromSetting,
                 ),
               ),
               body: Center(
@@ -2750,12 +2754,12 @@ class MainGameViewState extends State<MainGameView> {
                             }
                           ),
                           WidgetUtils.spacer(5),
-                          const Text(
+                          Text(
                             "Do not ask again",
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: ConstantUtils.primaryAppColor
+                              color: widget.primaryAppColorFromSetting
                             ),
                           )
                         ],
@@ -2812,7 +2816,7 @@ class MainGameViewState extends State<MainGameView> {
         child: GestureDetector(
           onTap: onTap,
           child: CircleAvatar(
-            backgroundColor: isSelectedAlready ? Colors.redAccent : ConstantUtils.primaryAppColor,
+            backgroundColor: isSelectedAlready ? Colors.redAccent : widget.primaryAppColorFromSetting,
             child: Text(
                 text,
                 style: const TextStyle(
@@ -2838,7 +2842,7 @@ class MainGameViewState extends State<MainGameView> {
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all( Radius.circular(50.0)),
               border: Border.all(
-                color: isSelectedAlready ? ConstantUtils.primaryAppColor : Colors.transparent,
+                color: isSelectedAlready ? widget.primaryAppColorFromSetting : Colors.transparent,
                 width: 4.0,
               ),
             ),
@@ -2910,10 +2914,10 @@ class MainGameViewState extends State<MainGameView> {
               backgroundColor: Colors.transparent,
               child: Text(
                   text,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
-                      color: ConstantUtils.primaryAppColor
+                      color: widget.primaryAppColorFromSetting
                   )
               ),
             ),
@@ -2933,10 +2937,10 @@ class MainGameViewState extends State<MainGameView> {
           backgroundColor: Colors.transparent,
           child: Text(
               text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w900,
-              color: ConstantUtils.primaryAppColor
+              color: widget.primaryAppColorFromSetting
             ),
           ),
         ),
@@ -2978,11 +2982,11 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   Widget _maybeMarker2IconNoOneHasThis(String text, VoidCallback onTap) {
-    return const SizedBox(
+    return SizedBox(
         width: ConstantUtils.MARKING_DIAMETER,
         height: ConstantUtils.MARKING_DIAMETER,
         child: CircleAvatar(
-          backgroundColor: ConstantUtils.primaryAppColor,
+          backgroundColor: widget.primaryAppColorFromSetting,
           child: Center(child: Icon(Icons.not_interested, size: ConstantUtils.MARKING_ICON_DIAMETER, color: Colors.white,)),
         )
     );

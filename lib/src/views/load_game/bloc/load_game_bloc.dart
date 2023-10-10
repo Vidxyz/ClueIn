@@ -7,7 +7,6 @@ import 'package:cluein_app/src/views/load_game/bloc/load_game_event.dart';
 import 'package:cluein_app/src/views/load_game/bloc/load_game_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoadGameBloc extends Bloc<LoadGameEvent, LoadGameState> {
 
@@ -23,12 +22,11 @@ class LoadGameBloc extends Bloc<LoadGameEvent, LoadGameState> {
   }
 
   void _deleteSavedGame(DeleteSavedGame event, Emitter<LoadGameState> emit) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.gameId}");
+    await sembast.delete("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.gameId}");
 
-    final savedGameIds =  prefs.getStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
+    final savedGameIds =  await sembast.readStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
     savedGameIds.remove(event.gameId);
-    await prefs.setStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY, savedGameIds);
+    await sembast.writeStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY, savedGameIds);
   }
 
   void _fetchSavedGames(FetchSavedGames event, Emitter<LoadGameState> emit) async {

@@ -1,54 +1,96 @@
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
-import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/about/about_page.dart';
 import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
+import 'package:cluein_app/src/views/home_page/bloc/home_page_bloc.dart';
+import 'package:cluein_app/src/views/home_page/bloc/home_page_event.dart';
+import 'package:cluein_app/src/views/home_page/bloc/home_page_state.dart';
 import 'package:cluein_app/src/views/load_game/load_game.dart';
+import 'package:cluein_app/src/views/settings/settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomePage extends StatefulWidget {
+class HomePageView extends StatefulWidget {
 
-  const HomePage({super.key});
+  const HomePageView({super.key});
+
+  static Route route() {
+    return MaterialPageRoute<void>(builder: (_) => withBloc());
+  }
+
+  static Widget withBloc() => MultiBlocProvider(
+    providers: [
+      BlocProvider<HomePageBloc>(
+          create: (context) => HomePageBloc(
+            sembast: RepositoryProvider.of<SembastRepository>(context),
+          )
+      ),
+    ],
+    child: const HomePageView(),
+  );
 
   @override
   State createState() {
-    return HomePageState();
+    return HomePageViewState();
   }
 
 }
 
-class HomePageState extends State<HomePage> {
+class HomePageViewState extends State<HomePageView> {
+
+  late Color primaryAppColorFromSetting;
+
+  late HomePageBloc homePageBloc;
 
   @override
   void initState() {
     super.initState();
 
-    var hack = RepositoryProvider.of<SembastRepository>(context);
+    homePageBloc = BlocProvider.of<HomePageBloc>(context);
+    _fetchHomePageSettings();
   }
 
-  @override
+  _fetchHomePageSettings() {
+    homePageBloc.add(const FetchHomePageSettings());
+  }
+
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _appIcon(),
-              // WidgetUtils.spacer(10),
-              // _appText(),
-              WidgetUtils.spacer(25),
-              _actionButton("New Game"),
-              WidgetUtils.spacer(5),
-              _actionButton("Load Game"),
-              // todo - post MVP - include settings menu with different CLUE game flavours
-              // WidgetUtils.spacer(5),
-              // _actionButton("Settings"),
-              WidgetUtils.spacer(5),
-              _actionButton("About"),
-              WidgetUtils.spacer(5),
-            ],
-          ),
+      body: BlocListener<HomePageBloc, HomePageState>(
+        listener: (context, state) {
+          if (state is HomePageSettingsFetched) {
+            primaryAppColorFromSetting = Color(state.primaryColor);
+          }
+        },
+        child: BlocBuilder<HomePageBloc, HomePageState> (
+          builder: (context, state) {
+            if (state is HomePageSettingsFetched) {
+              return Scaffold(
+                body: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _appIcon(),
+                        WidgetUtils.spacer(25),
+                        _actionButton("New Game"),
+                        WidgetUtils.spacer(5),
+                        _actionButton("Load Game"),
+                        WidgetUtils.spacer(5),
+                        _actionButton("Settings"),
+                        WidgetUtils.spacer(5),
+                        _actionButton("About"),
+                        WidgetUtils.spacer(5),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+            else {
+              return WidgetUtils.progressIndicator();
+            }
+          },
         ),
       ),
     );
@@ -68,28 +110,17 @@ class HomePageState extends State<HomePage> {
                 break;
               case "About":
                 _goToAboutPage();
+              case "Settings":
+                _goToSettingsPage();
                 break;
               default:
                 break;
             }
           },
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(ConstantUtils.primaryAppColor),
+            backgroundColor: MaterialStateProperty.all<Color>(primaryAppColorFromSetting),
           ),
           child: Text(title),
-      ),
-    );
-  }
-
-  _appText() {
-    return const Center(
-      child: Text(
-        "ClueIn",
-        style: TextStyle(
-          fontSize: 26,
-          fontWeight: FontWeight.bold,
-          color: ConstantUtils.primaryAppColor
-        ),
       ),
     );
   }
@@ -117,22 +148,29 @@ class HomePageState extends State<HomePage> {
   _goToCreateNewGamePage() {
     Navigator.push(
         context,
-        CreateNewGameView.route()
-    );
+        CreateNewGameView.route(primaryAppColorFromSetting)
+    ).then((value) => _fetchHomePageSettings());
+  }
+
+  _goToSettingsPage() {
+    Navigator.push(
+        context,
+        SettingsView.route(primaryAppColorFromSetting)
+    ).then((value) => _fetchHomePageSettings());
   }
 
   _goToLoadGamePage() {
     Navigator.push(
         context,
-        LoadGameView.route()
-    );
+        LoadGameView.route(primaryAppColorFromSetting)
+    ).then((value) => _fetchHomePageSettings());
   }
 
   _goToAboutPage() {
     Navigator.push(
         context,
-        AboutPage.route()
-    );
+        AboutPage.route(primaryAppColorFromSetting)
+    ).then((value) => _fetchHomePageSettings());
   }
 
 }

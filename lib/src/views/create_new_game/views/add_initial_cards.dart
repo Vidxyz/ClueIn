@@ -14,8 +14,11 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 
 class AddInitialCardsView extends StatefulWidget {
+  final Color primaryAppColorFromSetting;
+  
   const AddInitialCardsView({
     super.key,
+    required this.primaryAppColorFromSetting
   });
 
 
@@ -81,7 +84,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
           identify: "userPromptTextKey",
           keyTarget: userPromptTextKey,
           alignSkip: Alignment.centerRight,
-          color: ConstantUtils.primaryAppColor,
+          color: widget.primaryAppColorFromSetting,
           shape: ShapeLightFocus.RRect,
           enableOverlayTab: true,
           enableTargetTab: true,
@@ -178,7 +181,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
 
       basicTutorialCoachMark = TutorialCoachMark(
         targets: basicTargets,
-        colorShadow: ConstantUtils.primaryAppColor,
+        colorShadow: widget.primaryAppColorFromSetting,
         hideSkip: true,
         showSkipInLastTarget: false,
         focusAnimationDuration: const Duration(milliseconds: 200),
@@ -251,8 +254,8 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
           child: Text(
             "Please select exactly the $maxCards cards that you start the game with",
             textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: ConstantUtils.primaryAppColor,
+            style: TextStyle(
+                color: widget.primaryAppColorFromSetting,
                 fontSize: 14,
                 fontWeight: FontWeight.bold
             ),
@@ -476,7 +479,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          const c = ConstantUtils.primaryAppColor;
+          final c = widget.primaryAppColorFromSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -528,7 +531,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          const c = ConstantUtils.primaryAppColor;
+          final c = widget.primaryAppColorFromSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -552,7 +555,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          const c = ConstantUtils.primaryAppColor;
+          final c = widget.primaryAppColorFromSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -590,11 +593,11 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                 controller: personCountTextFieldController,
                 enabled: false,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintStyle: TextStyle(color: Colors.grey),
+                decoration: InputDecoration(
+                  hintStyle: const TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: ConstantUtils.primaryAppColor,
+                      color: widget.primaryAppColorFromSetting,
                     ),
                   ),
                 ),
