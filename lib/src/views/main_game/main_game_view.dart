@@ -1892,7 +1892,7 @@ class MainGameViewState extends State<MainGameView> {
 
   _markCellBackgroundColourDialogDialogAsClosedAndSaveBackgoundColour(EntityType entityType, String currentEntity, String currentPlayerName) {
     if (selectedBackgroundColourFromDialog != null) {
-      KeyboardUtils.lightImpact();
+      KeyboardUtils.mediumImpact();
       cellBackgroundColourState[currentEntity]![currentPlayerName] = selectedBackgroundColourFromDialog!.value;
 
       _mainGameBloc.add(
@@ -2135,7 +2135,7 @@ class MainGameViewState extends State<MainGameView> {
 
   _markDialogAsClosedAndSaveMarking(EntityType entityType, String currentEntity, String currentPlayerName) {
     if (selectedMarkingsFromDialog.isNotEmpty) {
-      KeyboardUtils.lightImpact();
+      KeyboardUtils.mediumImpact();
 
       // Something was selected, persist it
       selectedMarkingsFromDialog.forEach((selectedMarkingFromDialog) {
@@ -2294,7 +2294,7 @@ class MainGameViewState extends State<MainGameView> {
       String currentPlayerName,
       List<String> currentMarkings
       ) {
-    KeyboardUtils.lightImpact();
+    KeyboardUtils.mediumImpact();
 
     setState(() {
       isMarkingDialogOpen = true;

@@ -1,4 +1,5 @@
 import 'package:cluein_app/src/utils/constant_utils.dart';
+import 'package:cluein_app/src/utils/keyboard_utils.dart';
 import 'package:cluein_app/src/utils/screen_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/main_game/main_game_view.dart';
@@ -171,11 +172,14 @@ class MarkingsViewState extends State<MarkingsView> {
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedMarkingsFromDialogState.add(ConstantUtils.tick);
+                            if (selectedMarkingsFromDialogState.contains(ConstantUtils.tick)) {
+                              selectedMarkingsFromDialogState.remove(ConstantUtils.tick);
+                            }
+                            else {
+                              selectedMarkingsFromDialogState.add(ConstantUtils.tick);
+                            }
                           });
-                          if (!widget.selectMultipleMarkingsAtOnceSetting) {
-                            Navigator.pop(context);
-                          }
+                          widget.setStateAndPopIfNeededCallback(ConstantUtils.tick, widget.entityType, widget.currentEntity, widget.currentPlayerName);
                         },
                         child: const CircleAvatar(
                           backgroundColor: Colors.teal,
@@ -195,11 +199,14 @@ class MarkingsViewState extends State<MarkingsView> {
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedMarkingsFromDialogState.add(ConstantUtils.questionMark);
+                            if (selectedMarkingsFromDialogState.contains(ConstantUtils.questionMark)) {
+                              selectedMarkingsFromDialogState.remove(ConstantUtils.questionMark);
+                            }
+                            else {
+                              selectedMarkingsFromDialogState.add(ConstantUtils.questionMark);
+                            }
                           });
-                          if (!widget.selectMultipleMarkingsAtOnceSetting) {
-                            Navigator.pop(context);
-                          }
+                          widget.setStateAndPopIfNeededCallback(ConstantUtils.questionMark, widget.entityType, widget.currentEntity, widget.currentPlayerName);
                         },
                         child: const CircleAvatar(
                           backgroundColor: Colors.amber,
@@ -215,11 +222,14 @@ class MarkingsViewState extends State<MarkingsView> {
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedMarkingsFromDialogState.add(ConstantUtils.cross);
+                            if (selectedMarkingsFromDialogState.contains(ConstantUtils.cross)) {
+                              selectedMarkingsFromDialogState.remove(ConstantUtils.cross);
+                            }
+                            else {
+                              selectedMarkingsFromDialogState.add(ConstantUtils.cross);
+                            }
                           });
-                          if (!widget.selectMultipleMarkingsAtOnceSetting) {
-                            Navigator.pop(context);
-                          }
+                          widget.setStateAndPopIfNeededCallback(ConstantUtils.cross, widget.entityType, widget.currentEntity, widget.currentPlayerName);
                         },
                         child: const CircleAvatar(
                           backgroundColor: Colors.redAccent,
@@ -245,40 +255,40 @@ class MarkingsViewState extends State<MarkingsView> {
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 6 : 12,
               children: [
-                _maybeMarker("1", widget.currentMarkings.contains("1"), () {
+                _maybeMarker("1", selectedMarkingsFromDialogState.contains("1"), () {
                   setStateAndPopIfNeededCallback("1", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("2", widget.currentMarkings.contains("2"), () {
+                _maybeMarker("2", selectedMarkingsFromDialogState.contains("2"), () {
                   setStateAndPopIfNeededCallback("2", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("3", widget.currentMarkings.contains("3"),  () {
+                _maybeMarker("3", selectedMarkingsFromDialogState.contains("3"),  () {
                   setStateAndPopIfNeededCallback("3", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("4", widget.currentMarkings.contains("4"), () {
+                _maybeMarker("4", selectedMarkingsFromDialogState.contains("4"), () {
                   setStateAndPopIfNeededCallback("4", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("5", widget.currentMarkings.contains("5"),  () {
+                _maybeMarker("5", selectedMarkingsFromDialogState.contains("5"),  () {
                   setStateAndPopIfNeededCallback("5", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("6", widget.currentMarkings.contains("6"),  () {
+                _maybeMarker("6", selectedMarkingsFromDialogState.contains("6"),  () {
                   setStateAndPopIfNeededCallback("6", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("7", widget.currentMarkings.contains("7"),  () {
+                _maybeMarker("7", selectedMarkingsFromDialogState.contains("7"),  () {
                   setStateAndPopIfNeededCallback("7", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("8", widget.currentMarkings.contains("8"),  () {
+                _maybeMarker("8", selectedMarkingsFromDialogState.contains("8"),  () {
                   setStateAndPopIfNeededCallback("8", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("9", widget.currentMarkings.contains("9"),  () {
+                _maybeMarker("9", selectedMarkingsFromDialogState.contains("9"),  () {
                   setStateAndPopIfNeededCallback("9", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("10", widget.currentMarkings.contains("10"),  () {
+                _maybeMarker("10", selectedMarkingsFromDialogState.contains("10"),  () {
                   setStateAndPopIfNeededCallback("10", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("11", widget.currentMarkings.contains("11"),  () {
+                _maybeMarker("11", selectedMarkingsFromDialogState.contains("11"),  () {
                   setStateAndPopIfNeededCallback("11", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("12", widget.currentMarkings.contains("12"),  () {
+                _maybeMarker("12", selectedMarkingsFromDialogState.contains("12"),  () {
                   setStateAndPopIfNeededCallback("12", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
               ],
@@ -298,40 +308,40 @@ class MarkingsViewState extends State<MarkingsView> {
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: ScreenUtils.isPortraitOrientation(context) ? 6 : 12,
               children: [
-                _maybeMarker("A", widget.currentMarkings.contains("A"), () {
+                _maybeMarker("A", selectedMarkingsFromDialogState.contains("A"), () {
                   setStateAndPopIfNeededCallback("A", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("B", widget.currentMarkings.contains("B"), () {
+                _maybeMarker("B", selectedMarkingsFromDialogState.contains("B"), () {
                   setStateAndPopIfNeededCallback("B", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("C", widget.currentMarkings.contains("C"),  () {
+                _maybeMarker("C", selectedMarkingsFromDialogState.contains("C"),  () {
                   setStateAndPopIfNeededCallback("C", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("D", widget.currentMarkings.contains("D"), () {
+                _maybeMarker("D", selectedMarkingsFromDialogState.contains("D"), () {
                   setStateAndPopIfNeededCallback("D", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("E", widget.currentMarkings.contains("E"),  () {
+                _maybeMarker("E", selectedMarkingsFromDialogState.contains("E"),  () {
                   setStateAndPopIfNeededCallback("E", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("F", widget.currentMarkings.contains("F"),  () {
+                _maybeMarker("F", selectedMarkingsFromDialogState.contains("F"),  () {
                   setStateAndPopIfNeededCallback("F", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("G", widget.currentMarkings.contains("G"),  () {
+                _maybeMarker("G", selectedMarkingsFromDialogState.contains("G"),  () {
                   setStateAndPopIfNeededCallback("G", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("H", widget.currentMarkings.contains("H"),  () {
+                _maybeMarker("H", selectedMarkingsFromDialogState.contains("H"),  () {
                   setStateAndPopIfNeededCallback("H", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("I", widget.currentMarkings.contains("I"),  () {
+                _maybeMarker("I", selectedMarkingsFromDialogState.contains("I"),  () {
                   setStateAndPopIfNeededCallback("I", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("J", widget.currentMarkings.contains("J"),  () {
+                _maybeMarker("J", selectedMarkingsFromDialogState.contains("J"),  () {
                   setStateAndPopIfNeededCallback("J", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("K", widget.currentMarkings.contains("K"),  () {
+                _maybeMarker("K", selectedMarkingsFromDialogState.contains("K"),  () {
                   setStateAndPopIfNeededCallback("K", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
-                _maybeMarker("L", widget.currentMarkings.contains("L"),  () {
+                _maybeMarker("L", selectedMarkingsFromDialogState.contains("L"),  () {
                   setStateAndPopIfNeededCallback("L", widget.entityType, widget.currentEntity, widget.currentPlayerName);
                 }),
               ],
@@ -355,12 +365,15 @@ class MarkingsViewState extends State<MarkingsView> {
   }
 
   setStateAndPopIfNeededCallback(String currentMarking, EntityType entityType, String currentEntity, String currentPlayerName) {
-    if (selectedMarkingsFromDialogState.contains(currentMarking)) {
-      selectedMarkingsFromDialogState.remove(currentMarking);
-    }
-    else {
-      selectedMarkingsFromDialogState.add(currentMarking);
-    }
+    KeyboardUtils.mediumImpact();
+    setState(() {
+      if (selectedMarkingsFromDialogState.contains(currentMarking)) {
+        selectedMarkingsFromDialogState.remove(currentMarking);
+      }
+      else {
+        selectedMarkingsFromDialogState.add(currentMarking);
+      }
+    });
     widget.setStateAndPopIfNeededCallback(currentMarking, widget.entityType, widget.currentEntity, widget.currentPlayerName);
   }
   
