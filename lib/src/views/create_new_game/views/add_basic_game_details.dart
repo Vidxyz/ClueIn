@@ -67,7 +67,7 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                       WidgetUtils.spacer(2.5),
                       _renderTotalPlayers(),
                       Padding(
-                        padding: EdgeInsets.all(5),
+                        padding: const EdgeInsets.all(5),
                         child: Text(
                           "You are P1",
                           textAlign: TextAlign.center,
@@ -147,6 +147,12 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                           decoration: InputDecoration(
                             hintText: playerNamesHint[index],
                             hintStyle: const TextStyle(color: Colors.grey),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: widget.primaryAppColorFromSetting, width: 2.0),
+                            ),
+                            focusedBorder:  OutlineInputBorder(
+                              borderSide: BorderSide(color: widget.primaryAppColorFromSetting, width: 2.0),
+                            ),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(
                                 color: widget.primaryAppColorFromSetting,
@@ -185,6 +191,11 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
           Expanded(
               flex: 8,
               child: NumberPicker(
+                selectedTextStyle: TextStyle(
+                  color: widget.primaryAppColorFromSetting,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
                 value: totalPlayerCountState,
                 minValue: 2,
                 maxValue: 6,
@@ -234,10 +245,16 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                 );
               }
             },
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: widget.primaryAppColorFromSetting, width: 2.0),
+              ),
+              focusedBorder:  OutlineInputBorder(
+                borderSide: BorderSide(color: widget.primaryAppColorFromSetting, width: 2.0),
+              ),
+              border: const OutlineInputBorder(),
               hintText: 'Enter game name',
-              hintStyle: TextStyle(color: Colors.grey, fontWeight: FontWeight.normal),
+              hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.normal),
             ),
           ),
         )

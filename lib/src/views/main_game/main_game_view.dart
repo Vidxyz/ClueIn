@@ -835,6 +835,7 @@ class MainGameViewState extends State<MainGameView> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontSize: 15,
+                              fontWeight: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? FontWeight.bold : FontWeight.normal,
                               color: noPlayersHaveThisCard(EntityType.Character, currentEntity) ? Colors.red : null,
                               decoration: anyPlayerHasThisCardOrCardIsPublicInfo(EntityType.Character, currentEntity) ? TextDecoration.lineThrough : null,
                               decorationColor: widget.primaryAppColorFromSetting,

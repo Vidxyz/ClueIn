@@ -126,6 +126,13 @@ class SettingsViewState extends State<SettingsView> {
             "If enabled, the dialog will not be dismissed after tapping on the first marking",
             ),
             trailing: Checkbox(
+              fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                final c = widget.primaryAppColorSettingsValue;
+                if (states.contains(MaterialState.disabled)) {
+                  return c.withOpacity(.32);
+                }
+                return c;
+              }),
               onChanged: (value) {
                 setState(() {
                   selectMultipleMarkingsAtOnceSettingsValue = value ?? false;
@@ -176,7 +183,9 @@ class SettingsViewState extends State<SettingsView> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: const Text("Reset to default"),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorSettingsValue),
+              ),
               onPressed: () {
                 setState(() {
                   primaryAppColorSettingsValue = ConstantUtils.primaryAppColor.value;
@@ -184,9 +193,12 @@ class SettingsViewState extends State<SettingsView> {
                 _updateBlocState();
                 Navigator.of(context).pop();
               },
+              child: const Text("Reset to default"),
             ),
             ElevatedButton(
-              child: const Text("Save"),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorSettingsValue),
+              ),
               onPressed: () {
                 setState(() {
                   primaryAppColorSettingsValue = lastSelectedColorValue.value;
@@ -194,6 +206,7 @@ class SettingsViewState extends State<SettingsView> {
                 _updateBlocState();
                 Navigator.of(context).pop();
               },
+              child: const Text("Save"),
             ),
           ],
         );
