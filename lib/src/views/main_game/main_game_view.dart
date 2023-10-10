@@ -110,6 +110,7 @@ class MainGameViewState extends State<MainGameView> {
   bool selectMultipleMarkingsAtOnceSettingState = false;
 
   int currentQuickMarkerIndex = 0;
+  bool isScreenHidden = false;
 
   Timer? debounce;
   bool isSnackbarBeingShown = false;
@@ -170,6 +171,7 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   initTutorial() {
+    basicTargets.clear();
 
     // Intro screen
     basicTargets.add(
@@ -655,8 +657,6 @@ class MainGameViewState extends State<MainGameView> {
     );
 
 
-
-
     basicTutorialCoachMark = TutorialCoachMark(
       targets: basicTargets,
       colorShadow: primaryColorSettingState,
@@ -677,6 +677,12 @@ class MainGameViewState extends State<MainGameView> {
 
   bool _canUndo() => undoStack.isNotEmpty;
   bool _canRedo() => redoStack.isNotEmpty;
+
+  _toggleScreenHide() {
+    setState(() {
+      isScreenHidden = !isScreenHidden;
+    });
+  }
 
   _performUndo() {
     if (_canUndo()) {
@@ -707,6 +713,7 @@ class MainGameViewState extends State<MainGameView> {
           primaryColorSettingState = value.primaryColorSetting;
           selectMultipleMarkingsAtOnceSettingState = value.selectMultipleMarkingsAtOnceSetting;
         });
+        initTutorial();
       }
     });
   }
@@ -753,20 +760,27 @@ class MainGameViewState extends State<MainGameView> {
           color: primaryColorSettingState,
         ),
         actions: [
+          // IconButton(
+          //   icon: Icon(
+          //     Icons.help,
+          //     color: primaryColorSettingState,
+          //   ),
+          //   onPressed: _performTutorial,
+          // ),
           IconButton(
             icon: Icon(
-              Icons.help,
-              color: primaryColorSettingState,
+              Icons.remove_red_eye,
+              color: isScreenHidden ? primaryColorSettingState : Colors.grey,
             ),
-            onPressed: _performTutorial,
+            onPressed: _toggleScreenHide,
           ),
-          IconButton(
-            icon: Icon(
-              Icons.settings,
-              color: primaryColorSettingState,
-            ),
-            onPressed: _goToSettingsPage,
-          ),
+          // IconButton(
+          //   icon: Icon(
+          //     Icons.settings,
+          //     color: primaryColorSettingState,
+          //   ),
+          //   onPressed: _goToSettingsPage,
+          // ),
           IconButton(
             key: undoKey,
             icon: Icon(
@@ -782,6 +796,31 @@ class MainGameViewState extends State<MainGameView> {
               color: _canRedo() ? primaryColorSettingState : Colors.grey,
             ),
             onPressed: _performRedo,
+          ),
+          PopupMenuButton<int>(
+            icon: Icon(Icons.more_vert, color: primaryColorSettingState),
+            onSelected: (item) {
+              switch (item) {
+                case 0:
+                  _goToSettingsPage();
+                  break;
+                case 1:
+                  _performTutorial();
+                  break;
+                default:
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem<int>(
+                  value: 0,
+                  child: Text("Settings")
+              ),
+              const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text("Help")
+              ),
+            ],
           ),
         ],
       ),
@@ -1161,7 +1200,12 @@ class MainGameViewState extends State<MainGameView> {
   }
 
 
+  /// Returns false if screen is hidden
   bool noPlayersHaveThisCard(EntityType entityType, String currentEntity) {
+    if (isScreenHidden) {
+      return false;
+    }
+
     if (entityType == EntityType.Room) {
       return gameDefinitionState.playerNames.entries
           .map((e) => e.value)
@@ -1182,7 +1226,12 @@ class MainGameViewState extends State<MainGameView> {
     }
   }
 
+  /// Returns false if screen is hidden
   bool anyPlayerHasThisCardOrCardIsPublicInfo(EntityType entityType, String currentEntity) {
+    if (isScreenHidden) {
+      return false;
+    }
+
     if (entityType == EntityType.Room) {
       return gameDefinitionState.playerNames.entries
           .map((e) => e.value)
@@ -1653,17 +1702,20 @@ class MainGameViewState extends State<MainGameView> {
                                 height: 17.5,
                                 child: Align(
                                   alignment: Alignment.bottomRight,
-                                  child: CircleAvatar(
-                                    backgroundColor: knownCards == 0 ? Colors.red : (knownCards == maxCardsPerPlayer ? Colors.teal : Colors.orange) ,
-                                    child: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Center(
-                                        child: Text(
-                                          "${knownCards}/${maxCardsPerPlayer}",
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 9,
-                                            color: Colors.white
+                                  child: Visibility(
+                                    visible: !isScreenHidden,
+                                    child: CircleAvatar(
+                                      backgroundColor: knownCards == 0 ? Colors.red : (knownCards == maxCardsPerPlayer ? Colors.teal : Colors.orange) ,
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Center(
+                                          child: Text(
+                                            "${knownCards}/${maxCardsPerPlayer}",
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 9,
+                                              color: Colors.white
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -1857,7 +1909,7 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _fillInCharacterCellContentsBasedOnState(String currentCharacter, String playerName) {
-    if (charactersGameState[currentCharacter]?[playerName]?.isNotEmpty ?? false) {
+    if ((charactersGameState[currentCharacter]?[playerName]?.isNotEmpty ?? false) && !isScreenHidden) {
       // Something has been selected
       return _renderAllOtherMarkings(
           (
@@ -1904,7 +1956,7 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _fillInRoomCellContentsBasedOnState(String currentRoom, String playerName) {
-    if (roomsGameState[currentRoom]?[playerName]?.isNotEmpty ?? false) {
+    if ((roomsGameState[currentRoom]?[playerName]?.isNotEmpty ?? false) && !isScreenHidden) {
       // Something has been selected
       return _renderAllOtherMarkings(
           (
@@ -1954,7 +2006,7 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _fillInWeaponCellContentsBasedOnState(String currentWeapon, String playerName) {
-    if (weaponsGameState[currentWeapon]?[playerName]?.isNotEmpty ?? false) {
+    if ((weaponsGameState[currentWeapon]?[playerName]?.isNotEmpty ?? false) && !isScreenHidden) {
       // Something has been selected
       return _renderAllOtherMarkings(
           (weaponsGameState[currentWeapon]?[playerName] ?? [])
