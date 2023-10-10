@@ -1,6 +1,7 @@
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
+import 'package:cluein_app/src/utils/snackbar_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/about/about_page.dart';
 import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
@@ -119,7 +120,8 @@ class HomePageViewState extends State<HomePageView> {
                 _goToSettingsPage();
                 break;
               case "How To Play":
-                _goToSettingsPage();
+                // _goToSettingsPage();
+               SnackbarUtils.showSnackBarMedium(context, r"Soon to come... hang tight!");
                 break;
               default:
                 break;

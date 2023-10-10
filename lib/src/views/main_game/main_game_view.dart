@@ -109,6 +109,14 @@ class MainGameViewState extends State<MainGameView> {
 
   int currentQuickMarkerIndex = 0;
 
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -616,6 +624,7 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _performTutorial() {
+    _scrollController.animateTo(0, duration: const Duration(milliseconds: 200), curve: Curves.easeIn);
     basicTutorialCoachMark?.show(context: context);
   }
 
@@ -859,6 +868,7 @@ class MainGameViewState extends State<MainGameView> {
         axisDirection: AxisDirection.down,
         color: primaryColorSettingState,
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.all(0),
