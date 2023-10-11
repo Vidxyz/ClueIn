@@ -37,4 +37,13 @@ class WidgetUtils {
   }
 
   static Widget progressIndicator(Color color) => Center(child: CircularProgressIndicator(color: color,),);
+
+  static Widget divider(Color color) {
+    return Divider(
+      height: ConstantUtils.HORIZONTAL_DIVIDER_SIZE_DEFAULT.toDouble(),
+      thickness: 5,
+      endIndent: 0,
+      color: color,
+    );
+  }
 }

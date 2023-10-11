@@ -8,6 +8,7 @@ import 'package:cluein_app/src/views/create_new_game/create_new_game.dart';
 import 'package:cluein_app/src/views/home_page/bloc/home_page_bloc.dart';
 import 'package:cluein_app/src/views/home_page/bloc/home_page_event.dart';
 import 'package:cluein_app/src/views/home_page/bloc/home_page_state.dart';
+import 'package:cluein_app/src/views/how_to_play/how_to_play.dart';
 import 'package:cluein_app/src/views/load_game/load_game.dart';
 import 'package:cluein_app/src/views/settings/settings_view.dart';
 import 'package:flutter/material.dart';
@@ -120,8 +121,7 @@ class HomePageViewState extends State<HomePageView> {
                 _goToSettingsPage();
                 break;
               case "How To Play":
-                // _goToSettingsPage();
-               SnackbarUtils.showSnackBarMedium(context, "Soon to come... hang tight!");
+                _goToHowToPlayPage();
                 break;
               default:
                 break;
@@ -182,6 +182,13 @@ class HomePageViewState extends State<HomePageView> {
     Navigator.push(
         context,
         AboutPage.route(gameSettings!.primaryColorSetting)
+    ).then((value) => _fetchHomePageSettings());
+  }
+
+  _goToHowToPlayPage() {
+    Navigator.push(
+        context,
+        HowToPlay.route(gameSettings!)
     ).then((value) => _fetchHomePageSettings());
   }
 
