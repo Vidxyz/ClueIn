@@ -24,6 +24,16 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     on<UndoLastMove>(_undoLastMove);
     on<RedoLastMove>(_redoLastMove);
     on<GameOverEvent>(_gameOverEvent);
+    on<MarkMandatoryTutorialAsComplete>(_markMandatoryTutorialAsComplete);
+  }
+
+  void _markMandatoryTutorialAsComplete(MarkMandatoryTutorialAsComplete event, Emitter<MainGameState> emit) async {
+    final currentState = state;
+    if (currentState is MainGameStateModified) {
+      await sembast.setString(ConstantUtils.SETTING_HAS_MANDATORY_TUTORIAL_BEEN_SHOWN, "true");
+      emit(const DummyState());
+      emit(currentState);
+    }
   }
 
   void _gameOverEvent(GameOverEvent event, Emitter<MainGameState> emit) async {

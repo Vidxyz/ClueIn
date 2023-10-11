@@ -35,12 +35,15 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     //     ClueVersion.values.byName(((await sembast.getString(ConstantUtils.SETTING_CLUE_VERSION)) ?? ClueVersion.Default.name));
     final selectMultipleMarkingsAtOnceSetting =
       bool.parse((await sembast.getString(ConstantUtils.SETTING_MULTIPLE_MARKINGS_AT_ONCE) ?? "false"));
+    final hasMandatoryTutorialBeenShown =
+      bool.parse((await sembast.getString(ConstantUtils.SETTING_HAS_MANDATORY_TUTORIAL_BEEN_SHOWN) ?? "false"));
 
     emit(
         SettingsFetched(
           primaryColor: primaryColorSetting,
           // clueVersion: clueVersionSetting,
           selectMultipleMarkingsAtOnce: selectMultipleMarkingsAtOnceSetting,
+          hasMandatoryTutorialBeenShown: hasMandatoryTutorialBeenShown,
         )
     );
   }

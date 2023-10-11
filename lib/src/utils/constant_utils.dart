@@ -64,6 +64,7 @@ class ConstantUtils {
   static const String SETTING_PRIMARY_COLOR = "cluein_app_primary_color";
   static const String SETTING_CLUE_VERSION = "cluein_app_flavor";
   static const String SETTING_MULTIPLE_MARKINGS_AT_ONCE = "cluein_app_multiple_markings_at_once";
+  static const String SETTING_HAS_MANDATORY_TUTORIAL_BEEN_SHOWN = "cluein_app_has_mandatory_tutorial_been_shown";
 
   static const int MAX_UNDO_STACK_SIZE = 20;
 

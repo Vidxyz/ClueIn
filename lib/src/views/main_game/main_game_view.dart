@@ -151,6 +151,13 @@ class MainGameViewState extends State<MainGameView> {
 
     initTutorial();
     _setupGameStateInitially();
+
+    if (!widget.gameSettings.hasMandatoryTutorialBeenShown) {
+      _performTutorial();
+      _mainGameBloc.add(
+          const MarkMandatoryTutorialAsComplete()
+      );
+    }
   }
 
   _tapAnywhereToContinue() {
@@ -709,7 +716,13 @@ class MainGameViewState extends State<MainGameView> {
   _goToSettingsPage() {
     Navigator.push(
         context,
-        SettingsView.route(primaryColorSettingState)
+        SettingsView.route(
+            GameSettings(
+                primaryColorSetting: primaryColorSettingState,
+                selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSettingState,
+                hasMandatoryTutorialBeenShown: widget.gameSettings.hasMandatoryTutorialBeenShown,
+            )
+        )
     ).then((value) {
       if (value != null) {
         setState(() {
@@ -722,7 +735,9 @@ class MainGameViewState extends State<MainGameView> {
   }
 
   _performTutorial() {
-    _scrollController.animateTo(0, duration: const Duration(milliseconds: 200), curve: Curves.easeIn);
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(0, duration: const Duration(milliseconds: 200), curve: Curves.easeIn);
+    }
     basicTutorialCoachMark?.show(context: context);
   }
 
@@ -2685,7 +2700,7 @@ class MainGameViewState extends State<MainGameView> {
                               )
                           ),
                           TextSpan(
-                              text: " was murdered in the ",
+                              text: " committed the crime in the ",
                               style: TextStyle(
                                 color: primaryColorSettingState,
                                 fontSize: 18,

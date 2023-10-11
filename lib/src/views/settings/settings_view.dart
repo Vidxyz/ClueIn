@@ -12,13 +12,13 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 class SettingsView extends StatefulWidget {
   static const String routeName = "settings";
 
-  final Color primaryAppColorSettingsValue;
+  final GameSettings gameSettings;
 
   const SettingsView({super.key,
-    required this.primaryAppColorSettingsValue,
+    required this.gameSettings,
   });
 
-  static Route<GameSettings> route(Color primaryAppColorSettingsValue) => MaterialPageRoute(
+  static Route<GameSettings> route(GameSettings gameSettings) => MaterialPageRoute(
     settings: const RouteSettings(
         name: routeName
     ),
@@ -29,7 +29,7 @@ class SettingsView extends StatefulWidget {
               sembast: RepositoryProvider.of<SembastRepository>(context),
             )),
       ],
-      child: SettingsView(primaryAppColorSettingsValue: primaryAppColorSettingsValue),
+      child: SettingsView(gameSettings: gameSettings),
     ),
   );
 
@@ -62,9 +62,9 @@ class SettingsViewState extends State<SettingsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Settings", style: TextStyle(color: widget.primaryAppColorSettingsValue),),
+        title: Text("Settings", style: TextStyle(color: widget.gameSettings.primaryColorSetting),),
         iconTheme: IconThemeData(
-          color: widget.primaryAppColorSettingsValue,
+          color: widget.gameSettings.primaryColorSetting,
         ),
       ),
       body: WillPopScope(
@@ -73,7 +73,8 @@ class SettingsViewState extends State<SettingsView> {
             context,
             GameSettings(
                 primaryColorSetting: Color(primaryAppColorSettingsValue),
-                selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSettingsValue
+                selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSettingsValue,
+                hasMandatoryTutorialBeenShown: widget.gameSettings.hasMandatoryTutorialBeenShown,
             )
           );
           return Future.value(false);
@@ -92,7 +93,7 @@ class SettingsViewState extends State<SettingsView> {
                 return _showSettingsList(state);
               }
               else {
-                return WidgetUtils.progressIndicator(widget.primaryAppColorSettingsValue);
+                return WidgetUtils.progressIndicator(widget.gameSettings.primaryColorSetting);
               }
             },
           ),
@@ -140,7 +141,7 @@ class SettingsViewState extends State<SettingsView> {
             ),
             trailing: Checkbox(
               fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                final c = widget.primaryAppColorSettingsValue;
+                final c = widget.gameSettings.primaryColorSetting;
                 if (states.contains(MaterialState.disabled)) {
                   return c.withOpacity(.32);
                 }
@@ -183,7 +184,7 @@ class SettingsViewState extends State<SettingsView> {
           title: Text(
               'Select color',
             style: TextStyle(
-              color: widget.primaryAppColorSettingsValue
+              color: widget.gameSettings.primaryColorSetting
             ),
           ),
           content: SingleChildScrollView(
@@ -197,7 +198,7 @@ class SettingsViewState extends State<SettingsView> {
           actions: <Widget>[
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorSettingsValue),
+                backgroundColor: MaterialStateProperty.all<Color>(widget.gameSettings.primaryColorSetting),
               ),
               onPressed: () {
                 setState(() {
@@ -210,7 +211,7 @@ class SettingsViewState extends State<SettingsView> {
             ),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(widget.primaryAppColorSettingsValue),
+                backgroundColor: MaterialStateProperty.all<Color>(widget.gameSettings.primaryColorSetting),
               ),
               onPressed: () {
                 setState(() {

@@ -145,5 +145,13 @@ class GameOverEvent extends MainGameEvent {
   const GameOverEvent();
 
   @override
-  List<Object> get props => [super.props];
+  List<Object> get props => [];
+}
+
+class MarkMandatoryTutorialAsComplete extends MainGameEvent {
+
+  const MarkMandatoryTutorialAsComplete();
+
+  @override
+  List<Object> get props => [];
 }

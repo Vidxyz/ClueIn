@@ -244,9 +244,11 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                                 height: 25,
                                 child: CircleAvatar(
                                   backgroundColor: Colors.redAccent,
-                                  child: Icon(
-                                    Icons.clear,
-                                    color: Colors.white,
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.clear,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -371,9 +373,11 @@ class AddBasicGameDetailsViewState extends State<AddBasicGameDetailsView> with A
                   height: 25,
                   child: CircleAvatar(
                     backgroundColor: Colors.redAccent,
-                    child: Icon(
-                        Icons.clear,
-                      color: Colors.white,
+                    child: Center(
+                      child: Icon(
+                          Icons.clear,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

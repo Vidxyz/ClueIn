@@ -26,13 +26,18 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
       int.parse((await sembast.getString(ConstantUtils.SETTING_PRIMARY_COLOR)) ?? ConstantUtils.primaryAppColor.value.toString());
     final selectMultipleMarkingsAtOnceSetting =
       bool.parse((await sembast.getString(ConstantUtils.SETTING_MULTIPLE_MARKINGS_AT_ONCE) ?? "false"));
+
+    final hasMandatoryTutorialBeenShown =
+      bool.parse((await sembast.getString(ConstantUtils.SETTING_HAS_MANDATORY_TUTORIAL_BEEN_SHOWN) ?? "false"));
+
     final savedGameIds =  await sembast.readStringList(ConstantUtils.SHARED_PREF_SAVED_IDS_KEY) ?? [];
 
     emit(
         HomePageSettingsFetched(
           gameSettings: GameSettings(
             primaryColorSetting: Color(primaryColorSetting),
-            selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSetting
+            selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSetting,
+            hasMandatoryTutorialBeenShown: hasMandatoryTutorialBeenShown,
           ),
           numberOfPreviouslySavedGames: savedGameIds.length
         )

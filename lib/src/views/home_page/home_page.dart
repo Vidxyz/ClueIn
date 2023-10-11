@@ -83,9 +83,9 @@ class HomePageViewState extends State<HomePageView> {
                         WidgetUtils.spacer(5),
                         _actionButton("Settings"),
                         WidgetUtils.spacer(5),
-                        _actionButton("About"),
-                        WidgetUtils.spacer(5),
                         _actionButton("How To Play"),
+                        WidgetUtils.spacer(5),
+                        _actionButton("About"),
                         WidgetUtils.spacer(5),
                       ],
                     ),
@@ -165,7 +165,7 @@ class HomePageViewState extends State<HomePageView> {
   _goToSettingsPage() {
     Navigator.push(
         context,
-        SettingsView.route(gameSettings!.primaryColorSetting)
+        SettingsView.route(gameSettings!)
     ).then((value) => _fetchHomePageSettings());
   }
 

@@ -18,11 +18,13 @@ class SettingsFetched extends SettingsState {
   final int primaryColor;
   // final ClueVersion clueVersion;
   final bool selectMultipleMarkingsAtOnce;
+  final bool hasMandatoryTutorialBeenShown;
 
   const SettingsFetched({
     required this.primaryColor,
     // required this.clueVersion,
     required this.selectMultipleMarkingsAtOnce,
+    required this.hasMandatoryTutorialBeenShown,
   });
 
   @override
@@ -30,5 +32,6 @@ class SettingsFetched extends SettingsState {
     primaryColor,
     // clueVersion,
     selectMultipleMarkingsAtOnce,
+    hasMandatoryTutorialBeenShown,
   ];
 }
