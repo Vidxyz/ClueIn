@@ -702,6 +702,7 @@ class MainGameViewState extends State<MainGameView> {
 
   _performUndo() {
     if (_canUndo()) {
+      KeyboardUtils.lightImpact();
       final currentState = _mainGameBloc.state;
       if (currentState is MainGameStateModified) {
         _mainGameBloc.add(
@@ -752,6 +753,7 @@ class MainGameViewState extends State<MainGameView> {
 
   _performRedo() {
     if (_canRedo()) {
+      KeyboardUtils.lightImpact();
       final currentState = _mainGameBloc.state;
       if (currentState is MainGameStateModified) {
         _mainGameBloc.add(
@@ -774,6 +776,7 @@ class MainGameViewState extends State<MainGameView> {
     final conclusion = generateConclusion();
     if (conclusion.isGameOver() && !isGameOver) {
       isGameOver = true;
+      _updateBlocStateFromState();
       _mainGameBloc.add(const GameOverEvent());
     }
     return Scaffold(
@@ -1370,6 +1373,9 @@ class MainGameViewState extends State<MainGameView> {
 
     showDialog(context: context, builder: (context) {
       return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
           child: SizedBox(
             height: ScreenUtils.getScreenHeight(context) / 3,
             child: Scaffold(
@@ -1435,6 +1441,9 @@ class MainGameViewState extends State<MainGameView> {
     final currentPlayerNameId = currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).lastOrNull ?? "";
     showDialog(context: context, builder: (context) {
       return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
           child: SizedBox(
             height: ScreenUtils.getScreenHeight(context) / 3,
             child: Scaffold(
@@ -2606,22 +2615,26 @@ class MainGameViewState extends State<MainGameView> {
         }
       });
 
-      _mainGameBloc.add(
-          MainGameStateChanged(
-            initialGame: gameDefinitionState,
-            charactersGameState: charactersGameState,
-            weaponsGameState: weaponsGameState,
-            roomsGameState: roomsGameState,
-            gameBackgroundColorState: cellBackgroundColourState,
-            undoStack: undoStack,
-            redoStack: redoStack,
-          )
-      );
+      _updateBlocStateFromState();
       setState(() {
         isMarkingDialogOpen = false;
         selectedMarkingsFromDialog = [];
       });
     }
+  }
+
+  _updateBlocStateFromState() {
+    _mainGameBloc.add(
+        MainGameStateChanged(
+          initialGame: gameDefinitionState,
+          charactersGameState: charactersGameState,
+          weaponsGameState: weaponsGameState,
+          roomsGameState: roomsGameState,
+          gameBackgroundColorState: cellBackgroundColourState,
+          undoStack: undoStack,
+          redoStack: redoStack,
+        )
+    );
   }
 
   _showGameOverDialog(GameConclusion conclusion) {
@@ -2643,6 +2656,9 @@ class MainGameViewState extends State<MainGameView> {
 
     showDialog(context: context, builder: (context) {
       return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
         child: Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
@@ -2788,18 +2804,30 @@ class MainGameViewState extends State<MainGameView> {
 
     showDialog<bool>(context: context, builder: (context) {
       return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
         child: StatefulBuilder(
           builder: (context, setState) {
-            return MarkingsView(
-                primaryColorSetting: primaryColorSettingState,
-                selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSettingState,
-                currentMarkings: currentMarkings,
-                entityType: entityType,
-                currentEntity: currentEntity,
-                currentPlayerName: currentPlayerName,
-                // closeDialogCallback: _markDialogAsClosedAndSaveMarking,
-                setStateAndPopIfNeededCallback: _setStateAndPopIfNeeded,
-                closeDialogAndResetCellCallback: _markDialogAsClosedAndResetMarking,
+            return Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                  side: BorderSide(
+                      color: primaryColorSettingState,
+                      width: 1
+                  )
+              ),
+              child: MarkingsView(
+                  primaryColorSetting: primaryColorSettingState,
+                  selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSettingState,
+                  currentMarkings: currentMarkings,
+                  entityType: entityType,
+                  currentEntity: currentEntity,
+                  currentPlayerName: currentPlayerName,
+                  // closeDialogCallback: _markDialogAsClosedAndSaveMarking,
+                  setStateAndPopIfNeededCallback: _setStateAndPopIfNeeded,
+                  closeDialogAndResetCellCallback: _markDialogAsClosedAndResetMarking,
+              ),
             );
           },
         ),
@@ -2854,6 +2882,9 @@ class MainGameViewState extends State<MainGameView> {
 
     showDialog(context: context, builder: (context) {
       return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
         child:  SizedBox(
           height: ScreenUtils.getScreenHeight(context) / 2,
           child: Scaffold(
@@ -3004,6 +3035,9 @@ class MainGameViewState extends State<MainGameView> {
     Future.delayed(const Duration(milliseconds: 500), () {
       showDialog<bool>(context: context, builder: (context) {
         return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
           child:  SizedBox(
             height: ScreenUtils.getScreenHeight(context) / 2,
             child: Scaffold(

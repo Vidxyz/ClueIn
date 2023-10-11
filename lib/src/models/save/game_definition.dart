@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:cluein_app/src/models/game_card.dart';
 import 'package:cluein_app/src/views/main_game/bloc/main_game_state.dart';
 import 'package:equatable/equatable.dart';

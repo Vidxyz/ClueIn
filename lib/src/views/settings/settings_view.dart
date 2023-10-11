@@ -182,6 +182,9 @@ class SettingsViewState extends State<SettingsView> {
         builder: (context) {
           return StatefulBuilder(builder: (context, setState2) {
             return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
               title: Text(
                 "Select version",
                 style: TextStyle(
@@ -259,6 +262,9 @@ class SettingsViewState extends State<SettingsView> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
           title: Text(
               'Select color',
             style: TextStyle(

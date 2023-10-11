@@ -93,6 +93,7 @@ class NoteObservations extends StatelessWidget {
                   ),
                 ),
               ),
+              WidgetUtils.spacer(10),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
