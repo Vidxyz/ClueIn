@@ -1,7 +1,7 @@
 import 'package:cluein_app/src/models/game_card.dart';
+import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/keyboard_utils.dart';
-import 'package:cluein_app/src/utils/screen_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_event.dart';
@@ -14,11 +14,11 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 
 class AddInitialCardsView extends StatefulWidget {
-  final Color primaryAppColorFromSetting;
+  final GameSettings gameSettings;
   
   const AddInitialCardsView({
     super.key,
-    required this.primaryAppColorFromSetting
+    required this.gameSettings
   });
 
 
@@ -49,6 +49,8 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
   List<TargetFocus> basicTargets = [];
   TutorialCoachMark? basicTutorialCoachMark;
 
+  Map<String, String> cardDisplayNameMap = {};
+
   @override
   void initState() {
     super.initState();
@@ -72,6 +74,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
     });
 
 
+    cardDisplayNameMap = ConstantUtils.clueVersionToDisplayNameMap[widget.gameSettings.clueVersionSetting]!;
   }
 
   createTutorial() {
@@ -84,7 +87,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
           identify: "userPromptTextKey",
           keyTarget: userPromptTextKey,
           alignSkip: Alignment.centerRight,
-          color: widget.primaryAppColorFromSetting,
+          color: widget.gameSettings.primaryColorSetting,
           shape: ShapeLightFocus.RRect,
           enableOverlayTab: true,
           enableTargetTab: true,
@@ -183,7 +186,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
 
       basicTutorialCoachMark = TutorialCoachMark(
         targets: basicTargets,
-        colorShadow: widget.primaryAppColorFromSetting,
+        colorShadow: widget.gameSettings.primaryColorSetting,
         hideSkip: true,
         showSkipInLastTarget: false,
         focusAnimationDuration: const Duration(milliseconds: 200),
@@ -252,7 +255,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                 behavior: const ScrollBehavior(),
                 child: GlowingOverscrollIndicator(
                   axisDirection: AxisDirection.down,
-                  color: widget.primaryAppColorFromSetting,
+                  color: widget.gameSettings.primaryColorSetting,
                   child: SingleChildScrollView(
                     physics: const ScrollPhysics(),
                     child: Center(
@@ -280,7 +283,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
               );
             }
             else {
-              return WidgetUtils.progressIndicator(widget.primaryAppColorFromSetting);
+              return WidgetUtils.progressIndicator(widget.gameSettings.primaryColorSetting);
             }
           }),
     );
@@ -297,7 +300,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
             "Please select exactly the $maxCards cards that you start the game with. These are the card that were dealt to you randomly. Ensure that no one else knows this!",
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: widget.primaryAppColorFromSetting,
+                color: widget.gameSettings.primaryColorSetting,
                 fontSize: 14,
                 fontWeight: FontWeight.bold
             ),
@@ -429,7 +432,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Character,
                 ConstantUtils.characterList[index],
-                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.characterList[index]]!,
+                cardDisplayNameMap[ConstantUtils.characterList[index]]!,
                 _checkBoxPersons(ConstantUtils.characterList[index])
             );
           }
@@ -448,7 +451,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Weapon,
                 ConstantUtils.weaponList[index],
-                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.weaponList[index]]!,
+                cardDisplayNameMap[ConstantUtils.weaponList[index]]!,
                 _checkBoxWeapons(ConstantUtils.weaponList[index])
             );
           }
@@ -467,7 +470,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Room,
                 ConstantUtils.roomList[index],
-                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.roomList[index]]!,
+                cardDisplayNameMap[ConstantUtils.roomList[index]]!,
                 _checkBoxRooms(ConstantUtils.roomList[index])
             );
           }
@@ -524,7 +527,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          final c = widget.primaryAppColorFromSetting;
+          final c = widget.gameSettings.primaryColorSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -576,7 +579,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          final c = widget.primaryAppColorFromSetting;
+          final c = widget.gameSettings.primaryColorSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -600,7 +603,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          final c = widget.primaryAppColorFromSetting;
+          final c = widget.gameSettings.primaryColorSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -642,7 +645,7 @@ class AddInitialCardsViewState extends State<AddInitialCardsView> with WidgetsBi
                   hintStyle: const TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: widget.primaryAppColorFromSetting,
+                      color: widget.gameSettings.primaryColorSetting,
                     ),
                   ),
                 ),

@@ -186,11 +186,11 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
                     primaryAppColorFromSetting: widget.gameSettings.primaryColorSetting,
                     numberOfPreviouslySavedGames: widget.numberOfPreviouslySavedGames,
                 ),
-                AddInitialCardsView(primaryAppColorFromSetting: widget.gameSettings.primaryColorSetting),
+                AddInitialCardsView(gameSettings: widget.gameSettings),
                 !isPublicInfoCardCountZero(state) ?
                   AddPublicInfoCardsView(
                       maxCardsPublicInfo: getPublicInfoCardCount(state),
-                      primaryAppColorFromSetting: widget.gameSettings.primaryColorSetting
+                      gameSettings: widget.gameSettings
                   ) : null,
               ]),
             );

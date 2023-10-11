@@ -109,6 +109,7 @@ class MainGameViewState extends State<MainGameView> {
 
   Color primaryColorSettingState = ConstantUtils.primaryAppColor;
   bool selectMultipleMarkingsAtOnceSettingState = false;
+  ClueVersion selectedClueVersionSetting = ConstantUtils.defaultClueVersion;
 
   int currentQuickMarkerIndex = 0;
   bool isScreenHidden = false;
@@ -119,6 +120,8 @@ class MainGameViewState extends State<MainGameView> {
   bool isGameOver = false;
 
   final ScrollController _scrollController = ScrollController();
+
+  Map<String, String> cardDisplayNameMap = {};
 
   @override
   void dispose() {
@@ -148,7 +151,10 @@ class MainGameViewState extends State<MainGameView> {
 
     primaryColorSettingState = widget.gameSettings.primaryColorSetting;
     selectMultipleMarkingsAtOnceSettingState = widget.gameSettings.selectMultipleMarkingsAtOnceSetting;
+    selectedClueVersionSetting = widget.gameSettings.clueVersionSetting;
 
+    cardDisplayNameMap = ConstantUtils.clueVersionToDisplayNameMap[selectedClueVersionSetting]!;
+    
     initTutorial();
     _setupGameStateInitially();
 
@@ -721,6 +727,7 @@ class MainGameViewState extends State<MainGameView> {
                 primaryColorSetting: primaryColorSettingState,
                 selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSettingState,
                 hasMandatoryTutorialBeenShown: widget.gameSettings.hasMandatoryTutorialBeenShown,
+                clueVersionSetting: selectedClueVersionSetting,
             )
         )
     ).then((value) {
@@ -728,6 +735,8 @@ class MainGameViewState extends State<MainGameView> {
         setState(() {
           primaryColorSettingState = value.primaryColorSetting;
           selectMultipleMarkingsAtOnceSettingState = value.selectMultipleMarkingsAtOnceSetting;
+          selectedClueVersionSetting = value.clueVersionSetting;
+          cardDisplayNameMap = ConstantUtils.clueVersionToDisplayNameMap[selectedClueVersionSetting]!;
         });
         initTutorial();
       }
@@ -1153,7 +1162,7 @@ class MainGameViewState extends State<MainGameView> {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                          ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                          cardDisplayNameMap[currentEntity] ?? "",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontSize: 15,
@@ -1194,7 +1203,7 @@ class MainGameViewState extends State<MainGameView> {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                          ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                          cardDisplayNameMap[currentEntity] ?? "",
                           textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
@@ -1235,7 +1244,7 @@ class MainGameViewState extends State<MainGameView> {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        ConstantUtils.entityNameToDisplayNameMap[currentEntity] ?? "",
+                        cardDisplayNameMap[currentEntity] ?? "",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
@@ -2393,7 +2402,7 @@ class MainGameViewState extends State<MainGameView> {
                   )
               ),
               TextSpan(
-                  text: ConstantUtils.entityNameToDisplayNameMap[currentEntity],
+                  text: cardDisplayNameMap[currentEntity],
                   style: TextStyle(
                       color: primaryColorSettingState,
                       fontSize: 16,
@@ -2440,7 +2449,7 @@ class MainGameViewState extends State<MainGameView> {
                   )
               ),
               TextSpan(
-                  text: ConstantUtils.entityNameToDisplayNameMap[currentEntity],
+                  text: cardDisplayNameMap[currentEntity],
                   style: TextStyle(
                       color: primaryColorSettingState,
                       fontSize: 16,
@@ -2692,7 +2701,7 @@ class MainGameViewState extends State<MainGameView> {
                         ),
                         children: [
                           TextSpan(
-                              text: ConstantUtils.entityNameToDisplayNameMap[conclusion.character],
+                              text: cardDisplayNameMap[conclusion.character],
                               style: TextStyle(
                                   color: primaryColorSettingState,
                                   fontSize: 18,
@@ -2708,7 +2717,7 @@ class MainGameViewState extends State<MainGameView> {
                               )
                           ),
                           TextSpan(
-                              text: ConstantUtils.entityNameToDisplayNameMap[conclusion.room],
+                              text: cardDisplayNameMap[conclusion.room],
                               style: TextStyle(
                                   color: primaryColorSettingState,
                                   fontSize: 18,
@@ -2724,7 +2733,7 @@ class MainGameViewState extends State<MainGameView> {
                               )
                           ),
                           TextSpan(
-                              text: ConstantUtils.entityNameToDisplayNameMap[conclusion.weapon],
+                              text: cardDisplayNameMap[conclusion.weapon],
                               style: TextStyle(
                                   color: primaryColorSettingState,
                                   fontSize: 18,

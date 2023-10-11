@@ -26,7 +26,8 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
       int.parse((await sembast.getString(ConstantUtils.SETTING_PRIMARY_COLOR)) ?? ConstantUtils.primaryAppColor.value.toString());
     final selectMultipleMarkingsAtOnceSetting =
       bool.parse((await sembast.getString(ConstantUtils.SETTING_MULTIPLE_MARKINGS_AT_ONCE) ?? "false"));
-
+    final clueVersionSetting  =
+      ClueVersion.values.byName(((await sembast.getString(ConstantUtils.SETTING_CLUE_VERSION)) ?? "ClueVersion.${ConstantUtils.defaultClueVersion.name}").split(".").last);
     final hasMandatoryTutorialBeenShown =
       bool.parse((await sembast.getString(ConstantUtils.SETTING_HAS_MANDATORY_TUTORIAL_BEEN_SHOWN) ?? "false"));
 
@@ -38,6 +39,7 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
             primaryColorSetting: Color(primaryColorSetting),
             selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSetting,
             hasMandatoryTutorialBeenShown: hasMandatoryTutorialBeenShown,
+            clueVersionSetting: clueVersionSetting,
           ),
           numberOfPreviouslySavedGames: savedGameIds.length
         )

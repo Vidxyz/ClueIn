@@ -2,6 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+enum ClueVersion { CluePre2016, CluePre2019, Clue, Clue2013Manor, CluedoPre2016, Cluedo, }
+
+
 class ConstantUtils {
   static const double WEB_APP_MAX_WIDTH = 600;
 
@@ -31,7 +34,35 @@ class ConstantUtils {
 
   static const List<String> allEntitites = [...characterList, ...weaponList, ...roomList];
 
-  static const Map<String, String> entityNameToDisplayNameMap = {
+  static Map<ClueVersion, Map<String, String>> clueVersionToDisplayNameMap = {
+    ClueVersion.CluePre2016: cluePre2016NameToDisplayNameMap,
+    ClueVersion.CluePre2019: cluePre2019NameToDisplayNameMap,
+    ClueVersion.Clue: clueNameToDisplayNameMap,
+    ClueVersion.Clue2013Manor: clueManorNameToDisplayNameMap,
+
+    ClueVersion.CluedoPre2016: cluedoPre2016NameToDisplayNameMap,
+    ClueVersion.Cluedo: cluedoNameToDisplayNameMap,
+  };
+
+  static const List<ClueVersion> clueVersionOptions = [
+    ClueVersion.CluePre2016,
+    ClueVersion.CluePre2019,
+    ClueVersion.Clue,
+    ClueVersion.Clue2013Manor,
+    ClueVersion.CluedoPre2016,
+    ClueVersion.Cluedo,
+  ];
+
+  static Map<ClueVersion, String> clueVersionSettingDisplayNameMap = {
+    ClueVersion.CluePre2016: "Clue (pre-2016)",
+    ClueVersion.CluePre2019: "Clue (pre-2019)",
+    ClueVersion.Clue: "Clue",
+    ClueVersion.Clue2013Manor: "Clue (2013, Manor)",
+    ClueVersion.CluedoPre2016: "Cluedo (pre-2016)",
+    ClueVersion.Cluedo: "Cluedo",
+  };
+
+  static const Map<String, String> cluePre2016NameToDisplayNameMap = {
     "Scarlett": "Ms. Scarlett",
     "Mustard": "Col. Mustard",
     "White": "Mrs. White",
@@ -50,10 +81,136 @@ class ConstantUtils {
     "Kitchen" : "Kitchen",
     "BallRoom" : "Ball Room",
     "Conservatory" : "Conservatory",
-    "BilliardRoom" : "Billiards Room",
+    "BilliardRoom" : "Billiard Room",
     "Library" : "Library",
     "Study" : "Study",
   };
+
+  static const Map<String, String> clueNameToDisplayNameMap = {
+    "Scarlett": "Ms. Scarlett",
+    "Mustard": "Col. Mustard",
+    "White": "Dr. Orchid",
+    "Green": "Mr. Green",
+    "Peacock": "Mrs. Peacock",
+    "Plum": "Prof. Plum",
+    "Dagger" : "Dagger",
+    "Candlestick" : "Candlestick",
+    "Revolver" : "Revolver",
+    "Rope" : "Rope",
+    "LeadPipe" : "Lead Pipe",
+    "Wrench" : "Wrench",
+    "Hall" : "Bathroom",
+    "Lounge" : "Lounge",
+    "DiningRoom" : "Dining Room",
+    "Kitchen" : "Kitchen",
+    "BallRoom" : "Ball Room",
+    "Conservatory" : "Conservatory",
+    "BilliardRoom" : "Billiard Room",
+    "Library" : "Library",
+    "Study" : "Study",
+  };
+
+  static const Map<String, String> cluePre2019NameToDisplayNameMap = {
+    "Scarlett": "Ms. Scarlett",
+    "Mustard": "Col. Mustard",
+    "White": "Dr. Orchid",
+    "Green": "Mr. Green",
+    "Peacock": "Mrs. Peacock",
+    "Plum": "Prof. Plum",
+    "Dagger" : "Dagger",
+    "Candlestick" : "Candlestick",
+    "Revolver" : "Revolver",
+    "Rope" : "Rope",
+    "LeadPipe" : "Lead Piping",
+    "Wrench" : "Wrench",
+    "Hall" : "Hall",
+    "Lounge" : "Lounge",
+    "DiningRoom" : "Dining Room",
+    "Kitchen" : "Kitchen",
+    "BallRoom" : "Ball Room",
+    "Conservatory" : "Conservatory",
+    "BilliardRoom" : "Billiard Room",
+    "Library" : "Library",
+    "Study" : "Study",
+  };
+
+  static const Map<String, String> clueManorNameToDisplayNameMap = {
+    "Scarlett": "Ms. Scarlett",
+    "Mustard": "Col. Mustard",
+    "White": "Dr. Orchid",
+    "Green": "Mr. Green",
+    "Peacock": "Mrs. Peacock",
+    "Plum": "Prof. Plum",
+    "Dagger" : "Dagger",
+    "Candlestick" : "Candlestick",
+    "Revolver" : "Pistol",
+    "Rope" : "Rope",
+    "LeadPipe" : "Lead Pipe",
+    "Wrench" : "Wrench",
+
+    "Kitchen" : "Kitchen",
+    "DiningRoom" : "Dining Room",
+    "Hall" : "Living Room",
+    "Lounge" : "Bedroom",
+    "BallRoom" : "Garage",
+    "Conservatory" : "Courtyard",
+    "BilliardRoom" : "Game Room",
+    "Library" : "Bathroom",
+    "Study" : "Office",
+  };
+
+  static const Map<String, String> cluedoPre2016NameToDisplayNameMap = {
+    "Scarlett": "Ms. Scarlett",
+    "Mustard": "Col. Mustard",
+    "White": "Mrs. White",
+    "Green": "Rev. Green",
+    "Peacock": "Mrs. Peacock",
+    "Plum": "Prof. Plum",
+
+    "Dagger" : "Dagger",
+    "Candlestick" : "Candlestick",
+    "Revolver" : "Revolver",
+    "Rope" : "Rope",
+    "LeadPipe" : "Lead Piping",
+    "Wrench" : "Spanner",
+
+    "BallRoom" : "Ball Room",
+    "BilliardRoom" : "Billiard Room",
+    "Conservatory" : "Conservatory",
+    "DiningRoom" : "Dining Room",
+    "Hall" : "Hall",
+    "Kitchen" : "Kitchen",
+    "Library" : "Library",
+    "Lounge" : "Lounge",
+    "Study" : "Study",
+  };
+
+  static const Map<String, String> cluedoNameToDisplayNameMap = {
+    "Scarlett": "Ms. Scarlett",
+    "Mustard": "Col. Mustard",
+    "White": "Dr. Orchid",
+    "Green": "Rev. Green",
+    "Peacock": "Mrs. Peacock",
+    "Plum": "Prof. Plum",
+    "Dagger" : "Dagger",
+    "Candlestick" : "Candlestick",
+    "Revolver" : "Revolver",
+    "Rope" : "Rope",
+    "LeadPipe" : "Lead Piping",
+    "Wrench" : "Spanner",
+
+    "BallRoom" : "Ball Room",
+    "BilliardRoom" : "Billiard Room",
+    "Conservatory" : "Conservatory",
+    "DiningRoom" : "Dining Room",
+    "Hall" : "Hall",
+    "Kitchen" : "Kitchen",
+    "Library" : "Library",
+    "Lounge" : "Lounge",
+    "Study" : "Study",
+  };
+
+  static const ClueVersion defaultClueVersion = ClueVersion.CluePre2016;
 
   static const int MAX_MARKINGS = 12;
 

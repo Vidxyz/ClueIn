@@ -1,4 +1,5 @@
 import 'package:cluein_app/src/models/game_card.dart';
+import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/create_new_game/bloc/create_new_game_bloc.dart';
@@ -11,12 +12,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddPublicInfoCardsView extends StatefulWidget {
   final int maxCardsPublicInfo;
-  final Color primaryAppColorFromSetting;
+  final GameSettings gameSettings;
 
   const AddPublicInfoCardsView({
     super.key,
     required this.maxCardsPublicInfo,
-    required this.primaryAppColorFromSetting,
+    required this.gameSettings,
   });
 
   @override
@@ -42,7 +43,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
   late CreateNewGameBloc _createNewGameBloc;
 
   bool hasHintTutorialBeenShown = false;
-
+  Map<String, String> cardDisplayNameMap = {};
 
   @override
   void initState() {
@@ -78,6 +79,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
       );
     }
 
+    cardDisplayNameMap = ConstantUtils.clueVersionToDisplayNameMap[widget.gameSettings.clueVersionSetting]!;
   }
 
 
@@ -112,7 +114,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
                 behavior: const ScrollBehavior(),
                 child: GlowingOverscrollIndicator(
                   axisDirection: AxisDirection.down,
-                  color: widget.primaryAppColorFromSetting,
+                  color: widget.gameSettings.primaryColorSetting,
                   child: SingleChildScrollView(
                     physics: const ScrollPhysics(),
                     child: Center(
@@ -140,7 +142,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
               );
             }
             else {
-              return WidgetUtils.progressIndicator(widget.primaryAppColorFromSetting);
+              return WidgetUtils.progressIndicator(widget.gameSettings.primaryColorSetting);
             }
           }),
     );
@@ -154,7 +156,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
           "Please select the ${widget.maxCardsPublicInfo} cards that has been set aside for everyone to know.",
           textAlign: TextAlign.center,
           style: TextStyle(
-              color: widget.primaryAppColorFromSetting,
+              color: widget.gameSettings.primaryColorSetting,
               fontSize: 14,
               fontWeight: FontWeight.bold
           ),
@@ -286,7 +288,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Character,
                 ConstantUtils.characterList[index],
-                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.characterList[index]]!,
+                cardDisplayNameMap[ConstantUtils.characterList[index]]!,
                 _checkBoxPersons(ConstantUtils.characterList[index], isDisabled: isDisabled),
                 isDisabled: isDisabled
             );
@@ -307,7 +309,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Weapon,
                 ConstantUtils.weaponList[index],
-                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.weaponList[index]]!,
+                cardDisplayNameMap[ConstantUtils.weaponList[index]]!,
                 _checkBoxWeapons(ConstantUtils.weaponList[index], isDisabled: isDisabled),
                 isDisabled: isDisabled
             );
@@ -328,7 +330,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
             return _renderInitialCardSelectViewForEntity(
                 EntityType.Room,
                 ConstantUtils.roomList[index],
-                ConstantUtils.entityNameToDisplayNameMap[ConstantUtils.roomList[index]]!,
+                cardDisplayNameMap[ConstantUtils.roomList[index]]!,
                 _checkBoxRooms(ConstantUtils.roomList[index], isDisabled: isDisabled),
                 isDisabled: isDisabled
             );
@@ -395,7 +397,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          final c = widget.primaryAppColorFromSetting;
+          final c = widget.gameSettings.primaryColorSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -451,7 +453,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          final c = widget.primaryAppColorFromSetting;
+          final c = widget.gameSettings.primaryColorSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -477,7 +479,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
       child: Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          final c = widget.primaryAppColorFromSetting;
+          final c = widget.gameSettings.primaryColorSetting;
           if (states.contains(MaterialState.disabled)) {
             return c.withOpacity(.32);
           }
@@ -521,7 +523,7 @@ class AddPublicInfoCardsViewState extends State<AddPublicInfoCardsView> with Wid
                   hintStyle: const TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: widget.primaryAppColorFromSetting,
+                      color: widget.gameSettings.primaryColorSetting,
                     ),
                   ),
                 ),

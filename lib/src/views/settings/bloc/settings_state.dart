@@ -1,4 +1,5 @@
 import 'package:cluein_app/src/models/save/game_definition.dart';
+import 'package:cluein_app/src/utils/constant_utils.dart';
 import 'package:cluein_app/src/views/settings/bloc/settings_bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -16,13 +17,13 @@ class SettingsLoading extends SettingsState {}
 
 class SettingsFetched extends SettingsState {
   final int primaryColor;
-  // final ClueVersion clueVersion;
+  final ClueVersion clueVersion;
   final bool selectMultipleMarkingsAtOnce;
   final bool hasMandatoryTutorialBeenShown;
 
   const SettingsFetched({
     required this.primaryColor,
-    // required this.clueVersion,
+    required this.clueVersion,
     required this.selectMultipleMarkingsAtOnce,
     required this.hasMandatoryTutorialBeenShown,
   });
@@ -30,7 +31,7 @@ class SettingsFetched extends SettingsState {
   @override
   List<Object> get props => [
     primaryColor,
-    // clueVersion,
+    clueVersion,
     selectMultipleMarkingsAtOnce,
     hasMandatoryTutorialBeenShown,
   ];

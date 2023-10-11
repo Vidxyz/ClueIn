@@ -1,6 +1,7 @@
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
 import 'package:cluein_app/src/models/settings/game_settings.dart';
 import 'package:cluein_app/src/utils/constant_utils.dart';
+import 'package:cluein_app/src/utils/screen_utils.dart';
 import 'package:cluein_app/src/utils/widget_utils.dart';
 import 'package:cluein_app/src/views/settings/bloc/settings_bloc.dart';
 import 'package:cluein_app/src/views/settings/bloc/settings_event.dart';
@@ -46,7 +47,7 @@ class SettingsViewState extends State<SettingsView> {
 
   int primaryAppColorSettingsValue = ConstantUtils.primaryAppColor.value;
   bool selectMultipleMarkingsAtOnceSettingsValue = false;
-  // ClueVersion clueVersionSettingsValue = ClueVersion.Default;
+  ClueVersion clueVersionSettingsValue = ConstantUtils.defaultClueVersion;
 
   Color lastSelectedColorValue = ConstantUtils.primaryAppColor;
 
@@ -62,9 +63,9 @@ class SettingsViewState extends State<SettingsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Settings", style: TextStyle(color: widget.gameSettings.primaryColorSetting),),
+        title: Text("Settings", style: TextStyle(color: Color(primaryAppColorSettingsValue)),),
         iconTheme: IconThemeData(
-          color: widget.gameSettings.primaryColorSetting,
+          color: Color(primaryAppColorSettingsValue),
         ),
       ),
       body: WillPopScope(
@@ -75,6 +76,7 @@ class SettingsViewState extends State<SettingsView> {
                 primaryColorSetting: Color(primaryAppColorSettingsValue),
                 selectMultipleMarkingsAtOnceSetting: selectMultipleMarkingsAtOnceSettingsValue,
                 hasMandatoryTutorialBeenShown: widget.gameSettings.hasMandatoryTutorialBeenShown,
+                clueVersionSetting: clueVersionSettingsValue,
             )
           );
           return Future.value(false);
@@ -83,7 +85,7 @@ class SettingsViewState extends State<SettingsView> {
           listener: (context, state) {
             if (state is SettingsFetched) {
               primaryAppColorSettingsValue = state.primaryColor;
-              // clueVersionSettingsValue = state.clueVersion;
+              clueVersionSettingsValue = state.clueVersion;
               selectMultipleMarkingsAtOnceSettingsValue = state.selectMultipleMarkingsAtOnce;
             }
           },
@@ -93,7 +95,7 @@ class SettingsViewState extends State<SettingsView> {
                 return _showSettingsList(state);
               }
               else {
-                return WidgetUtils.progressIndicator(widget.gameSettings.primaryColorSetting);
+                return WidgetUtils.progressIndicator(Color(primaryAppColorSettingsValue));
               }
             },
           ),
@@ -141,7 +143,7 @@ class SettingsViewState extends State<SettingsView> {
             ),
             trailing: Checkbox(
               fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                final c = widget.gameSettings.primaryColorSetting;
+                final c = Color(primaryAppColorSettingsValue);
                 if (states.contains(MaterialState.disabled)) {
                   return c.withOpacity(.32);
                 }
@@ -157,22 +159,98 @@ class SettingsViewState extends State<SettingsView> {
             ),
           ),
         ),
-        // ListTile(
-        //   onTap: () {
-        //
-        //   },
-        //   title: const Text(
-        //     "Clue version"
-        //   ),
-        //   subtitle: Text(
-        //     clueVersionSettingsValue.name,
-        //     style: TextStyle(
-        //       color: Color(primaryAppColorSettingsValue),
-        //       fontWeight: FontWeight.bold,
-        //     ),
-        //   ),
-        // )
+        ListTile(
+          onTap: _showClueVersionSelectDialog,
+          title: const Text(
+            "Clue version"
+          ),
+          trailing: Text(
+            ConstantUtils.clueVersionSettingDisplayNameMap[clueVersionSettingsValue]!,
+            style: TextStyle(
+              color: Color(primaryAppColorSettingsValue),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        )
       ],
+    );
+  }
+
+  _showClueVersionSelectDialog() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setState2) {
+            return AlertDialog(
+              title: Text(
+                "Select version",
+                style: TextStyle(
+                    color: Color(primaryAppColorSettingsValue)
+                ),
+              ),
+              content: SizedBox(
+                width: ScreenUtils.getScreenWidth(context) / 2,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: ConstantUtils.clueVersionOptions.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final version = ConstantUtils.clueVersionOptions[index];
+                    return ListTile(
+                      title: Text(ConstantUtils.clueVersionSettingDisplayNameMap[version]!,
+                          style: const TextStyle(fontWeight: FontWeight.w500)),
+                      leading: Transform.scale(
+                        scale: 1.25,
+                        child: Checkbox(
+                          checkColor: Colors.white,
+                          fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                            final c = Color(primaryAppColorSettingsValue);
+                            if (states.contains(MaterialState.disabled)) {
+                              return c.withOpacity(.32);
+                            }
+                            return c;
+                          }),
+                          value: clueVersionSettingsValue.name == version.name,
+                          shape: const CircleBorder(),
+                          onChanged: (bool? value) {
+                            if (value ?? false) {
+                              setState(() {
+                                clueVersionSettingsValue = version;
+                              });
+                              setState2(() {
+                                clueVersionSettingsValue = version;
+                              });
+                              _updateBlocState();
+                            }
+                          },
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          clueVersionSettingsValue = version;
+                        });
+                        setState2(() {
+                          clueVersionSettingsValue = version;
+                        });
+                        _updateBlocState();
+                      },
+                    );
+                  },
+                ),
+              ),
+              actions: <Widget>[
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Color(primaryAppColorSettingsValue)),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Go back"),
+                ),
+              ],
+            );
+          });
+        }
     );
   }
 
@@ -184,7 +262,7 @@ class SettingsViewState extends State<SettingsView> {
           title: Text(
               'Select color',
             style: TextStyle(
-              color: widget.gameSettings.primaryColorSetting
+              color: Color(primaryAppColorSettingsValue)
             ),
           ),
           content: SingleChildScrollView(
@@ -198,7 +276,7 @@ class SettingsViewState extends State<SettingsView> {
           actions: <Widget>[
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(widget.gameSettings.primaryColorSetting),
+                backgroundColor: MaterialStateProperty.all<Color>(Color(primaryAppColorSettingsValue)),
               ),
               onPressed: () {
                 setState(() {
@@ -211,7 +289,7 @@ class SettingsViewState extends State<SettingsView> {
             ),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(widget.gameSettings.primaryColorSetting),
+                backgroundColor: MaterialStateProperty.all<Color>(Color(primaryAppColorSettingsValue)),
               ),
               onPressed: () {
                 setState(() {
@@ -232,7 +310,8 @@ class SettingsViewState extends State<SettingsView> {
     settingsGameBloc.add(
         SettingsUpdated(
             primaryColor: primaryAppColorSettingsValue,
-            selectMultipleMarkingsAtOnce: selectMultipleMarkingsAtOnceSettingsValue
+            selectMultipleMarkingsAtOnce: selectMultipleMarkingsAtOnceSettingsValue,
+            selectedClueVersion: clueVersionSettingsValue,
         )
     );
   }
