@@ -101,13 +101,13 @@ class CreateNewGameViewState extends State<CreateNewGameView> {
 
           }
           else if (state is NewGameSavedAndReadyToStart) {
-            Navigator.pushReplacement(
+            Navigator.push(
                 context,
                 MainGameView.route(
                     gameDefinition: state.gameDefinition,
                     gameSettings: widget.gameSettings,
                 )
-            );
+            ).then((value) => Navigator.pop(context));
           }
         },
         child: _pageViews(),

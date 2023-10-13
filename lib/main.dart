@@ -1,12 +1,11 @@
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
-import 'package:cluein_app/src/utils/constant_utils.dart';
-import 'package:cluein_app/src/views/home_page/home_page.dart';
 import 'package:cluein_app/src/views/shared_components/ads/bloc/ad_bloc.dart';
 import 'package:cluein_app/src/views/splash/splash_page.dart';
 import 'package:cluein_app/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:upgrader/upgrader.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,8 +28,8 @@ class MyApp extends StatelessWidget {
               create: (context) => AdBloc()
           ),
         ],
-        child: AppView(),
-        // child: renderAppView(),
+        // child: AppView(),
+        child: renderAppView(),
       ),
     );
   }
@@ -38,17 +37,24 @@ class MyApp extends StatelessWidget {
   // Use this to restrict web app width - unused right now because of problems with tutorial screen
   renderAppView() {
     if (kIsWeb) {
-      return Center(
-        child: ClipRect(
-          child: SizedBox(
-              width: ConstantUtils.WEB_APP_MAX_WIDTH,
-              child: AppView()
-          ),
-        ),
-      );
+      return AppView();
+      // return Center(
+      //   child: ClipRect(
+      //     child: SizedBox(
+      //         width: ConstantUtils.WEB_APP_MAX_WIDTH,
+      //         child: AppView()
+      //     ),
+      //   ),
+      // );
     }
     else {
-      return AppView();
+      return UpgradeAlert(
+        upgrader: Upgrader(
+          showIgnore: false,
+          showLater: true,
+        ),
+        child: AppView(),
+      );
     }
   }
 }
