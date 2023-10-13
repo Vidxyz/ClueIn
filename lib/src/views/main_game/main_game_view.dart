@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cluein_app/src/infrastructure/repo/sembast_repository.dart';
@@ -31,7 +32,7 @@ GlobalKey gameNameTextKey = GlobalKey();
 GlobalKey playerNameTextKey = GlobalKey();
 
 enum EntityType { Character, Weapon, Room }
-enum InferenceType { NoOtherPlayerHasThisCard, ThisPlayerHasNoOtherCards }
+enum InferenceType { NoOtherPlayerHasThisCard, ThisPlayerHasNoOtherCards, MaxCardsKnownForEntityType }
 
 class MainGameView extends StatefulWidget {
   static const String routeName = "game";
@@ -83,6 +84,7 @@ class MainGameViewState extends State<MainGameView> {
 
   bool dontAskAgainForInferenceNoOtherPlayerHasThisCard = false;
   bool dontAskAgainForInferenceThisPlayerHasNoOtherCards = false;
+  bool dontAskAgainForInferenceMaxCardsKnownForEntityType = false;
 
   List<String> selectedMarkingsFromDialog = [];
   Color? selectedBackgroundColourFromDialog;
@@ -1275,19 +1277,19 @@ class MainGameViewState extends State<MainGameView> {
     }
 
     if (entityType == EntityType.Room) {
-      return gameDefinitionState.playerNames.entries
+      return playerNameMapEntries
           .map((e) => e.value)
           .map((e) => roomsGameState[currentEntity]![e]!.contains(ConstantUtils.cross))
           .reduce((value, element) => value && element);
     }
     else if (entityType == EntityType.Weapon) {
-      return gameDefinitionState.playerNames.entries
+      return playerNameMapEntries
           .map((e) => e.value)
           .map((e) => weaponsGameState[currentEntity]![e]!.contains(ConstantUtils.cross))
           .reduce((value, element) => value && element);
     }
     else {
-      return gameDefinitionState.playerNames.entries
+      return playerNameMapEntries
           .map((e) => e.value)
           .map((e) => charactersGameState[currentEntity]![e]!.contains(ConstantUtils.cross))
           .reduce((value, element) => value && element);
@@ -1301,7 +1303,7 @@ class MainGameViewState extends State<MainGameView> {
     }
 
     if (entityType == EntityType.Room) {
-      return gameDefinitionState.playerNames.entries
+      return playerNameMapEntries
           .map((e) => e.value)
           .map((e) {
             final markings = roomsGameState[currentEntity]![e]!;
@@ -1310,7 +1312,7 @@ class MainGameViewState extends State<MainGameView> {
       .reduce((value, element) => value || element);
     }
     else if (entityType == EntityType.Weapon) {
-      return gameDefinitionState.playerNames.entries
+      return playerNameMapEntries
           .map((e) => e.value)
           .map((e) {
         final markings = weaponsGameState[currentEntity]![e]!;
@@ -1319,7 +1321,7 @@ class MainGameViewState extends State<MainGameView> {
           .reduce((value, element) => value || element);
     }
     else {
-      return gameDefinitionState.playerNames.entries
+      return playerNameMapEntries
           .map((e) => e.value)
           .map((e) {
         final markings = charactersGameState[currentEntity]![e]!;
@@ -1418,6 +1420,7 @@ class MainGameViewState extends State<MainGameView> {
     }).then((value) {
       if (editedGameNameValue != null) {
         _updateGameName(editedGameNameValue!);
+        editedGameNameValue = null;
       }
     });
   }
@@ -1445,50 +1448,69 @@ class MainGameViewState extends State<MainGameView> {
             borderRadius: BorderRadius.circular(15.0),
           ),
           child: SizedBox(
-            height: ScreenUtils.getScreenHeight(context) / 3,
-            child: Scaffold(
-                bottomNavigationBar: Row(
-                  children: [
-                    Expanded(
-                      child: _dismissDialogButton(),
-                    ),
-                  ],
-                ),
-                appBar: AppBar(
-                  automaticallyImplyLeading: false,
-                  title: Text("Edit player name", style: TextStyle(color: primaryColorSettingState),),
-                ),
-                body: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: TextFormField(
-                      textCapitalization: TextCapitalization.words,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(ConstantUtils.maxPlayerNameCharacters),
-                      ],
-                      onChanged: (text) {
-                        editedPlayerNameValue = text.trim();
-                      },
-                      initialValue: currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
-                      keyboardType: TextInputType.name,
-                      decoration: InputDecoration(
-                        // hintText: playerNamesHint[index],
-                        // hintStyle: const TextStyle(color: Colors.grey),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: primaryColorSettingState,
+            height: ScreenUtils.getScreenHeight(context) / 2.5,
+            child: IntrinsicHeight(
+              child: Scaffold(
+                  bottomNavigationBar: Row(
+                    children: [
+                      Expanded(
+                        child: _dismissDialogButton(),
+                      ),
+                    ],
+                  ),
+                  appBar: AppBar(
+                    automaticallyImplyLeading: false,
+                    title: Text("Edit player name", style: TextStyle(color: primaryColorSettingState),),
+                  ),
+                  body: Center(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: TextFormField(
+                            textCapitalization: TextCapitalization.words,
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(ConstantUtils.maxPlayerNameCharacters),
+                            ],
+                            onChanged: (text) {
+                              editedPlayerNameValue = text.trim();
+                            },
+                            initialValue: currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
+                            keyboardType: TextInputType.name,
+                            decoration: InputDecoration(
+                              // hintText: playerNamesHint[index],
+                              // hintStyle: const TextStyle(color: Colors.grey),
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: primaryColorSettingState,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        WidgetUtils.spacer(10),
+                        Center(
+                          child: Text(
+                            "Please note that changing a player name will reset the undo/redo stack",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: primaryColorSettingState,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        WidgetUtils.spacer(10),
+                      ],
                     ),
-                  ),
-                )
+                  )
+              ),
             ),
           )
       );
     }).then((value) {
       if (editedPlayerNameValue != null) {
         _updatePlayerName(editedPlayerNameValue!, currentPlayerName, currentPlayerNameId);
+        editedPlayerNameValue = null;
       }
     });
   }
@@ -1507,34 +1529,41 @@ class MainGameViewState extends State<MainGameView> {
     });
 
     _mainGameBloc.add(
-        MainGameStateChanged(
-          initialGame: gameDefinitionState,
-          charactersGameState: charactersGameState,
-          weaponsGameState: weaponsGameState,
-          roomsGameState: roomsGameState,
-          gameBackgroundColorState: cellBackgroundColourState,
-          undoStack: undoStack,
-          redoStack: redoStack,
-        )
+        GameNameChanged(initialGame: gameDefinitionState)
     );
+
+    // _mainGameBloc.add(
+    //     MainGameStateChanged(
+    //       initialGame: gameDefinitionState,
+    //       charactersGameState: charactersGameState,
+    //       weaponsGameState: weaponsGameState,
+    //       roomsGameState: roomsGameState,
+    //       gameBackgroundColorState: cellBackgroundColourState,
+    //       undoStack: undoStack,
+    //       undoStackPlayerNameMap: undoStackPlayerNameMap,
+    //       redoStack: redoStack,
+    //       redoStackPlayerNameMap: redoStackPlayerNameMap,
+    //     )
+    // );
   }
 
   _updatePlayerName(String newValue, String originalPlayerNamePlusId, currentPlayerNameId) {
     setState(() {
       // Update game definition, and update each game state
       String newPlayerNamePlusId = "${newValue}${ConstantUtils.UNIQUE_NAME_DELIMITER}${currentPlayerNameId}";
+
       ConstantUtils.characterList.forEach((currentCharacter) {
         final currentMarkingMap = charactersGameState[currentCharacter]!;
         currentMarkingMap[newPlayerNamePlusId] = charactersGameState[currentCharacter]![originalPlayerNamePlusId]!;
         currentMarkingMap.remove(originalPlayerNamePlusId);
         charactersGameState[currentCharacter] = currentMarkingMap;
 
-
         final currentCellBackgroundMap = cellBackgroundColourState[currentCharacter]!;
         currentCellBackgroundMap[newPlayerNamePlusId] = cellBackgroundColourState[currentCharacter]![originalPlayerNamePlusId]!;
         currentCellBackgroundMap.remove(originalPlayerNamePlusId);
         cellBackgroundColourState[currentCharacter] = currentCellBackgroundMap;
       });
+
       ConstantUtils.weaponList.forEach((currentWeapon) {
         final currentMarkingMap = weaponsGameState[currentWeapon]!;
         currentMarkingMap[newPlayerNamePlusId] = weaponsGameState[currentWeapon]![originalPlayerNamePlusId]!;
@@ -1546,6 +1575,7 @@ class MainGameViewState extends State<MainGameView> {
         currentCellBackgroundMap.remove(originalPlayerNamePlusId);
         cellBackgroundColourState[currentWeapon] = currentCellBackgroundMap;
       });
+
       ConstantUtils.roomList.forEach((currentRoom) {
         final currentMarkingMap = roomsGameState[currentRoom]!;
         currentMarkingMap[newPlayerNamePlusId] = roomsGameState[currentRoom]![originalPlayerNamePlusId]!;
@@ -1578,16 +1608,20 @@ class MainGameViewState extends State<MainGameView> {
     });
 
     _mainGameBloc.add(
-        MainGameStateChanged(
-          initialGame: gameDefinitionState,
-          charactersGameState: charactersGameState,
-          weaponsGameState: weaponsGameState,
-          roomsGameState: roomsGameState,
-          gameBackgroundColorState: cellBackgroundColourState,
-          undoStack: undoStack,
-          redoStack: redoStack,
-        )
+        PlayerNameChanged(initialGame: gameDefinitionState)
     );
+
+    // _mainGameBloc.add(
+    //     MainGameStateChanged(
+    //       initialGame: gameDefinitionState,
+    //       charactersGameState: charactersGameState,
+    //       weaponsGameState: weaponsGameState,
+    //       roomsGameState: roomsGameState,
+    //       gameBackgroundColorState: cellBackgroundColourState,
+    //       undoStack: undoStack,
+    //       redoStack: redoStack,
+    //     )
+    // );
 
   }
 
@@ -1826,22 +1860,17 @@ class MainGameViewState extends State<MainGameView> {
           return [
             Expanded(
               flex: 3,
-              child: InkWell(
-                onTap: () {
-                  _showEditPlayerNameDialog(currentPlayerName);
-                },
-                child: Container(
-                  color: Colors.grey.shade200,
-                  // child: Center(
-                  //   child: Text(
-                  //     currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
-                  //     style: const TextStyle(
-                  //         fontWeight: FontWeight.bold,
-                  //       fontSize: 12
-                  //     ),
-                  //   ),
-                  // ),
-                ),
+              child: Container(
+                color: Colors.grey.shade200,
+                // child: Center(
+                //   child: Text(
+                //     currentPlayerName.split(ConstantUtils.UNIQUE_NAME_DELIMITER).firstOrNull ?? "",
+                //     style: const TextStyle(
+                //         fontWeight: FontWeight.bold,
+                //       fontSize: 12
+                //     ),
+                //   ),
+                // ),
               ),
             ),
             _verticalDivider2()
@@ -2235,29 +2264,6 @@ class MainGameViewState extends State<MainGameView> {
     });
   }
 
-  _markCellBackgroundColourDialogDialogAsClosedAndSaveBackgoundColour(EntityType entityType, String currentEntity, String currentPlayerName) {
-    if (selectedBackgroundColourFromDialog != null) {
-      KeyboardUtils.mediumImpact();
-      cellBackgroundColourState[currentEntity]![currentPlayerName] = selectedBackgroundColourFromDialog!.value;
-
-      _mainGameBloc.add(
-          MainGameStateChanged(
-            initialGame: gameDefinitionState,
-            charactersGameState: charactersGameState,
-            weaponsGameState: weaponsGameState,
-            roomsGameState: roomsGameState,
-            gameBackgroundColorState: cellBackgroundColourState,
-            undoStack: undoStack,
-            redoStack: redoStack,
-          )
-      );
-      setState(() {
-        isBackgroundColourDialogOpen = false;
-        selectedBackgroundColourFromDialog = null;
-      });
-    }
-  }
-
   _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(
       EntityType entityType,
       String currentPlayerName,
@@ -2286,14 +2292,122 @@ class MainGameViewState extends State<MainGameView> {
             _inferNoOtherRemainingCardsToDiscoverForCurrentPlayerConfirmationText(currentPlayerName, currentEntity),
                 () {
               _markAllOtherCardsForCurrentPlayerAsNotHaving(entityType, currentPlayerName, currentEntity);
+              Future.delayed(const Duration(milliseconds: 100), () {
+                _inferAndConfirmInferenceIfNeededMaxCardsKnownForEntityType(entityType, currentPlayerName, currentEntity);  
+              });
             }
         );
       }
       else {
         _markAllOtherCardsForCurrentPlayerAsNotHaving(entityType, currentPlayerName, currentEntity);
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _inferAndConfirmInferenceIfNeededMaxCardsKnownForEntityType(entityType, currentPlayerName, currentEntity);
+        });
+      }
+    }
+    else {
+      // We skip to the third and final inference, if possible
+      _inferAndConfirmInferenceIfNeededMaxCardsKnownForEntityType(entityType, currentPlayerName, currentEntity);
+    }
+  }
+
+  _inferAndConfirmInferenceIfNeededMaxCardsKnownForEntityType(
+      EntityType entityType,
+      String currentPlayerName,
+      String currentEntity,
+      ) {
+
+    askAndInferDetails(String unknownCardName) {
+      if (!dontAskAgainForInferenceMaxCardsKnownForEntityType) {
+        _showInferenceConfirmationDialog(
+            InferenceType.MaxCardsKnownForEntityType,
+            entityType,
+            currentEntity,
+            currentPlayerName,
+            _inferMaxCardsKnownForEntityTypeConfirmationText(currentPlayerName, currentEntity, entityType),
+                () {
+              _markEntityAsNoPlayerHaving(entityType, unknownCardName);
+            }
+        );
+      }
+      else {
+        _markEntityAsNoPlayerHaving(entityType, unknownCardName);
+      }
+    }
+
+    final int numberOfKnownCards;
+    final String? unknownCardName;
+    if (entityType == EntityType.Character) {
+      final allMarkingsForCharacters = charactersGameState.map((key, value) {
+        return MapEntry(key, value.entries.map((e) => e.value).expand((element) => element));
+      });
+      numberOfKnownCards = allMarkingsForCharacters.entries.where((entry) {
+        return entry.value.contains(ConstantUtils.tick) || entry.value.contains(ConstantUtils.noOneHasThis);
+      }).length;
+      unknownCardName = allMarkingsForCharacters.entries.where((entry) {
+        return !(entry.value.contains(ConstantUtils.tick) || entry.value.contains(ConstantUtils.noOneHasThis));
+      }).map((e) => e.key).firstOrNull;
+
+      if (numberOfKnownCards == ConstantUtils.characterList.length - 1) {
+        askAndInferDetails(unknownCardName!);
+      }
+    }
+    else if (entityType == EntityType.Weapon) {
+      final allMarkingsForWeapons = weaponsGameState.map((key, value) {
+        return MapEntry(key, value.entries.map((e) => e.value).expand((element) => element));
+      });
+      numberOfKnownCards = allMarkingsForWeapons.entries.where((entry) {
+        return entry.value.contains(ConstantUtils.tick) || entry.value.contains(ConstantUtils.noOneHasThis);
+      }).length;
+      unknownCardName = allMarkingsForWeapons.entries.where((entry) {
+        return !(entry.value.contains(ConstantUtils.tick) || entry.value.contains(ConstantUtils.noOneHasThis));
+      }).map((e) => e.key).firstOrNull;
+
+      if (numberOfKnownCards == ConstantUtils.weaponList.length - 1) {
+        askAndInferDetails(unknownCardName!);
+      }
+    }
+    else {
+      final allMarkingsForRooms = roomsGameState.map((key, value) {
+        return MapEntry(key, value.entries.map((e) => e.value).expand((element) => element));
+      });
+      numberOfKnownCards = allMarkingsForRooms.entries.where((entry) {
+        return entry.value.contains(ConstantUtils.tick) || entry.value.contains(ConstantUtils.noOneHasThis);
+      }).length;
+      unknownCardName = allMarkingsForRooms.entries.where((entry) {
+        return !(entry.value.contains(ConstantUtils.tick) || entry.value.contains(ConstantUtils.noOneHasThis));
+      }).map((e) => e.key).firstOrNull;
+
+      if (numberOfKnownCards == ConstantUtils.roomList.length - 1) {
+        askAndInferDetails(unknownCardName!);
       }
     }
   }
+
+  _markCellBackgroundColourDialogDialogAsClosedAndSaveBackgoundColour(EntityType entityType, String currentEntity, String currentPlayerName) {
+    if (selectedBackgroundColourFromDialog != null) {
+      KeyboardUtils.mediumImpact();
+      cellBackgroundColourState[currentEntity]![currentPlayerName] = selectedBackgroundColourFromDialog!.value;
+
+      _mainGameBloc.add(
+          MainGameStateChanged(
+            initialGame: gameDefinitionState,
+            charactersGameState: charactersGameState,
+            weaponsGameState: weaponsGameState,
+            roomsGameState: roomsGameState,
+            gameBackgroundColorState: cellBackgroundColourState,
+            undoStack: undoStack,
+            redoStack: redoStack,
+          )
+      );
+      setState(() {
+        isBackgroundColourDialogOpen = false;
+        selectedBackgroundColourFromDialog = null;
+      });
+    }
+  }
+
+
 
   _markAllOtherRoomsAsMissing(String currentPlayerName, String currentEntity) {
     GameState tempRooms = {};
@@ -2332,6 +2446,77 @@ class MainGameViewState extends State<MainGameView> {
       temp[key] = newVal;
     });
     charactersGameState = temp;
+  }
+
+  /// Marks every player as NOT having the following entity
+  /// If there is tick or cross already on it, it is untouched
+  /// Otherwise a cross is added to markings list
+  _markEntityAsNoPlayerHaving(EntityType entityType, String currentEntity) {
+    if (entityType == EntityType.Character) {
+      GameState temp = {};
+      charactersGameState.forEach((characterName, playerNameMarkingMap) {
+        if (currentEntity == characterName) {
+          final newMap = playerNameMarkingMap.map((playerName, markings) {
+            return MapEntry(
+                playerName,
+                !(markings.contains(ConstantUtils.cross)) ? [...markings, ConstantUtils.cross] : markings
+            );
+          });
+          temp[characterName] = newMap;
+        }
+        else {
+          temp[characterName] = playerNameMarkingMap;
+        }
+      });
+
+      setState(() {
+        charactersGameState = temp;
+      });
+      _updateBlocStateFromState();
+    }
+    else if (entityType == EntityType.Weapon) {
+      GameState temp = {};
+      weaponsGameState.forEach((weaponName, playerNameMarkingMap) {
+        if (currentEntity == weaponName) {
+          final newMap = playerNameMarkingMap.map((playerName, markings) {
+            return MapEntry(
+                playerName,
+                !(markings.contains(ConstantUtils.cross)) ? [...markings, ConstantUtils.cross] : markings
+            );
+          });
+          temp[weaponName] = newMap;
+        }
+        else {
+          temp[weaponName] = playerNameMarkingMap;
+        }
+      });
+      setState(() {
+        weaponsGameState = temp;
+      });
+      _updateBlocStateFromState();
+    }
+    else {
+      GameState temp = {};
+      roomsGameState.forEach((roomName, playerNameMarkingMap) {
+        if (currentEntity == roomName) {
+          final newMap = playerNameMarkingMap.map((playerName, markings) {
+            return MapEntry(
+                playerName,
+                !(markings.contains(ConstantUtils.cross)) ? [...markings, ConstantUtils.cross] : markings
+            );
+          });
+          temp[roomName] = newMap;
+        }
+        else {
+          temp[roomName] = playerNameMarkingMap;
+        }
+      });
+      setState(() {
+        roomsGameState = temp;
+      });
+      _updateBlocStateFromState();
+    }
+
   }
 
   /// Marks all other "unknown" cards for the user as not having
@@ -2431,6 +2616,53 @@ class MainGameViewState extends State<MainGameView> {
     );
   }
 
+  _inferMaxCardsKnownForEntityTypeConfirmationText(String currentPlayerName, String currentEntity, EntityType entityType) {
+    return RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+            text: "Since you have confirmed that ",
+            style: TextStyle(
+                color: primaryColorSettingState,
+                fontSize: 16
+            ),
+            children: [
+              TextSpan(
+                  text: _refinedPlayerName(currentPlayerName),
+                  style: TextStyle(
+                      color: primaryColorSettingState,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                  )
+              ),
+              TextSpan(
+                  text: " has the ",
+                  style: TextStyle(
+                    color: primaryColorSettingState,
+                    fontSize: 16,
+                    // fontWeight: FontWeight.bold
+                  )
+              ),
+              TextSpan(
+                  text: cardDisplayNameMap[currentEntity],
+                  style: TextStyle(
+                      color: primaryColorSettingState,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                  )
+              ),
+              TextSpan(
+                  text: " card, we now know all the possible ${entityType.name.toLowerCase()}s!\n\nHit confirm if you'd like to mark the remaining ${entityType.name.toLowerCase()} as missing.",
+                  style: TextStyle(
+                    color: primaryColorSettingState,
+                    fontSize: 16,
+                    // fontWeight: FontWeight.bold
+                  )
+              ),
+            ]
+        )
+    );
+  }
+
   _inferNoOtherRemainingCardsToDiscoverForCurrentPlayerConfirmationText(String currentPlayerName, String currentEntity) {
     return RichText(
         textAlign: TextAlign.center,
@@ -2500,7 +2732,7 @@ class MainGameViewState extends State<MainGameView> {
                     _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
                         () {
                       _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
-                      Future.delayed(const Duration(milliseconds: 200), () {
+                      Future.delayed(const Duration(milliseconds: 100), () {
                         _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
                       });
                     }
@@ -2508,7 +2740,7 @@ class MainGameViewState extends State<MainGameView> {
               }
               else {
                 _markAllOtherPlayersAsNotHavingCharacterCard(currentPlayerName, currentEntity);
-                Future.delayed(const Duration(milliseconds: 200), () {
+                Future.delayed(const Duration(milliseconds: 100), () {
                   _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
                 });
               }
@@ -2544,7 +2776,7 @@ class MainGameViewState extends State<MainGameView> {
                     _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
                         () {
                       _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
-                      Future.delayed(const Duration(milliseconds: 200), () {
+                      Future.delayed(const Duration(milliseconds: 100), () {
                         _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
                       });
                     }
@@ -2552,7 +2784,7 @@ class MainGameViewState extends State<MainGameView> {
               }
               else {
                 _markAllOtherPlayersAsNotHavingWeaponCard(currentPlayerName, currentEntity);
-                Future.delayed(const Duration(milliseconds: 200), () {
+                Future.delayed(const Duration(milliseconds: 100), () {
                   _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
                 });
               }
@@ -2587,7 +2819,7 @@ class MainGameViewState extends State<MainGameView> {
                     _inferNoOtherPlayerHasThisCardConfirmationText(currentPlayerName, currentEntity),
                         () {
                       _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
-                      Future.delayed(const Duration(milliseconds: 200), () {
+                      Future.delayed(const Duration(milliseconds: 100), () {
                         _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
                       });
                     }
@@ -2595,7 +2827,7 @@ class MainGameViewState extends State<MainGameView> {
               }
               else {
                 _markAllOtherPlayersAsNotHavingRoomCard(currentPlayerName, currentEntity);
-                Future.delayed(const Duration(milliseconds: 200), () {
+                Future.delayed(const Duration(milliseconds: 100), () {
                   _inferAndConfirmInferenceIfNeededRemainingCardsForCurrentPlayer(entityType, currentPlayerName, currentEntity);
                 });
               }
@@ -3076,12 +3308,15 @@ class MainGameViewState extends State<MainGameView> {
                                 }),
                                 value: inferenceType == InferenceType.NoOtherPlayerHasThisCard ?
                                 dontAskAgainForInferenceNoOtherPlayerHasThisCard :
-                                dontAskAgainForInferenceThisPlayerHasNoOtherCards,
+                                (inferenceType == InferenceType.ThisPlayerHasNoOtherCards ? dontAskAgainForInferenceThisPlayerHasNoOtherCards : dontAskAgainForInferenceMaxCardsKnownForEntityType),
                                 onChanged: (value) {
                                   if (value != null) {
                                     setState(() {
                                       if (inferenceType == InferenceType.NoOtherPlayerHasThisCard) {
                                         dontAskAgainForInferenceNoOtherPlayerHasThisCard = value;
+                                      }
+                                      else if (inferenceType == InferenceType.MaxCardsKnownForEntityType) {
+                                        dontAskAgainForInferenceMaxCardsKnownForEntityType = value;
                                       }
                                       else {
                                         dontAskAgainForInferenceThisPlayerHasNoOtherCards = value;

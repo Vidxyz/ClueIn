@@ -19,12 +19,14 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
   MainGameBloc({
     required this.sembast,
   }) : super(MainGameStateInitial()) {
+    on<PlayerNameChanged>(_playerNameChanged);
     on<MainGameStateChanged>(_mainGameStateChanged);
     on<MainGameStateLoadInitial>(_mainGameStateLoadInitial);
     on<UndoLastMove>(_undoLastMove);
     on<RedoLastMove>(_redoLastMove);
     on<GameOverEvent>(_gameOverEvent);
     on<MarkMandatoryTutorialAsComplete>(_markMandatoryTutorialAsComplete);
+    on<GameNameChanged>(_gameNameChanged);
   }
 
   void _markMandatoryTutorialAsComplete(MarkMandatoryTutorialAsComplete event, Emitter<MainGameState> emit) async {
@@ -311,6 +313,63 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     );
   }
 
+
+  void _playerNameChanged(PlayerNameChanged event, Emitter<MainGameState> emit) async {
+    final currentState = state;
+    if (currentState is MainGameStateModified) {
+      final currentGameToSave = GameDefinition(
+        gameId: event.initialGame.gameId,
+        gameName: event.initialGame.gameName,
+        totalPlayers: event.initialGame.totalPlayers,
+        playerNames: event.initialGame.playerNames,
+        initialCards: event.initialGame.initialCards,
+        charactersGameState: currentState.charactersGameState,
+        weaponsGameState: currentState.weaponsGameState,
+        roomsGameState: currentState.roomsGameState,
+        cellColoursState: currentState.cellColoursState,
+        publicInfoCards: event.initialGame.publicInfoCards,
+        lastSaved: DateTime.now(),
+      );
+      final jsonStringToSave = currentGameToSave.toJson();
+      await sembast.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+
+      previousStateGlobal = jsonStringToSave;
+
+      emit(const DummyState());
+      emit(
+          MainGameStateModified(
+            charactersGameState: currentState.charactersGameState,
+            weaponsGameState: currentState.weaponsGameState,
+            roomsGameState: currentState.roomsGameState,
+            cellColoursState: currentState.cellColoursState,
+            undoStack: OperationStack([]),
+            redoStack: OperationStack([]),
+          )
+      );
+    }
+  }
+
+  void _gameNameChanged(GameNameChanged event, Emitter<MainGameState> emit) async {
+    final currentState = state;
+    if (currentState is MainGameStateModified) {
+      final currentGameToSave = GameDefinition(
+        gameId: event.initialGame.gameId,
+        gameName: event.initialGame.gameName,
+        totalPlayers: event.initialGame.totalPlayers,
+        playerNames: event.initialGame.playerNames,
+        initialCards: event.initialGame.initialCards,
+        charactersGameState: currentState.charactersGameState,
+        weaponsGameState: currentState.weaponsGameState,
+        roomsGameState: currentState.roomsGameState,
+        cellColoursState: currentState.cellColoursState,
+        publicInfoCards: event.initialGame.publicInfoCards,
+        lastSaved: DateTime.now(),
+      );
+      final jsonStringToSave = currentGameToSave.toJson();
+      await sembast.setString("${ConstantUtils.SHARED_PREF_SAVED_GAMES_KEY}_${event.initialGame.gameId}", jsonStringToSave);
+    }
+  }
+
   void _mainGameStateChanged(MainGameStateChanged event, Emitter<MainGameState> emit) async {
     final currentGameToSave = GameDefinition(
       gameId: event.initialGame.gameId,
@@ -350,7 +409,9 @@ class MainGameBloc extends Bloc<MainGameEvent, MainGameState> {
     else {
       final newStack = OperationStack(event.undoStack.list);
       newStack.drain();
-      newStack.push(previousStateGlobal!);
+      if (previousStateGlobal != null) {
+        newStack.push(previousStateGlobal!);
+      }
       previousStateGlobal = jsonStringToSave;
       emit(const DummyState());
       emit(

@@ -155,3 +155,30 @@ class MarkMandatoryTutorialAsComplete extends MainGameEvent {
   @override
   List<Object> get props => [];
 }
+
+class GameNameChanged extends MainGameEvent {
+  final GameDefinition initialGame;
+
+  const GameNameChanged({
+    required this.initialGame,
+  });
+
+  @override
+  List<Object> get props => [
+    initialGame,
+  ];
+}
+
+
+class PlayerNameChanged extends MainGameEvent {
+  final GameDefinition initialGame;
+
+  const PlayerNameChanged({
+    required this.initialGame,
+  });
+
+  @override
+  List<Object> get props => [
+    initialGame,
+  ];
+}
